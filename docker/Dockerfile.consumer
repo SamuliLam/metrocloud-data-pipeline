@@ -1,0 +1,16 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copy requirements file and source code
+COPY requirements.txt .
+COPY src/ ./src/
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the run_consumer script
+COPY run_consumer.py .
+
+# Run the consumer script
+CMD ["python", "run_consumer.py"]

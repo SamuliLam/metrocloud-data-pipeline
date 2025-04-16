@@ -1,6 +1,7 @@
 import json
 import time
 import signal
+import os
 from typing import Dict, Any, Callable, Optional
 from confluent_kafka import Consumer, KafkaError, KafkaException
 
@@ -20,8 +21,8 @@ class KafkaConsumer:
         """Initialize Kafka consumer with configuration."""
         self.bootstrap_servers = bootstrap_servers or settings.kafka.bootstrap_servers
         self.topic_name = topic_name or settings.kafka.topic_name
-        self.group_id = group_id or settings.kafka.consumer_group_id
-        self.auto_offset_reset = auto_offset_reset or settings.kafka.auto_offset_reset
+        self.group_id = group_id or os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
+        self.auto_offset_reset = auto_offset_reset or os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
         
         # Flag to control consumption loop
         self.running = False

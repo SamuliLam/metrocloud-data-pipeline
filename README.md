@@ -4,7 +4,6 @@ docker-compose up -d
 # Monitor logs the ensure kafka initialization
 docker logs -f kafka-broker
 
-
 # Run the IoT Data Pipeline Application
 python3 main.py
 

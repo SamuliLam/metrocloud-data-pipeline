@@ -1,0 +1,16 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copy requirements and source code
+COPY requirements.txt .
+COPY src/ ./src/
+
+# Install dependencies and additional troubleshooting tools
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the run_producer script
+COPY run_producer.py .
+
+# Run the producer script
+CMD ["python", "run_producer.py"]

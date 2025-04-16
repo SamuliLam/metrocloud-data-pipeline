@@ -3,6 +3,7 @@ import time
 from typing import Dict, Any, List
 from confluent_kafka import Producer
 from confluent_kafka.admin import AdminClient, NewTopic
+from confluent_kafka import KafkaException
 
 from src.utils.logger import log
 from src.config.config import settings
@@ -18,7 +19,10 @@ class KafkaProducer:
         # Producer configuration
         self.conf = {
             'bootstrap.servers': self.bootstrap_servers,
-            'client.id': 'iot-data-producer'
+            'client.id': 'iot-data-producer',
+            'retries': 5,  # Number of retries if sending fails
+            'retry.backoff.ms': 500,  # Backoff time between retries
+            'message.timeout.ms': 10000  # Time to wait for acknowledgement
         }
         
         # Create producer instance
@@ -30,33 +34,37 @@ class KafkaProducer:
     
     def _ensure_topic_exists(self, num_partitions: int = 3, replication_factor: int = 1) -> None:
         """Ensure that the Kafka topic exists, creating it if necessary."""
-        admin_client = AdminClient({'bootstrap.servers': self.bootstrap_servers})
-        
-        # Check if topic already exists
-        topics = admin_client.list_topics(timeout=10)
-        
-        if self.topic_name not in topics.topics:
-            log.info(f"Topic {self.topic_name} does not exist. Creating it...")
-            topic_list = [
-                NewTopic(
-                    self.topic_name,
-                    num_partitions=num_partitions,
-                    replication_factor=replication_factor
-                )
-            ]
+        try:
+            admin_client = AdminClient({'bootstrap.servers': self.bootstrap_servers})
             
-            # Create the topic
-            futures = admin_client.create_topics(topic_list)
+            # Check if topic already exists
+            topics = admin_client.list_topics(timeout=10)
             
-            # Wait for topic creation to complete
-            for topic, future in futures.items():
-                try:
-                    future.result()
-                    log.info(f"Topic {topic} created successfully")
-                except Exception as e:
-                    log.error(f"Failed to create topic {topic}: {str(e)}")
-        else:
-            log.info(f"Topic {self.topic_name} already exists")
+            if self.topic_name not in topics.topics:
+                log.info(f"Topic {self.topic_name} does not exist. Creating it...")
+                topic_list = [
+                    NewTopic(
+                        self.topic_name,
+                        num_partitions=num_partitions,
+                        replication_factor=replication_factor
+                    )
+                ]
+                
+                # Create the topic
+                futures = admin_client.create_topics(topic_list)
+                
+                # Wait for topic creation to complete
+                for topic, future in futures.items():
+                    try:
+                        future.result()
+                        log.info(f"Topic {topic} created successfully")
+                    except Exception as e:
+                        log.error(f"Failed to create topic {topic}: {str(e)}")
+            else:
+                log.info(f"Topic {self.topic_name} already exists")
+        except KafkaException as e:
+            log.warning(f"Kafka operation failed: {str(e)}")
+            log.info("Will continue and try to use the topic even if we couldn't verify its existence")
     
     def _delivery_report(self, err, msg) -> None:
         """Delivery report callback for produced messages."""
@@ -98,30 +106,10 @@ class KafkaProducer:
             self.send_message(message)
         
         # Flush to ensure all messages are sent
-        self.producer.flush()
+        self.producer.flush(timeout=10.0)  # Increased timeout to 10 seconds
         log.info(f"Batch of {len(messages)} messages sent to Kafka topic: {self.topic_name}")
     
     def close(self) -> None:
         """Flush and close the producer."""
         self.producer.flush()
         log.info("Kafka producer closed")
-
-
-# For testing
-if __name__ == "__main__":
-    from src.data_generator.iot_simulator import IoTSimulator
-    
-    # Create Kafka producer
-    producer = KafkaProducer()
-    
-    # Create IoT simulator with 3 devices
-    simulator = IoTSimulator(3)
-    
-    # Send data for 10 cycles
-    try:
-        for _ in range(10):
-            readings = simulator.generate_batch()
-            producer.send_batch(readings)
-            time.sleep(1)
-    finally:
-        producer.close()
