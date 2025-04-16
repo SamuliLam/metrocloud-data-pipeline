@@ -9,7 +9,7 @@ from src.utils.logger import log
 from src.config.config import settings
 
 class KafkaProducer:
-    """Kafka Producer for IoT sensor data."""
+    # Kafka Producer for IoT sensor data
     
     def __init__(self, bootstrap_servers: str = None, topic_name: str = None):
         """Initialize Kafka producer with configuration."""
@@ -33,7 +33,7 @@ class KafkaProducer:
         self._ensure_topic_exists()
     
     def _ensure_topic_exists(self, num_partitions: int = 3, replication_factor: int = 1) -> None:
-        """Ensure that the Kafka topic exists, creating it if necessary."""
+        # Ensure that the Kafka topic exists, creating it if necessary."""
         try:
             admin_client = AdminClient({'bootstrap.servers': self.bootstrap_servers})
             
@@ -67,14 +67,14 @@ class KafkaProducer:
             log.info("Will continue and try to use the topic even if we couldn't verify its existence")
     
     def _delivery_report(self, err, msg) -> None:
-        """Delivery report callback for produced messages."""
+        # Delivery report callback for produced messages
         if err is not None:
             log.error(f"Message delivery failed: {err}")
         else:
             log.debug(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
     
     def send_message(self, message: Dict[str, Any], key: str = None) -> None:
-        """Send a single message to Kafka topic."""
+        # Send a single message to Kafka topic
         try:
             # Convert the message to JSON string
             message_str = json.dumps(message)
@@ -101,7 +101,7 @@ class KafkaProducer:
             log.error(f"Error sending message to Kafka: {str(e)}")
     
     def send_batch(self, messages: List[Dict[str, Any]]) -> None:
-        """Send a batch of messages to Kafka topic."""
+        # Send a batch of messages to Kafka topic.
         for message in messages:
             self.send_message(message)
         
@@ -110,6 +110,6 @@ class KafkaProducer:
         log.info(f"Batch of {len(messages)} messages sent to Kafka topic: {self.topic_name}")
     
     def close(self) -> None:
-        """Flush and close the producer."""
+        #Flush and close the producer
         self.producer.flush()
         log.info("Kafka producer closed")

@@ -11,13 +11,13 @@ from src.data_ingestion.producer import KafkaProducer
 from src.data_ingestion.consumer import KafkaConsumer
 
 def signal_handler(sig, frame):
-    """Handle termination signals for graceful shutdown."""
+    # Handle termination signals for graceful shutdown
     global running
     log.info(f"Caught signal {sig}. Stopping application...")
     running = False
 
 def producer_task():
-    """Task function for the producer thread."""
+    # Task function for the producer thread.
     try:
         # Create Kafka producer
         producer = KafkaProducer()
@@ -43,7 +43,7 @@ def producer_task():
             producer.close()
 
 def consumer_task():
-    """Task function for the consumer thread."""
+    # Task function for the consumer thread.
     try:
         # Wait a bit to ensure the producer has started
         time.sleep(2)
@@ -81,7 +81,7 @@ def consumer_task():
             consumer.close()
 
 def main():
-    """Main application entry point."""
+    # Main application entry point.
     # Setup signal handlers and global running flag
     global running
     running = True
@@ -99,15 +99,15 @@ def main():
     try:
         # Create and start producer thread
         producer_thread = threading.Thread(target=producer_task)
-        producer_thread.daemon = True
+        producer_thread.daemon = True # Prevents the program from exiting
         producer_thread.start()
         
         # Create and start consumer thread
         consumer_thread = threading.Thread(target=consumer_task)
-        consumer_thread.daemon = True
+        consumer_thread.daemon = True # Prevents the program from exiting
         consumer_thread.start()
         
-        # Keep main thread alive
+        # Keep main thread alive and responsive (e.g., for signal handling)
         while running:
             time.sleep(0.1)
             

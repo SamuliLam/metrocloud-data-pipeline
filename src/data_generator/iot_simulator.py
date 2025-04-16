@@ -13,10 +13,12 @@ from src.config.config import settings
 fake = Faker()
 
 class IoTDevice:
-    """Simulates an IoT device that generates sensor data."""
+    # Simulates an IoT device that generates sensor data.
     
     def __init__(self, device_id: Optional[str] = None, device_type: Optional[str] = None):
-        """Initialize an IoT device with a unique ID and type."""
+        # Initialize an IoT device with a unique ID and type.
+        # If not provided, generates random UUID and selects a random sensor type.
+    
         self.device_id = device_id or str(uuid.uuid4())
         self.device_type = device_type or random.choice(["temperature", "humidity", "pressure", "motion", "light"])
         self.location = {
@@ -28,7 +30,9 @@ class IoTDevice:
         log.info(f"Initialized IoT device: {self.device_id} of type {self.device_type}")
     
     def generate_reading(self) -> Dict[str, Any]:
-        """Generate a simulated sensor reading based on the device type."""
+        # Generate a simulated sensor reading with value, unit, location, battery level, and timestamp.
+        # Occassionally includes anomalous values for realism
+
         timestamp = datetime.now(timezone.utc).isoformat() + "Z"
         
         # Generate sensor reading based on device type
@@ -51,13 +55,13 @@ class IoTDevice:
             value = random.random()
             unit = "unknown"
         
-        # Add some anomalies occasionally
+        # Add some occasional anomalies
         if random.random() < 0.05:  # 5% chance of anomaly
             if self.device_type in ["temperature", "humidity", "pressure", "light"]:
                 # Extreme value
                 value = value * 2 if random.random() < 0.5 else value * 0.1
         
-        # Create the reading object
+        # Final reading package
         reading = {
             "device_id": self.device_id,
             "device_type": self.device_type,
@@ -72,10 +76,12 @@ class IoTDevice:
 
 
 class IoTSimulator:
-    """Simulates multiple IoT devices generating data."""
+    """Simulates multiple IoT devices generating continuous or batch sensor data."""
     
     def __init__(self, num_devices: int = None):
-        """Initialize a set of IoT devices."""
+        # Initialize the simulator with a specified number of IoT devices."""
+        # Defaults to value in settings if not provided.
+
         self.num_devices = num_devices or settings.iot_simulator.num_devices
         self.devices: List[IoTDevice] = []
         
@@ -89,7 +95,8 @@ class IoTSimulator:
         log.info(f"IoT simulator initialized with {self.num_devices} devices")
     
     def generate_batch(self) -> List[Dict[str, Any]]:
-        """Generate a batch of readings from all devices."""
+        # Generate a batch of readings from all devices.
+        # Returns: List of sensor readings
         readings = []
         for device in self.devices:
             readings.append(device.generate_reading())

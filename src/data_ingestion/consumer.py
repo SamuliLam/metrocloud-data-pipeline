@@ -9,7 +9,7 @@ from src.utils.logger import log
 from src.config.config import settings
 
 class KafkaConsumer:
-    """Kafka Consumer for IoT sensor data."""
+    # Kafka Consumer for IoT sensor data.
     
     def __init__(
         self,
@@ -18,11 +18,12 @@ class KafkaConsumer:
         group_id: str = None,
         auto_offset_reset: str = None
     ):
-        """Initialize Kafka consumer with configuration."""
+        # Initialize Kafka consumer with configuration.
+        # Used passed values or fall back to settings from config
         self.bootstrap_servers = bootstrap_servers or settings.kafka.bootstrap_servers
         self.topic_name = topic_name or settings.kafka.topic_name
-        self.group_id = group_id or os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
-        self.auto_offset_reset = auto_offset_reset or os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
+        self.group_id = group_id or settings.kafka.group_id
+        self.auto_offset_reset = auto_offset_reset or settings.kafka.auto_offset_reset
         
         # Flag to control consumption loop
         self.running = False
@@ -32,11 +33,11 @@ class KafkaConsumer:
             'bootstrap.servers': self.bootstrap_servers,
             'group.id': self.group_id,
             'auto.offset.reset': self.auto_offset_reset,
-            'enable.auto.commit': True,
-            'auto.commit.interval.ms': 5000
+            'enable.auto.commit': True, # Automatically commit offsets
+            'auto.commit.interval.ms': 5000 # Commit every 5 seconds
         }
         
-        # Create consumer instance
+        # Create Kafka consumer instance
         self.consumer = Consumer(self.conf)
         log.info(f"Kafka consumer initialized with bootstrap servers: {self.bootstrap_servers}")
         
@@ -45,12 +46,12 @@ class KafkaConsumer:
         signal.signal(signal.SIGTERM, self._signal_handler)
     
     def _signal_handler(self, sig, frame):
-        """Handle termination signals for graceful shutdown."""
+        # Graceful shutdown on SIGINT or SIGTERM.
         log.info(f"Caught signal {sig}. Stopping consumer...")
         self.running = False
     
     def subscribe(self) -> None:
-        """Subscribe to the Kafka topic."""
+        # Subscribe to the configured Kafka topic.
         try:
             self.consumer.subscribe([self.topic_name])
             log.info(f"Subscribed to topic: {self.topic_name}")
@@ -59,8 +60,9 @@ class KafkaConsumer:
             raise
     
     def process_message(self, message: Dict[str, Any]) -> None:
-        """Process a single message from Kafka topic. Override this method to implement custom processing."""
-        # Default implementation just logs the message
+        # Process a single kafka message from Kafka topic.
+        # This default implementation just logs basic device data.
+        # Can be overriden in subclasses
         device_id = message.get('device_id', 'unknown')
         device_type = message.get('device_type', 'unknown')
         value = message.get('value', 'unknown')
@@ -69,11 +71,16 @@ class KafkaConsumer:
         log.info(f"Received data from device {device_id} ({device_type}): {value} {unit}")
     
     def consume_batch(self, batch_size: int = 100, timeout: float = 1.0) -> None:
-        """Consume a batch of messages from Kafka topic."""
+        """Consume a batch of messages from Kafka topic.
+        
+        Args:
+            batch_size: Number of messages to consume before processing
+            timeout: Poll timeout per message
+        """
         try:
-            self.subscribe()
-            
+            self.subscribe() 
             messages = []
+
             while len(messages) < batch_size:
                 msg = self.consumer.poll(timeout=timeout)
                 
@@ -88,7 +95,7 @@ class KafkaConsumer:
                         log.error(f"Error while consuming message: {msg.error()}")
                     continue
                 
-                # Parse the message value
+                # Decode and parse the message value
                 try:
                     message_str = msg.value().decode('utf-8')
                     message = json.loads(message_str)
@@ -113,11 +120,11 @@ class KafkaConsumer:
     
     def consume_loop(self, process_fn: Optional[Callable[[Dict[str, Any]], None]] = None, timeout: float = 1.0) -> None:
         """
-        Start a continuous consumption loop from Kafka topic.
+        Continuously consume messages from Kafka topic.
         
         Args:
             process_fn: Optional function to process each message, defaults to self.process_message
-            timeout: Poll timeout in seconds
+            timeout: Poll timeout for each message in seconds
         """
         try:
             self.subscribe()
@@ -133,7 +140,7 @@ class KafkaConsumer:
                 msg = self.consumer.poll(timeout=timeout)
                 
                 if msg is None:
-                    continue
+                    continue # No message yet
                 
                 if msg.error():
                     if msg.error().code() == KafkaError._PARTITION_EOF:

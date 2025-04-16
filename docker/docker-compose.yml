@@ -1,89 +1,106 @@
 services:
+  # Kafka Broker
   kafka:
     image: confluentinc/cp-kafka:7.9.0
+    
     container_name: kafka-broker
+    
     ports:
-      - "9092:9092"
-      - "29092:29092"
+      - "9092:9092" # Internal Kafka port for broker-to-client communication
+      - "29092:29092" # Host-accessible kafka port for tools like Kafka UI
+    
     environment:
-      # KRaft settings
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: 'broker, controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
-      # Listeners
+      # KRaft (Kafka Raft Metadata Mode) Configuration
+      KAFKA_NODE_ID: 1 # Unique node ID for this broker/controller
+      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093' # Define quorum voters (node_id@host:controller_port)
+
+      # Listener Configuration      
+      # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
       KAFKA_LISTENERS: 'PLAINTEXT://kafka:9092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      # What the broker advertises to clients: 'internal communication,external docker host communication'
       KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      
       # Topic configurations
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 
-      # Enable KRaft mode
-      CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      
+      # KRaft Cluster Initialization
+      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
+
     volumes:
-      - kafka_data:/var/lib/kafka/data
+      - kafka_data:/var/lib/kafka/data # Persist Kafka logs and data
+    
     networks:
-      - kafka-net
+      - kafka-net # Connects to custom Docker network for inter-service DNS
+
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka:9092 --list"]
       interval: 30s
       timeout: 10s
       retries: 5
     
+  # Kafka UI
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
-      - "8080:8080"
+      - "8080:8080" # Web UI exposed at http://localhost:8080
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-      SERVER_SERVLET_CONTEXT_PATH: /
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092 # Connects to Kafka's exposed port
+      SERVER_SERVLET_CONTEXT_PATH: / # Root path for the UI
     depends_on:
-      - kafka
+      - kafka # Ensure Kafka is started first
     networks:
-      - kafka-net
+      - kafka-net # Access Kafka over Docker network
 
+  # Kafka Producer 
   kafka-producer:
     build:
-      context: ..
+      context: .. # Project root directory
       dockerfile: docker/Dockerfile.producer
     container_name: kafka-producer
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      KAFKA_TOPIC_NAME: iot-sensor-data
-      IOT_NUM_DEVICES: 8
-      IOT_DATA_INTERVAL_SEC: 1.0
-      PYTHONUNBUFFERED: 1
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092 # Kafka broker inside Docker network
+      KAFKA_TOPIC_NAME: iot-sensor-data # Topic to publish simulated data
+      IOT_NUM_DEVICES: 8 # Number of virtual IoT devices
+      IOT_DATA_INTERVAL_SEC: 1.0 # How often each device sends data
+      PYTHONUNBUFFERED: 1 # Ensures real-time stdout logging
     depends_on:
       - kafka
     networks:
       - kafka-net
 
+  # Kafka Consumer
   kafka-consumer:
     build:
-      context: ..
+      context: .. # Project root directory
       dockerfile: docker/Dockerfile.consumer
     container_name: kafka-consumer
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      KAFKA_TOPIC_NAME: iot-sensor-data
-      KAFKA_CONSUMER_GROUP_ID: iot-data-consumer
-      KAFKA_AUTO_OFFSET_RESET: earliest
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092 # Kafka broker inside Docker network
+      KAFKA_TOPIC_NAME: iot-sensor-data # Topic to subscribe and consume from
+      KAFKA_CONSUMER_GROUP_ID: iot-data-consumer # Consumer's groud id
+      KAFKA_AUTO_OFFSET_RESET: earliest # Start from the beginning if no offset is found
       PYTHONUNBUFFERED: 1
     depends_on:
       - kafka
-      - kafka-producer
+      - kafka-producer # Wait until produer is available
     networks:
       - kafka-net
 
+# Docker Volume for Kafka Storage
 volumes:
   kafka_data:
     driver: local
 
+# Docker Network for All Services
 networks:
   kafka-net:
-    name: docker_kafka-net
+    name: docker_kafka-net # Custom bridge network (shared DNS for all services)

@@ -21,7 +21,7 @@ from confluent_kafka import Producer
 running = True
 
 def signal_handler(sig, frame):
-    """Handle termination signals for graceful shutdown."""
+    # Handle termination signals for graceful shutdown.
     global running
     log.info(f"Caught signal {sig}. Stopping producer...")
     running = False
@@ -68,7 +68,7 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
                 return False
 
 def main():
-    """Run the IoT data generator and producer."""
+    # Run the IoT data generator and producer.
     # Setup signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)

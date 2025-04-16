@@ -17,9 +17,8 @@ from confluent_kafka import Consumer
 
 
 def wait_for_kafka(max_retries=30, initial_backoff=1):
-    """
-    Wait for Kafka to become available with exponential backoff.
-    """
+    # Wait for Kafka to become available with exponential backoff.
+
     backoff = initial_backoff
     
     for attempt in range(1, max_retries + 1):
@@ -53,7 +52,7 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
                 return False
 
 class IoTAlertConsumer(KafkaConsumer):
-    """Custom consumer that processes IoT data and generates alerts."""
+    # Custom consumer that processes IoT data and generates alerts.
     
     def process_message(self, message):
         """Process a received IoT sensor reading."""
@@ -78,7 +77,7 @@ class IoTAlertConsumer(KafkaConsumer):
             log.info(f"Device {device_id} ({device_type}): {value}{unit}")
 
 def main():
-    """Run the IoT data consumer."""
+    # Run the IoT data consumer.
     log.info("Starting IoT Data Consumer Service")
     log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
     log.info(f"Kafka topic: {settings.kafka.topic_name}")
