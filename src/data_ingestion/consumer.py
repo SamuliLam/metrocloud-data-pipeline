@@ -9,8 +9,13 @@ from src.utils.logger import log
 from src.config.config import settings
 
 class KafkaConsumer:
-    # Kafka Consumer for IoT sensor data.
+    """
+    Kafka Consumer for IoT sensor data with multi-broker cluster support.
     
+    This class handles the connection to a Kafka cluster, subscribers to topics, and
+    processes messages. It includes fault tolerance for broker failures and
+    rebalancing in a multi-cultural environment.
+    """
     def __init__(
         self,
         bootstrap_servers: str = None,
@@ -18,8 +23,15 @@ class KafkaConsumer:
         group_id: str = None,
         auto_offset_reset: str = None
     ):
-        # Initialize Kafka consumer with configuration.
-        # Used passed values or fall back to settings from config
+        """
+        Initialize Kafka consumer with configuration.
+        
+        Args:
+            bootstrap_servers: Comma-separated list of broker addresses (host:port)
+            topic_name: Name of the Kafka topic to consume message from
+            group_id: Consumer group ID for load balancing
+            auto_offset_reset: Strategy for consuming messages ('earliest' or 'latest')
+        """
         self.bootstrap_servers = bootstrap_servers or settings.kafka.bootstrap_servers
         self.topic_name = topic_name or settings.kafka.topic_name
         self.group_id = group_id or settings.kafka.group_id
@@ -33,8 +45,21 @@ class KafkaConsumer:
             'bootstrap.servers': self.bootstrap_servers,
             'group.id': self.group_id,
             'auto.offset.reset': self.auto_offset_reset,
+
+            # Commit settings
             'enable.auto.commit': True, # Automatically commit offsets
-            'auto.commit.interval.ms': 5000 # Commit every 5 seconds
+            'auto.commit.interval.ms': 5000, # Commit every 5 seconds
+
+            # Performance settings
+            'fetch.min.bytes': 1, # Minimum bytest to fetch
+
+            # Fault tolerance settings
+            'session.timeout.ms': 30000, # Longer timeout for fault tolerance
+            'heartbeat.interval.ms': 10000, # Heartbeat interval
+            'max.poll.interval.ms': 300000, # Max time between polls
+
+            # Load balancing
+            'partition.assignment.strategy': 'cooperative-sticky' # Better handling of rebalances
         }
         
         # Create Kafka consumer instance
@@ -46,23 +71,54 @@ class KafkaConsumer:
         signal.signal(signal.SIGTERM, self._signal_handler)
     
     def _signal_handler(self, sig, frame):
-        # Graceful shutdown on SIGINT or SIGTERM.
+        """
+        Graceful shutdown on SIGINT or SIGTERM.
+        
+        Args:
+            sig: Signal numebr
+            frame: Current stack frame
+        """
         log.info(f"Caught signal {sig}. Stopping consumer...")
         self.running = False
     
     def subscribe(self) -> None:
-        # Subscribe to the configured Kafka topic.
+        """
+        Subscribe to the configured Kafka topic.
+
+        In a multi-broker environment, subscription triggers a rebalance to assign
+        partitions among consumers in the group
+        """
         try:
-            self.consumer.subscribe([self.topic_name])
+            self.consumer.subscribe([self.topic_name], on_assign=self._on_assign_callback)
             log.info(f"Subscribed to topic: {self.topic_name}")
         except KafkaException as e:
             log.error(f"Error subscribing to topic {self.topic_name}: {str(e)}")
             raise
     
+    def _on_assign_callback(self, consumer, partitions):
+        """
+        Callback executed when partitions are assigned to this consumer.
+        
+        Args:
+            consumer: The consumer instance
+            partitions: List of TopicPartition objects assigned
+        """
+        if partitions:
+            partition_info = [f"{p.topic}[{p.partition}]" for p in partitions]
+            log.info(f"Assigned partitions: {', '.join(partition_info)}")
+        else:
+            log.warning("No partitions assigned to this consumer")
+    
     def process_message(self, message: Dict[str, Any]) -> None:
-        # Process a single kafka message from Kafka topic.
-        # This default implementation just logs basic device data.
-        # Can be overriden in subclasses
+        """
+        Process a single message from Kafka topic.
+        
+        This is a base implementation that should be overridden in subclasses
+        for custom processing logic.
+        
+        Args:
+            message: Dictionary containing the message data
+        """
         device_id = message.get('device_id', 'unknown')
         device_type = message.get('device_type', 'unknown')
         value = message.get('value', 'unknown')
@@ -70,32 +126,62 @@ class KafkaConsumer:
         
         log.info(f"Received data from device {device_id} ({device_type}): {value} {unit}")
     
+    def _handle_message_errors(self, msg):
+        """
+        Handle errors in Kafka messages.
+        
+        Args:
+            msg: Kafka message object
+            
+        Returns:
+            True if the message was processed, False if it had errors
+        """
+        if msg is None:
+            return False
+        
+        if msg.error():
+            # End of partition event - not an error
+            if msg.error().code() == KafkaError._PARTITION_EOF:
+                log.debug(f"Reached end of partition {msg.partition()}")
+            # Broker connection error
+            elif msg.error().code() == KafkaError._TRANSPORT:
+                log.warning(f"Broker connection error: {msg.error()}. Will reconnect automatically.")
+            # Other errors
+            else:
+                log.error(f"Error while consuming message: {msg.error()}")
+            return False
+        
+        return True
+    
     def consume_batch(self, batch_size: int = 100, timeout: float = 1.0) -> None:
         """Consume a batch of messages from Kafka topic.
+
+        This method polls for a batch of messags and processes them.
         
         Args:
             batch_size: Number of messages to consume before processing
             timeout: Poll timeout per message
+
+        Return:
+            List of processes messages
         """
         try:
-            self.subscribe() 
-            messages = []
+            # Make sure we're subscribed
+            if not self.consumer.assignment():
+                self.subscribe()
 
-            while len(messages) < batch_size:
+            messages = []
+            start_time = time.time()
+
+            # Poll for messages until we get a batch or timeout
+            while len(messages) < batch_size and (time.time() - start_time) < (timeout * 5):
                 msg = self.consumer.poll(timeout=timeout)
                 
-                if msg is None:
-                    break
-                
-                if msg.error():
-                    if msg.error().code() == KafkaError._PARTITION_EOF:
-                        # End of partition event
-                        log.debug(f"Reached end of partition {msg.partition()}")
-                    else:
-                        log.error(f"Error while consuming message: {msg.error()}")
+                # Skip message if it has errors:
+                if not self._handle_message_errors(msg):
                     continue
-                
-                # Decode and parse the message value
+
+                # Parse the message value
                 try:
                     message_str = msg.value().decode('utf-8')
                     message = json.loads(message_str)
@@ -103,7 +189,8 @@ class KafkaConsumer:
                 except Exception as e:
                     log.error(f"Error parsing message: {str(e)}")
                     continue
-            
+                
+            # Process the batch of messages
             if messages:
                 log.info(f"Consumed {len(messages)} messages from topic: {self.topic_name}")
                 for message in messages:
@@ -122,11 +209,14 @@ class KafkaConsumer:
         """
         Continuously consume messages from Kafka topic.
         
+        This method continuously polls for messags and processes them until the consumer is stopped.
+        
         Args:
             process_fn: Optional function to process each message, defaults to self.process_message
             timeout: Poll timeout for each message in seconds
         """
         try:
+            # Make sure we're subscribed
             self.subscribe()
             
             # Set processing function
@@ -136,32 +226,30 @@ class KafkaConsumer:
             self.running = True
             log.info(f"Starting consumption loop from topic: {self.topic_name}")
             
+            # Main consumption loop
             while self.running:
                 msg = self.consumer.poll(timeout=timeout)
                 
-                if msg is None:
-                    continue # No message yet
-                
-                if msg.error():
-                    if msg.error().code() == KafkaError._PARTITION_EOF:
-                        # End of partition event
-                        log.debug(f"Reached end of partition {msg.partition()}")
-                    else:
-                        log.error(f"Error while consuming message: {msg.error()}")
+                # Skip message if it has errors
+                if not self._handle_message_errors(msg):
                     continue
-                
-                # Parse the message value
+
+                # Parse and process the message
                 try:
                     message_str = msg.value().decode('utf-8')
                     message = json.loads(message_str)
                     processor(message)
+
                 except Exception as e:
                     log.error(f"Error processing message: {str(e)}")
                     continue
                 
         except KafkaException as e:
             log.error(f"Kafka error during consumption loop: {str(e)}")
-            raise
+            # if connection to a broker fails, other may still be available
+            # Try to continue if possible
+            if not self.running:
+                raise
         except Exception as e:
             log.error(f"Unexpected error during consumption loop: {str(e)}")
             raise
@@ -169,12 +257,23 @@ class KafkaConsumer:
             self.close()
     
     def close(self) -> None:
-        """Close the consumer."""
+        """
+        Close the consumer.
+        
+        This ensures that offsets are committed and the consumer
+        leaves the group cleanly.
+        """
         self.running = False
         if hasattr(self, 'consumer'):
+            # Final comit of offsets before closing
+            try:
+                self.consumer.commit(asynchronous=False)
+                log.info("final offsets committed successfully")
+            except Exception as e:
+                log.warning(f"Error committing final offsets: {str(e)}")
+
             self.consumer.close()
             log.info("Kafka consumer closed")
-
 
 # For testing
 if __name__ == "__main__":

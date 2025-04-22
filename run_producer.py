@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to run the IoT data generator and producer.
-This is intended to be run in a Docker container.
+This is intended to be run in a Docker container with a multi-broker kafka cluster.
 """
 
 import time
@@ -21,7 +21,14 @@ from confluent_kafka import Producer
 running = True
 
 def signal_handler(sig, frame):
-    # Handle termination signals for graceful shutdown.
+    """
+    Handle termination signals for graceful shutdown.
+    This ensures the producer stops cleanly when the container is stopped.
+
+    Args:
+        sig: Signal number
+        frame: Current stack frame
+    """
     global running
     log.info(f"Caught signal {sig}. Stopping producer...")
     running = False
@@ -29,6 +36,7 @@ def signal_handler(sig, frame):
 def wait_for_kafka(max_retries=30, initial_backoff=1):
     """
     Wait for Kafka to become available with exponential backoff.
+    With multiple brokers, we need more patience and resilience.
     
     Args:
         max_retries: Maximum number of retry attempts
@@ -41,13 +49,19 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
     
     for attempt in range(1, max_retries + 1):
         try:
-            log.info(f"Attempt {attempt}/{max_retries} to connect to Kafka at {settings.kafka.bootstrap_servers}")
+            # Get the bootstrap servers from environment or settings
+            bootstrap_servers = settings.kafka.bootstrap_servers
+            log.info(f"Attempt {attempt}/{max_retries} to connect to Kafka Cluster at {bootstrap_servers}")
             
             # Try to create a producer to test connection
-            producer = Producer({'bootstrap.servers': settings.kafka.bootstrap_servers})
-            producer.flush(timeout=5)
+            producer = Producer({
+                'bootstrap.servers': bootstrap_servers,
+                'socket.timeout.ms': 10000, # Longer timeout for multi-broker setup
+                'message.timeout.ms': 1000
+            })
+            producer.flush(timeout=10) # Increased timeout for multi-broker setup
             
-            log.info("Successfully connected to Kafka!")
+            log.info("Successfully connected to Kafka cluster!")
             return True
             
         except Exception as e:
@@ -68,8 +82,11 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
                 return False
 
 def main():
-    # Run the IoT data generator and producer.
-    # Setup signal handlers
+    """
+    Main function to run the IoT data generator and producer.
+    Handles connection to the multi-broker Kafka cluster and continuously generates and sends IoT sensor data.
+    """ 
+    # Setup signal handlers for graceful shutdown
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
@@ -79,7 +96,8 @@ def main():
     log.info(f"IoT simulator configured with {settings.iot_simulator.num_devices} devices")
     log.info(f"Data generation interval: {settings.iot_simulator.data_generation_interval_sec} seconds")
     
-    # Wait for Kafka to be ready
+    # Wait for Kafka to be ready - important in a multi-broker environment
+    # where brokers may take longer to elect a controller and become ready
     if not wait_for_kafka():
         log.error("Kafka is not available. Exiting.")
         sys.exit(1)
@@ -95,8 +113,13 @@ def main():
         log.info("Starting continuous IoT data generation...")
         
         while running:
+            # Generate batch or readings from simulated devices
             readings = simulator.generate_batch()
+
+            # Send the readings to Kafka - will be distributed across brokers
             producer.send_batch(readings)
+            
+            # Wait before generating next batch
             time.sleep(settings.iot_simulator.data_generation_interval_sec)
             
     except KeyboardInterrupt:
@@ -105,9 +128,12 @@ def main():
         log.error(f"Unexpected error in producer: {str(e)}")
         raise
     finally:
+        # Ensure producer is properly closed
         if 'producer' in locals():
             producer.close()
         log.info("Producer shutdown complete")
 
+
 if __name__ == "__main__":
     main()
+
