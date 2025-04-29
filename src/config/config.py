@@ -64,12 +64,6 @@ class KafkaSettings(BaseSettings):
     replication_factor: int = int(os.getenv("KAFKA_REPLICATION_FACTOR", "3"))
     partitions: int = int(os.getenv("KAFKA_PARTITIONS", "6"))
     
-    # Optional SSL and authentication settings
-    security_protocol: Optional[str] = os.getenv("KAFKA_SECURITY_PROTOCOL", None)  # PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
-    ssl_cafile: Optional[str] = os.getenv("KAFKA_SSL_CAFILE", None)
-    ssl_certfile: Optional[str] = os.getenv("KAFKA_SSL_CERTFILE", None)
-    ssl_keyfile: Optional[str] = os.getenv("KAFKA_SSL_KEYFILE", None)
-    
     # Get list of brokers for programmatic access
     @property
     def broker_list(self) -> List[str]:

@@ -1,43 +1,58 @@
-# IoT Data Ingestion Pipeline with Kafka
-A scalable, fault-tolerant data pipeline for ingesting, processing, and analyzing IoT sensor data using Apache Kafka with multiple brokers in KRaft mode.
+# IoT Data Ingestion Pipeline with Multi-Broker Kafka and Schema Registry
+A scalable, fault-tolerant data pipeline for ingesting, processing, and analyzing IoT sensor data using Apache Kafka with multiple brokers in KRaft mode and Schema Registry for data validation and evolution.
 
 ## Project Overview
 This project implements a complete data ingestion pipeline for IoT devices with the following components:
 
-- Data Simulation: Simulates multiple IoT sensors (temperature, humidity, pressure, motion, light) generating data
-- Data Ingestion: Uses Apache Kafka for reliable, scalable data ingestion
+- Data Simulation: Simulates multiple IoT sensors (temperature, humidity, pressure, motion, light, etc.) generating data
+- Data Ingestion: Uses Confluet-Kafka-Python for reliable, scalable data ingestion
 - Data Processing: Processes and filters the data, generating alerts for anomalies
-- Monitoring: Kafka UI for monitoring the Kafka cluster and topics
+- Monitoring: Kafka UI for observability and operational insights
+
+## Key Features
+- High availability: Replication across multiple Kafka brokers
+- Data Validation: Schema enforcement at produce time
+- Fault Tolerance: Automatic failover and recovery
+- Efficient Serialization: Compact binary format with Avro
+- Anomaly Detection: Real-time monitoring for unusual sensor readings
+- Horizontal Scaling: Add more brokers to handle increased load
+- Schema Management: Centralized control of data formats
 
 ## Architecture
-![architecture.png](architecture.png)
+![architecture.png](images/architecture1.png)
 
 ## Project Structure
 ```
 metrocloud-data-pipeline/
 ├── docker/
-│   ├── docker-compose.yml           # Docker Compose configuration for all services
-│   ├── Dockerfile.producer          # Dockerfile for the producer service
-│   └── Dockerfile.consumer          # Dockerfile for the consumer service
+│   ├── .env
+│   ├── docker-compose.yml              # Docker Compose configuration for all services
+│   ├── Dockerfile.producer             # Dockerfile for the producer service
+│   └── Dockerfile.consumer             # Dockerfile for the consumer service
+├── images/
+│   ├── architecture.png                
+│   └── architecture1.png
 ├── src/
 │   ├── config/
 │   │   ├── __init__.py
-│   │   └── config.py                # Configuration using pydantic-settings
+│   │   └── config.py                   # Configuration using pydantic-settings and Schema Registry
 │   ├── data_generator/
 │   │   ├── __init__.py
-│   │   └── iot_simulator.py         # IoT device simulator
+│   │   └── iot_simulator.py            # IoT device simulator (Avro-compatible)
 │   ├── data_ingestion/
 │   │   ├── __init__.py
-│   │   ├── producer.py              # Kafka producer implementation
-│   │   └── consumer.py              # Kafka consumer implementation
+│   │   ├── producer.py                 # Kafka producer implementation with Avro serialization
+│   │   └── consumer.py                 # Kafka consumer implementation with Avro deserialization
+│   ├── schemas/
+│   │   └── iot_sensor_reading.avsc     # Avro schema for IoT sensor data
 │   └── utils/
 │       ├── __init__.py
-│       └── logger.py                # Logger configuration
-├── main.py                          # Main application for local development
-├── README.md                        # Project documentation
-├── run_producer.py                  # Standalone script for producer in Docker
-├── run_consumer.py                  # Standalone script for consumer in Docker
-├── requirements.txt                 # Python dependencies
+│       ├── logger.py                   # Enhanced logger configuration
+│       └── schema_registry.py          # Schema Registry client implementation
+├── README.md                           # Project documentation
+├── requirements.txt                    # Python dependencies
+├── run_producer.py                     # Standalone script for producer in Docker
+├── run_consumer.py                     # Standalone script for consumer in Docker
 ```
 
 ## Technologies Used
@@ -47,6 +62,8 @@ metrocloud-data-pipeline/
 - Pydantic: For configuration management and data validation
 - Docker & Docker Compose: For containerization and orchestration
 - Kafka UI: Web interface for monitoring Kafka
+- Schema Registry: Centralized schema management for data validation and evolution
+- Avro Serialization: Efficient binary format with embedded schema information
 
 ## Getting Started
 ### Prerequisites
@@ -67,9 +84,10 @@ metrocloud-data-pipeline/
     ```
     This will start:
     - 3 Kafka brokers in KRaft mode (each acting as both broker and controller)
+    - Schema Registry for centralized schema management
     - Kafka UI for monitoring (accessible at http://localhost:8080)
-    - Producer service that generates and sends IoT data
-    - Consumer service that processes the data and generates alerts
+    - Producer service that generates and sends IoT data with Avro serialization
+    - Consumer service that processes the data with Avro deserialization
 
 3. View the logs
     ```bash
@@ -77,7 +95,8 @@ metrocloud-data-pipeline/
     docker-compose logs -f
 
     # View logs for a specific service
-    docker-compose logs -f kafka1 kafka2 kafka3
+    docker-compose logs -f kafka-broker-1 kafka-broker-2 kafka-broker-3
+    docker-compose logs -f schema-registry
     docker-compose logs -f kafka-producer
     docker-compose logs -f kafka-consumer
     ```
@@ -95,6 +114,7 @@ metrocloud-data-pipeline/
     - Open your browser and navigate to http://localhost:8080
     - This allows you to monitor:
         - Kafka broker health
+        - Schema Registry to view registered schemas
         - Topics and messages
         - Consumer groups
         - Partitions and their replication status
@@ -103,31 +123,6 @@ metrocloud-data-pipeline/
     ```bash
     docker-compose down -v
     ```
-
-### Running Locally for Development
-For development purposes, you can run the components separately:
-1. Start only the Kafka broker and UI:
-    ```bash
-    cd docker
-    docker-compose up -d kafka kafka-ui
-    ```
-
-2. Create a virtual python environment
-    ```bash
-    python -m venv venv
-    source venv/bin/activate
-    ```
-
-3. Install Python dependencies
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3. Run the main application
-    ```bash
-    python main.py
-    ```
-
 ## IoT Data Simulation
 The system simulates the following types of IoT devices:
 - Temperature sensors (°C)
@@ -166,26 +161,48 @@ Topics are created with fault tolerance in mind:
 - Partitions: 6 (allows parallel consumption)
 - Min In-Sync Replicas: 2(requires at least 3 brokers to acknowledge writes)
 
+## Avro Schema and Schema Registry
+### Schema Registry
+The Schema Registry provides:
+- Centralized schema storage and versioninng
+- Schema compatibility enforcement
+- Schema evolution management
+- Integration with Kafka producers and consumers
+
+### Avro Schema
+The IoT sensor data schema (`iot_sensor_reading.avsc`) includes:
+- Basic sensor information (device_id, device_type, timestamp)
+- Measurement data (value, unit)
+- Location information (latitude, longitude, building, floor, zone)
+- Device status (battery_level, signal_strength, firmware_version)
+- Anomaly detection (is_anomaly)
+- Extensibility with metadata field
+
 ## Configuration Options
 The application can be configured through environment variables:
 
 ### Kafka Configuration
-- `KAFKA_BOOTSTRAP_SERVERS`: Comma-separated list of Kafka broker addresses
-- `KAFKA_TOPIC_NAME`: Kafka topic name (default: "iot-sensor-data")
-- `KAFKA_CONSUMER_GROUP_ID`: Consumer group ID (default: "iot-data-consumer")
-- `KAFKA_AUTO_OFFSET_RESET`: Auto offset reset (default: "earliest")
-- `KAFKA_REPLICATION_FACTOR`: Replication factor for topics (default: 3)
-- `KAFKA_PARTITIONS`: Number of partitions per topic (default: 6)
+- `KAFKA_BOOTSTRAP_SERVERS`kafka1:9092,kafka2:9092,kafka3:9092
+- `KAFKA_TOPIC_NAME`=iot-sensor-data
+- `KAFKA_CONSUMER_GROUP_ID`=iot-data-consumer
+- `KAFKA_AUTO_OFFSET_RESET`=earliest
+- `KAFKA_REPLICATION_FACTOR`=3
+- `KAFKA_PARTITIONS`=6
 
 ### IoT Simulator Configuration
-- `IOT_NUM_DEVICES`: Number of simulated IoT devices (default: 8)
-- `IOT_DATA_INTERVAL_SEC`: Interval between data generation in seconds (default: 1.0)
-- `IOT_DEVICE_TYPES`: Comma-separated list of device types to simulate
-- `IOT_ANOMALY_PROBABILITY`: Probability of generating anomalous readings (default: 0.05)
+- `IOT_NUM_DEVICES`=8
+- `IOT_DATA_INTERVAL_SEC`=1.0
+- `IOT_DEVICE_TYPES`=temperature,humidity,pressure,motion,light
+- `IOT_ANOMALY_PROBABILITY`=0.05
 
 ### Logging Configuration
-- `LOG_LEVEL`: Logging level (default: INFO)
-- `ENVIRONMENT`: Set to "production" to enable file logging
+- `LOG_LEVEL`=INFO
+
+### Schema Registry configuration
+- `SCHEMA_REGISTRY_URL`=http://schema-registry:8081
+- `SCHEMA_AUTO_REGISTER`=True
+- `SCHEMA_COMPATIBILITY_LEVEL`=BACKWARD
+- `SCHEMA_SUBJECT_STRATEGY`=TopicNameStrategy
 
 ## Understanding the Multi-Broker Setup
 ### Kafka Listeners Configuration
