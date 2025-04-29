@@ -1,0 +1,163 @@
+{
+  "namespace": "com.iotdatapipeline.avro",
+  "type": "record",
+  "name": "IoTSensorReading",
+  "doc": "Schema for IoT sensor readings - Version 2 with additional fields",
+  "fields": [
+    {
+      "name": "device_id",
+      "type": "string",
+      "doc": "Unique identifier for the IoT device"
+    },
+    {
+      "name": "device_type",
+      "type": "string",
+      "doc": "Type of IoT device (temperature, humidity, pressure, motion, light, etc.)"
+    },
+    {
+      "name": "timestamp",
+      "type": "string",
+      "doc": "ISO-8601 formatted timestamp of the reading"
+    },
+    {
+      "name": "value",
+      "type": [
+        "double",
+        "int",
+        "null"
+      ],
+      "doc": "Sensor reading value"
+    },
+    {
+      "name": "unit",
+      "type": "string",
+      "doc": "Unit of measurement (°C, %, hPa, lux, boolean, etc.)"
+    },
+    {
+      "name": "location",
+      "type": {
+        "type": "record",
+        "name": "Location",
+        "fields": [
+          {
+            "name": "latitude",
+            "type": "double",
+            "doc": "Latitude coordinate"
+          },
+          {
+            "name": "longitude",
+            "type": "double",
+            "doc": "Longitude coordinate"
+          },
+          {
+            "name": "building",
+            "type": [
+              "string",
+              "null"
+            ],
+            "doc": "Building identifier"
+          },
+          {
+            "name": "floor",
+            "type": [
+              "int",
+              "null"
+            ],
+            "doc": "Floor number"
+          },
+          {
+            "name": "zone",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "doc": "Zone within the building"
+          },
+          {
+            "name": "room",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "doc": "Room identifier (new in v2)"
+          }
+        ]
+      },
+      "doc": "Physical location of the device"
+    },
+    {
+      "name": "battery_level",
+      "type": [
+        "double",
+        "null"
+      ],
+      "doc": "Battery level in percentage (0-100%)"
+    },
+    {
+      "name": "signal_strength",
+      "type": [
+        "double",
+        "null"
+      ],
+      "default": null,
+      "doc": "Signal strength in dBm"
+    },
+    {
+      "name": "is_anomaly",
+      "type": "boolean",
+      "default": false,
+      "doc": "Flag indicating if this reading is anomalous"
+    },
+    {
+      "name": "firmware_version",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "doc": "Device firmware version"
+    },
+    {
+      "name": "metadata",
+      "type": [
+        {
+          "type": "map",
+          "values": "string"
+        },
+        "null"
+      ],
+      "default": null,
+      "doc": "Additional metadata for extensibility"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "DeviceStatus",
+        "symbols": ["ACTIVE", "IDLE", "MAINTENANCE", "ERROR", "UNKNOWN"]
+      },
+      "default": "ACTIVE",
+      "doc": "Current status of the device (new in v2)"
+    },
+    {
+      "name": "tags",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "default": [],
+      "doc": "List of tags associated with this device (new in v2)"
+    },
+    {
+      "name": "maintenance_date",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "doc": "Date of last maintenance in ISO-8601 format (new in v2)"
+    }
+  ]
+}

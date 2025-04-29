@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script to run the IoT data consumer.
-This is intended to be run in a Docker container with a multi-broker cluster.
+Script to run the IoT data consumer with Avro deserialization.
+This is intended to be run in a Docker container with a multi-broker Kafka cluster.
 """
 
 import time
@@ -13,36 +13,36 @@ import os
 from src.utils.logger import log
 from src.config.config import settings
 from src.data_ingestion.consumer import KafkaConsumer
-from confluent_kafka import Consumer
+from src.utils.schema_registry import schema_registry
 
-
-def wait_for_kafka(max_retries=30, initial_backoff=1):
+def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
     """
-    Wait for Kafka to become available with exponential backoff.
-    With multiple brokers, connection attemps are more complex and may require more time and retries.
-
+    Wait for Kafka and Schema Registry to become available with exponential backoff.
+    With multiple brokers and Schema Registry, connection attempts are more complex 
+    and may require more time and retries.
+    
     Args:
         max_retries: Maximum number of retry attempts
         initial_backoff: Initial backoff time in seconds
     
     Returns:
-        True if Kafka connection was successful, False otherwise
+        True if connection was successful, False otherwise
     """
-
     backoff = initial_backoff
     
     for attempt in range(1, max_retries + 1):
         try:
-            # Get the bootstrap severs from environment or settings
+            # Get the bootstrap servers from environment or settings
             bootstrap_servers = settings.kafka.bootstrap_servers
-            log.info(f"Attempt {attempt}/{max_retries} to connect to Kafka at {bootstrap_servers}")
+            log.info(f"Attempt {attempt}/{max_retries} to connect to Kafka cluster at {bootstrap_servers}")
             
             # Try to create a consumer to test connection
+            from confluent_kafka import Consumer
             consumer = Consumer({
                 'bootstrap.servers': bootstrap_servers,
                 'group.id': 'test-connection-group',
                 'auto.offset.reset': 'earliest',
-                'session.timeout.ms': 10000, # Longer timeout for multi-broker setup
+                'session.timeout.ms': 10000,  # Longer timeout for multi-broker setup
                 'heartbeat.interval.ms': 3000
             })
             
@@ -54,11 +54,18 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
             # Close the consumer properly
             consumer.close()
             
-            log.info("Successfully connected to a Kafka cluster!")
+            # Now check Schema Registry
+            sr_url = settings.schema_registry.url
+            log.info(f"Attempting to connect to Schema Registry at {sr_url}")
+            
+            # Try to get subjects from Schema Registry
+            subjects = schema_registry.get_subjects()
+            log.info(f"Successfully connected to Schema Registry. Available subjects: {subjects}")
+            
             return True
             
         except Exception as e:
-            log.warning(f"Failed to connect to Kafka: {str(e)}")
+            log.warning(f"Failed to connect to Kafka or Schema Registry: {str(e)}")
             
             if attempt < max_retries:
                 # Add some jitter to the backoff
@@ -71,33 +78,40 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
                 # Increase backoff for next attempt (exponential backoff)
                 backoff = min(backoff * 2, 30)  # Cap at 30 seconds
             else:
-                log.error(f"Failed to connect to Kafka after {max_retries} attempts")
+                log.error(f"Failed to connect after {max_retries} attempts")
                 return False
 
 class IoTAlertConsumer(KafkaConsumer):
     """
-    Custom consumer that processes IoT data and generates alerts.
+    Custom consumer that processes IoT data with Avro deserialization and generates alerts.
     This implementation is aware of the multi-broker setup and 
     includes logic to handle broker failovers.
-    """ 
+    """
     
     def process_message(self, message):
         """
-        Process a received IoT sensor reading and generate alerts based on specified thresholds
+        Process a received IoT sensor reading and generate alerts 
+        based on specified thresholds.
         
         Args:
-            message: Dictionary containing the IoT sensor reading
+            message: Dictionary containing the deserialized Avro IoT sensor reading
         """
         device_id = message.get('device_id', 'unknown')
         device_type = message.get('device_type', 'unknown')
         value = message.get('value', 'unknown')
         unit = message.get('unit', '')
         timestamp = message.get('timestamp', 'unknown')
+        firmware_version = message.get('firmware_version', 'unknown')
+        is_anomaly = message.get('is_anomaly', False)
+        
+        # Enhanced logging for Avro-deserialized messages
+        if is_anomaly:
+            log.info(f"Processing anomalous reading from device {device_id} (v{firmware_version})")
         
         # Check for anomalies or specific conditions
         try:
             # Convert value to float for numeric comparisons
-            # but handle the case when value might be non-numeric (like boolean for motion)
+            # but handle the case where value might be non-numeric (like boolean for motion)
             if device_type == "temperature" and float(value) > 30:
                 log.warning(f"HIGH TEMPERATURE ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
             elif device_type == "humidity" and float(value) > 70:
@@ -109,7 +123,10 @@ class IoTAlertConsumer(KafkaConsumer):
             elif device_type == "light" and float(value) < 10:
                 log.info(f"LOW LIGHT LEVEL: Device {device_id} reported {value}{unit} at {timestamp}")
             else:
-                log.info(f"Device {device_id} ({device_type}): {value}{unit}")
+                # Include firmware version and metadata in standard logs
+                metadata = message.get('metadata', {})
+                metadata_str = ", ".join(f"{k}: {v}" for k, v in metadata.items()) if metadata else "none"
+                log.info(f"Device {device_id} ({device_type}, v{firmware_version}): {value}{unit}, metadata: {metadata_str}")
         except (ValueError, TypeError) as e:
             # Handle case where value conversion fails
             log.error(f"Error processing value from device {device_id}: {str(e)}")
@@ -117,34 +134,36 @@ class IoTAlertConsumer(KafkaConsumer):
 
 def main():
     """
-    Main functions to run the IoT data consumer.
-    Handles connection to the multi-broker Kafka cluster.
-    Sets up the consumer, and processes incoming IoT data.
+    Main function to run the IoT data consumer with Avro deserialization.
+    Handles connection to the multi-broker Kafka cluster,
+    sets up the consumer, and processes incoming IoT data.
     """
-    log.info("Starting IoT Data Consumer Service")
+    log.info("Starting IoT Data Consumer Service with Avro Deserialization")
     log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
+    log.info(f"Schema Registry URL: {settings.schema_registry.url}")
     log.info(f"Kafka topic: {settings.kafka.topic_name}")
-
-    # Get consumer group ID from environment or use default
-    consumer_groupd_id = os.getenv("KAFKA_CONSUMER_GROUP_ID", "iod-data-consumer")
-    log.info(f"Consumer group ID: {consumer_groupd_id}")
     
-    # Wait for Kafka to be ready
-    if not wait_for_kafka():
-        log.error("Kafka is not available. Exiting.")
+    # Get consumer group ID from environment or use default
+    consumer_group_id = os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
+    log.info(f"Consumer group ID: {consumer_group_id}")
+    
+    # Wait for Kafka and Schema Registry to be ready
+    if not wait_for_kafka_and_schema_registry():
+        log.error("Kafka cluster or Schema Registry is not available. Exiting.")
         sys.exit(1)
     
-    try: 
-        # Create and start the consumer
+    try:
+        # Create and start the consumer with multi-broker awareness and Avro deserialization
         consumer = IoTAlertConsumer(
-            group_id=consumer_groupd_id,
+            group_id=consumer_group_id,
             # Fault tolerance settings for multi-broker environment
             auto_offset_reset=os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
         )
         
         # Start consuming messages in a continuous loop
-        log.info("Starting continuous IoT data consumption...")
-        consumer.consume_loop(timeout=1.0)        
+        log.info("Starting continuous IoT data consumption with Avro deserialization...")
+        consumer.consume_loop(timeout=1.0)
+        
     except KeyboardInterrupt:
         log.info("Consumer interrupted by user")
     except Exception as e:
@@ -154,7 +173,5 @@ def main():
         # Ensure any cleanup happens
         log.info("Consumer shutdown complete")
 
-
 if __name__ == "__main__":
     main()
-

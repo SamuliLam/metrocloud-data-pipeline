@@ -99,7 +99,7 @@ services:
     hostname: kafka3
     ports:
       - "9094:9092" # Internal Kafka port for broker-to-client communication
-      - "29094:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
+      - "29094:29092" # Host-accessible external kafka port for host machine tools like Kafka UI
     environment:
       # KRaft settings - Unique ID and roles
       KAFKA_NODE_ID: 3 
@@ -140,6 +140,47 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5 
+
+# Schema Registry
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.9.0
+    container_name: schema-registry
+    hostname: schema-registry
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:9092,kafka2:9092,kafka3:9092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+      # Schema compatibility settings
+      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: BACKWARD
+
+      # Replication factor for schemas topic
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
+
+    restart: always
+    command: >
+      bash -c '
+        echo "Waiting for Kafka to be ready..."
+        cub kafka-ready -b kafka1:9092 1 60 &&
+        cub kafka-ready -b kafka2:9092 1 60 &&
+        cub kafka-ready -b kafka3:9092 1 60 &&
+        echo "Kafka is ready! Starting Schema Registry..." &&
+        /etc/confluent/docker/run
+      '
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - kafka-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     
   # Kafka UI
   kafka-ui:
@@ -150,11 +191,13 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local-cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092,kafka2:9092,kafka3:9092 # Connects to Kafka's exposed port
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
       SERVER_SERVLET_CONTEXT_PATH: / # Root path for the UI
     depends_on:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
     networks:
       - kafka-net # Access Kafka over Docker network
 
@@ -168,6 +211,9 @@ services:
       # Configure producer to connect all brokers inside docker for fault tolerance
       KAFKA_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092,kafka3:9092
       KAFKA_TOPIC_NAME: iot-sensor-data # Topic to publish simulated data
+      # Schema Registry Configuration
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      # Settings for IoT data simulation
       IOT_NUM_DEVICES: 8 # Number of virtual IoT devices
       IOT_DATA_INTERVAL_SEC: 1.0 # How often each device sends data
       PYTHONUNBUFFERED: 1 # Ensures real-time stdout logging
@@ -175,6 +221,7 @@ services:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
     networks:
       - kafka-net
 
@@ -189,11 +236,14 @@ services:
       KAFKA_TOPIC_NAME: iot-sensor-data # Topic to subscribe and consume from
       KAFKA_CONSUMER_GROUP_ID: iot-data-consumer # Consumer's groud id
       KAFKA_AUTO_OFFSET_RESET: earliest # Start from the beginning if no offset is found
+      # Schema Registry configuration
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
       PYTHONUNBUFFERED: 1
     depends_on:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
       - kafka-producer # Wait until produer is available
     networks:
       - kafka-net

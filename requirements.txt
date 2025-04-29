@@ -1,6 +1,10 @@
 confluent-kafka==2.9.0
+confluent-kafka[avro]==2.9.0 # Kafka with Avro support
 python-dotenv==1.1.0
 pydantic==2.11.3
 pydantic-settings==2.8.1
 loguru==0.7.3
 faker==37.1.0
+avro-python3==1.10.2 # Avro serialization
+fastavro==1.10.0 # Fast Avro implementation
+requests==2.32.3 # For Schema Registry HTTP requests

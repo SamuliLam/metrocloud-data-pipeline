@@ -1,21 +1,22 @@
-import json
 import time
 import signal
 import os
-from typing import Dict, Any, Callable, Optional
+from typing import Dict, Any, Callable, Optional, List
 from confluent_kafka import Consumer, KafkaError, KafkaException
 
 from src.utils.logger import log
 from src.config.config import settings
+from src.utils.schema_registry import schema_registry
 
 class KafkaConsumer:
     """
-    Kafka Consumer for IoT sensor data with multi-broker cluster support.
+    Kafka Consumer for IoT sensor data with Avro deserialization and Schema Registry.
     
-    This class handles the connection to a Kafka cluster, subscribers to topics, and
-    processes messages. It includes fault tolerance for broker failures and
-    rebalancing in a multi-cultural environment.
+    This class handles the connection to a Kafka cluster, subscribes to topics,
+    and processes messages. It includes fault tolerance for broker failures
+    and rebalancing in a multi-broker environment.
     """
+    
     def __init__(
         self,
         bootstrap_servers: str = None,
@@ -24,47 +25,51 @@ class KafkaConsumer:
         auto_offset_reset: str = None
     ):
         """
-        Initialize Kafka consumer with configuration.
+        Initialize Kafka consumer with configuration for a multi-broker environment.
         
         Args:
             bootstrap_servers: Comma-separated list of broker addresses (host:port)
-            topic_name: Name of the Kafka topic to consume message from
+            topic_name: Name of the Kafka topic to consume messages from
             group_id: Consumer group ID for load balancing
             auto_offset_reset: Strategy for consuming messages ('earliest' or 'latest')
         """
         self.bootstrap_servers = bootstrap_servers or settings.kafka.bootstrap_servers
         self.topic_name = topic_name or settings.kafka.topic_name
-        self.group_id = group_id or settings.kafka.group_id
-        self.auto_offset_reset = auto_offset_reset or settings.kafka.auto_offset_reset
+        self.group_id = group_id or os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
+        self.auto_offset_reset = auto_offset_reset or os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
         
         # Flag to control consumption loop
         self.running = False
         
-        # Consumer configuration
+        # Consumer configuration with fault tolerance for multi-broker setup
         self.conf = {
             'bootstrap.servers': self.bootstrap_servers,
             'group.id': self.group_id,
             'auto.offset.reset': self.auto_offset_reset,
-
+            
             # Commit settings
-            'enable.auto.commit': True, # Automatically commit offsets
-            'auto.commit.interval.ms': 5000, # Commit every 5 seconds
-
+            'enable.auto.commit': True,
+            'auto.commit.interval.ms': 5000,
+            
             # Performance settings
-            'fetch.min.bytes': 1, # Minimum bytest to fetch
-
+            'fetch.min.bytes': 1,           # Minimum bytes to fetch
+            
             # Fault tolerance settings
-            'session.timeout.ms': 30000, # Longer timeout for fault tolerance
+            'session.timeout.ms': 30000,    # Longer timeout for fault tolerance
             'heartbeat.interval.ms': 10000, # Heartbeat interval
             'max.poll.interval.ms': 300000, # Max time between polls
-
+            
             # Load balancing
-            'partition.assignment.strategy': 'cooperative-sticky' # Better handling of rebalances
+            'partition.assignment.strategy': 'cooperative-sticky'  # Better handling of rebalances
         }
         
-        # Create Kafka consumer instance
+        # Create consumer instance
         self.consumer = Consumer(self.conf)
         log.info(f"Kafka consumer initialized with bootstrap servers: {self.bootstrap_servers}")
+        
+        # Schema Registry
+        self.schema_registry_client = schema_registry
+        log.info("Schema Registry client initialized for consumer")
         
         # Setup signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -72,10 +77,10 @@ class KafkaConsumer:
     
     def _signal_handler(self, sig, frame):
         """
-        Graceful shutdown on SIGINT or SIGTERM.
+        Handle termination signals for graceful shutdown.
         
         Args:
-            sig: Signal numebr
+            sig: Signal number
             frame: Current stack frame
         """
         log.info(f"Caught signal {sig}. Stopping consumer...")
@@ -83,10 +88,10 @@ class KafkaConsumer:
     
     def subscribe(self) -> None:
         """
-        Subscribe to the configured Kafka topic.
-
-        In a multi-broker environment, subscription triggers a rebalance to assign
-        partitions among consumers in the group
+        Subscribe to the Kafka topic.
+        
+        In a multi-broker environment, subscription triggers a rebalance
+        to assign partitions among consumers in the group.
         """
         try:
             self.consumer.subscribe([self.topic_name], on_assign=self._on_assign_callback)
@@ -119,6 +124,7 @@ class KafkaConsumer:
         Args:
             message: Dictionary containing the message data
         """
+        # Default implementation just logs the message
         device_id = message.get('device_id', 'unknown')
         device_type = message.get('device_type', 'unknown')
         value = message.get('value', 'unknown')
@@ -153,46 +159,54 @@ class KafkaConsumer:
         
         return True
     
-    def consume_batch(self, batch_size: int = 100, timeout: float = 1.0) -> None:
-        """Consume a batch of messages from Kafka topic.
-
-        This method polls for a batch of messags and processes them.
+    def consume_batch(self, batch_size: int = 100, timeout: float = 1.0) -> List[Dict[str, Any]]:
+        """
+        Consume a batch of messages from Kafka topic.
+        
+        This method polls for a batch of messages and processes them.
         
         Args:
-            batch_size: Number of messages to consume before processing
-            timeout: Poll timeout per message
-
-        Return:
-            List of processes messages
+            batch_size: Maximum number of messages to consume in one batch
+            timeout: Poll timeout in seconds
+            
+        Returns:
+            List of processed messages
         """
         try:
             # Make sure we're subscribed
             if not self.consumer.assignment():
                 self.subscribe()
-
+            
             messages = []
             start_time = time.time()
-
+            
             # Poll for messages until we get a batch or timeout
             while len(messages) < batch_size and (time.time() - start_time) < (timeout * 5):
                 msg = self.consumer.poll(timeout=timeout)
                 
-                # Skip message if it has errors:
+                # Skip message if it has errors
                 if not self._handle_message_errors(msg):
                     continue
-
-                # Parse the message value
+                
+                # Deserialize the message value using Avro and Schema Registry
                 try:
-                    message_str = msg.value().decode('utf-8')
-                    message = json.loads(message_str)
+                    # Deserialization context
+                    value_bytes = msg.value()
+                    
+                    # Deserialize with Schema Registry
+                    message = self.schema_registry_client.deserialize_sensor_reading(
+                        value_bytes, 
+                        self.topic_name
+                    )
+                    
                     messages.append(message)
                 except Exception as e:
-                    log.error(f"Error parsing message: {str(e)}")
+                    log.error(f"Error deserializing message: {str(e)}")
                     continue
-                
+            
             # Process the batch of messages
             if messages:
-                log.info(f"Consumed {len(messages)} messages from topic: {self.topic_name}")
+                log.info(f"Consumed {len(messages)} Avro-serialized messages from topic: {self.topic_name}")
                 for message in messages:
                     self.process_message(message)
             
@@ -207,13 +221,14 @@ class KafkaConsumer:
     
     def consume_loop(self, process_fn: Optional[Callable[[Dict[str, Any]], None]] = None, timeout: float = 1.0) -> None:
         """
-        Continuously consume messages from Kafka topic.
+        Start a continuous consumption loop from Kafka topic.
         
-        This method continuously polls for messags and processes them until the consumer is stopped.
+        This method continuously polls for messages and processes them
+        until the consumer is stopped.
         
         Args:
             process_fn: Optional function to process each message, defaults to self.process_message
-            timeout: Poll timeout for each message in seconds
+            timeout: Poll timeout in seconds
         """
         try:
             # Make sure we're subscribed
@@ -233,20 +248,26 @@ class KafkaConsumer:
                 # Skip message if it has errors
                 if not self._handle_message_errors(msg):
                     continue
-
+                
                 # Parse and process the message
                 try:
-                    message_str = msg.value().decode('utf-8')
-                    message = json.loads(message_str)
+                    # Deserialize with Schema Registry
+                    value_bytes = msg.value()
+                    message = self.schema_registry_client.deserialize_sensor_reading(
+                        value_bytes,
+                        self.topic_name
+                    )
+                    
+                    # Process the deserialized message
                     processor(message)
-
+                    
                 except Exception as e:
                     log.error(f"Error processing message: {str(e)}")
                     continue
                 
         except KafkaException as e:
             log.error(f"Kafka error during consumption loop: {str(e)}")
-            # if connection to a broker fails, other may still be available
+            # If connection to a broker fails, others may still be available
             # Try to continue if possible
             if not self.running:
                 raise
@@ -265,41 +286,12 @@ class KafkaConsumer:
         """
         self.running = False
         if hasattr(self, 'consumer'):
-            # Final comit of offsets before closing
+            # Final commit of offsets before closing
             try:
                 self.consumer.commit(asynchronous=False)
-                log.info("final offsets committed successfully")
+                log.info("Final offsets committed successfully")
             except Exception as e:
                 log.warning(f"Error committing final offsets: {str(e)}")
-
+                
             self.consumer.close()
             log.info("Kafka consumer closed")
-
-# For testing
-if __name__ == "__main__":
-    # Create custom processor class by inheritance
-    class CustomProcessor(KafkaConsumer):
-        def process_message(self, message):
-            # Override with custom processing logic
-            device_id = message.get('device_id', 'unknown')
-            device_type = message.get('device_type', 'unknown')
-            value = message.get('value', 'unknown')
-            timestamp = message.get('timestamp', 'unknown')
-            
-            if device_type == "temperature" and value > 30:
-                log.warning(f"HIGH TEMPERATURE ALERT: Device {device_id} reported {value}°C at {timestamp}")
-            elif device_type == "motion" and value == 1:
-                log.info(f"MOTION DETECTED: Device {device_id} detected motion at {timestamp}")
-            else:
-                log.info(f"Device {device_id} ({device_type}): {value}")
-    
-    # Create consumer with custom processing
-    consumer = CustomProcessor()
-    
-    try:
-        # Run the consumption loop
-        consumer.consume_loop(timeout=1.0)
-    except KeyboardInterrupt:
-        log.info("Consumer stopped by user")
-    finally:
-        consumer.close()
