@@ -51,6 +51,8 @@ class SchemaRegistry:
                 self.sensor_schema = avro.schema.parse(self.sensor_schema_str)
                 
             log.info(f"Loaded sensor schema from: {self.sensor_schema_path}")
+            log.debug(f"Schema compatibility level: {settings.schema_registry.compatibility_level}")
+
             
             # Initialize sensor serializer and deserializer
             self._init_serializers()
@@ -75,7 +77,7 @@ class SchemaRegistry:
             self.sensor_deserializer = AvroDeserializer(
                 schema_registry_client=self.schema_registry,
                 schema_str=self.sensor_schema_str,
-                from_dict=self._dict_to_sensor
+                from_dict=self._dict_to_sensor,
             )
             
             log.info("Initialized Avro serializers and deserializers")
@@ -113,8 +115,21 @@ class SchemaRegistry:
         location = avro_reading.get('location', {})
         if 'zone' not in location or location['zone'] is None:
             location['zone'] = None
+
+        if 'room' not in location or location['room'] is None:
+            location['room'] = None
         
         avro_reading['location'] = location
+
+        # Handle status
+        if 'status' not in avro_reading or avro_reading['status'] is None:
+            avro_reading['status'] = "ACTIVE"  # Default status
+
+        if 'tags' not in avro_reading or avro_reading['tags'] is None:
+            avro_reading['tags'] = []  # Empty list of tags
+        
+        if 'maintenance_date' not in avro_reading:
+            avro_reading['maintenance_date'] = None
             
         return avro_reading
     
@@ -165,6 +180,8 @@ class SchemaRegistry:
             schema_id = self.schema_registry.register_schema(subject, schema)            
 
             log.info(f"Schema registered with ID: {schema_id}")
+            log.debug(f"Schema compatibility level: {settings.schema_registry.compatibility_level}")
+
             return schema_id
 
         except Exception as e:
@@ -210,6 +227,32 @@ class SchemaRegistry:
             log.error(f"Error getting subjects: {str(e)}")
             return []
     
+    def set_compatibility(self, compatibility_level: str = None, subject: str = None) -> bool:
+        """
+        Set the compatibility level for schemas.
+        
+        Args:
+            compatibility_level: Compatibility level (BACKWARD, FORWARD, FULL, NONE)
+            subject: Subject name (None for global setting)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Get compatibility level from settings if not provided
+            level = compatibility_level or settings.schema_registry.compatibility_level
+            
+            if subject:
+                self.schema_registry.update_compatibility(level, subject)
+                log.info(f"Set compatibility level to {level} for subject: {subject}")
+            else:
+                self.schema_registry.update_compatibility(level)
+                log.info(f"Set global compatibility level to {level}")
+            return True
+        except Exception as e:
+            log.error(f"Error setting compatibility level: {str(e)}")
+            return False
+
     def delete_schema(self, subject: str, version: str = None) -> bool:
         """
         Delete a schema from the Schema Registry.
@@ -245,7 +288,8 @@ class SchemaRegistry:
             True if compatible, False otherwise
         """
         try:
-            return self.schema_registry.test_compatibility(subject, avro.schema.parse(schema_str))
+            schema = Schema(schema_str, schema_type="AVRO")
+            return self.schema_registry.test_compatibility(subject, schema)
         except Exception as e:
             log.error(f"Error checking compatibility: {str(e)}")
             return False

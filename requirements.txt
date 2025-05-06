@@ -8,3 +8,4 @@ faker==37.1.0
 avro-python3==1.10.2 # Avro serialization
 fastavro==1.10.0 # Fast Avro implementation
 requests==2.32.3 # For Schema Registry HTTP requests
+pyyaml==6.0.2 # For YAML configuration parsing

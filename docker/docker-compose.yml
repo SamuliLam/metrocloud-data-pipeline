@@ -10,34 +10,35 @@ services:
       - "29092:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
     environment:
       # KRaft settings - Unique ID and roles
-      KAFKA_NODE_ID: 1 
-      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID_1:-1}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller} # This node will act as both broker and controller
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
       # Listener Configuration - critical for proper networking      
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
       # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS_1:-PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092}
       # What the broker advertises to clients: 'internal communication,external docker host communication'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS_1:-PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT} # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES:-CONTROLLER} # Controller listener name
       
       # Topic configurations with higher replication factor for fault tolerance
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_MIN_ISR:-2}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       
       # KRaft Cluster Initialization
-      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
+      CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
     volumes:
       - kafka1_data:/var/lib/kafka/data # Persist Kafka logs and data
+      - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     healthcheck:
@@ -55,34 +56,35 @@ services:
       - "29093:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
     environment:
       # KRaft settings - Unique ID and roles
-      KAFKA_NODE_ID: 2 
-      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID_2:-2}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller} # This node will act as both broker and controller
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
       # Listener Configuration - critical for proper networking      
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
       # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS_2:-PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:29093,PLAINTEXT_HOST://0.0.0.0:29092}
       # What the broker advertises to clients: 'internal communication,external docker host communication'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:29093'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS_2:-PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:29093}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT} # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES:-CONTROLLER} # Controller listener name
       
       # Topic configurations with higher replication factor for fault tolerance
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_MIN_ISR:-2}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       
       # KRaft Cluster Initialization
-      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
+      CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
     volumes:
       - kafka2_data:/var/lib/kafka/data # Persist Kafka logs and data
+      - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     depends_on:
@@ -102,34 +104,35 @@ services:
       - "29094:29092" # Host-accessible external kafka port for host machine tools like Kafka UI
     environment:
       # KRaft settings - Unique ID and roles
-      KAFKA_NODE_ID: 3 
-      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID_3:-3}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller} # This node will act as both broker and controller
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
       # Listener Configuration - critical for proper networking      
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
       # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS_3:-PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:29093,PLAINTEXT_HOST://0.0.0.0:29092}
       # What the broker advertises to clients: 'internal communication,external docker host communication'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:29094'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS_3:-PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:29094}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT} # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES:-CONTROLLER} # Controller listener name
       
       # Topic configurations with higher replication factor for fault tolerance
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_MIN_ISR:-2}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       
       # KRaft Cluster Initialization
-      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
+      CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
     volumes:
       - kafka3_data:/var/lib/kafka/data # Persist Kafka logs and data
+      - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     depends_on:
@@ -150,15 +153,17 @@ services:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka1:9092,kafka2:9092,kafka3:9092'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: ${SCHEMA_REGISTRY_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
       # Schema compatibility settings
-      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: BACKWARD
+      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: ${SCHEMA_COMPATIBILITY_LEVEL:-BACKWARD}
 
       # Replication factor for schemas topic
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: ${SCHEMA_REGISTRY_REPLICATION_FACTOR:-3}
 
+    volumes:
+      - ../src/config/config.yaml:/etc/schema-registry/config.yaml # Mount configuration file
     restart: always
     command: >
       bash -c '
@@ -189,10 +194,12 @@ services:
     ports:
       - "8080:8080" # Web UI exposed at http://localhost:8080
     environment:
-      KAFKA_CLUSTERS_0_NAME: local-cluster
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092,kafka2:9092,kafka3:9092 # Connects to Kafka's exposed port
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      KAFKA_CLUSTERS_0_NAME: ${KAFKA_UI_CLUSTER_NAME:-local-cluster}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092} # Connects to Kafka's exposed port
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
       SERVER_SERVLET_CONTEXT_PATH: / # Root path for the UI
+    volumes:
+      - ../src/config/config.yaml:/etc/kafka-ui/config.yaml # Mount configuration file
     depends_on:
       - kafka1
       - kafka2
@@ -209,14 +216,17 @@ services:
     container_name: kafka-producer
     environment:
       # Configure producer to connect all brokers inside docker for fault tolerance
-      KAFKA_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092,kafka3:9092
-      KAFKA_TOPIC_NAME: iot-sensor-data # Topic to publish simulated data
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
+      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data} # Topic to publish simulated data
       # Schema Registry Configuration
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
       # Settings for IoT data simulation
-      IOT_NUM_DEVICES: 8 # Number of virtual IoT devices
-      IOT_DATA_INTERVAL_SEC: 1.0 # How often each device sends data
+      IOT_NUM_DEVICES: ${IOT_NUM_DEVICES:-8} # Number of virtual IoT devices
+      IOT_DATA_INTERVAL_SEC: ${IOT_DATA_INTERVAL_SEC:-1.0} # How often each device sends data
       PYTHONUNBUFFERED: 1 # Ensures real-time stdout logging
+      CONFIG_FILE_PATH: /app/config.yaml # Path to the config file inside the container
+    volumes:
+      - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
     depends_on:
       - kafka1
       - kafka2
@@ -232,19 +242,22 @@ services:
       dockerfile: docker/Dockerfile.consumer
     container_name: kafka-consumer
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092,kafka3:9092 # Kafka broker inside Docker network
-      KAFKA_TOPIC_NAME: iot-sensor-data # Topic to subscribe and consume from
-      KAFKA_CONSUMER_GROUP_ID: iot-data-consumer # Consumer's groud id
-      KAFKA_AUTO_OFFSET_RESET: earliest # Start from the beginning if no offset is found
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092} # Kafka broker inside Docker network
+      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data} # Topic to subscribe and consume from
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID:-iot-data-consumer} # Consumer's group id
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest} # Start from the beginning if no offset is found
       # Schema Registry configuration
-      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
       PYTHONUNBUFFERED: 1
+      CONFIG_FILE_PATH: /app/config.yaml # Path to the config file inside the container
+    volumes:
+      - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
     depends_on:
       - kafka1
       - kafka2
       - kafka3
       - schema-registry
-      - kafka-producer # Wait until produer is available
+      - kafka-producer # Wait until producer is available
     networks:
       - kafka-net
 
@@ -255,6 +268,14 @@ volumes:
   kafka2_data:
     driver: local
   kafka3_data:
+    driver: local
+  schema-registry:
+    driver: local
+  kafka-ui:
+    driver: local
+  kafka-producer:
+    driver: local
+  kafka-consumer:
     driver: local
 
 # Docker Network for All Services

@@ -35,37 +35,26 @@ class KafkaConsumer:
         """
         self.bootstrap_servers = bootstrap_servers or settings.kafka.bootstrap_servers
         self.topic_name = topic_name or settings.kafka.topic_name
-        self.group_id = group_id or os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
-        self.auto_offset_reset = auto_offset_reset or os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
+        self.group_id = group_id or settings.kafka.consumer_group_id
+        self.auto_offset_reset = auto_offset_reset or settings.kafka.auto_offset_reset
         
         # Flag to control consumption loop
         self.running = False
         
-        # Consumer configuration with fault tolerance for multi-broker setup
-        self.conf = {
-            'bootstrap.servers': self.bootstrap_servers,
-            'group.id': self.group_id,
-            'auto.offset.reset': self.auto_offset_reset,
-            
-            # Commit settings
-            'enable.auto.commit': True,
-            'auto.commit.interval.ms': 5000,
-            
-            # Performance settings
-            'fetch.min.bytes': 1,           # Minimum bytes to fetch
-            
-            # Fault tolerance settings
-            'session.timeout.ms': 30000,    # Longer timeout for fault tolerance
-            'heartbeat.interval.ms': 10000, # Heartbeat interval
-            'max.poll.interval.ms': 300000, # Max time between polls
-            
-            # Load balancing
-            'partition.assignment.strategy': 'cooperative-sticky'  # Better handling of rebalances
-        }
+        # Get consumer configuration from settings
+        self.conf = settings.consumer.get_config(
+            group_id=self.group_id,
+            auto_offset_reset=self.auto_offset_reset
+        )
+        
+        # Override bootstrap servers if provided
+        if bootstrap_servers:
+            self.conf['bootstrap.servers'] = bootstrap_servers
         
         # Create consumer instance
         self.consumer = Consumer(self.conf)
         log.info(f"Kafka consumer initialized with bootstrap servers: {self.bootstrap_servers}")
+        log.debug(f"Consumer configuration: {self.conf}")
         
         # Schema Registry
         self.schema_registry_client = schema_registry
@@ -288,6 +277,8 @@ class KafkaConsumer:
         if hasattr(self, 'consumer'):
             # Final commit of offsets before closing
             try:
+                # Use auto commit interval from config or default to 5 seconds for final commit timeout
+                commit_timeout = self.conf.get('auto.commit.interval.ms', 5000) / 1000
                 self.consumer.commit(asynchronous=False)
                 log.info("Final offsets committed successfully")
             except Exception as e:

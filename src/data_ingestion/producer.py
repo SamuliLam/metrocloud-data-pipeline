@@ -27,31 +27,17 @@ class KafkaProducer:
         self.bootstrap_servers = bootstrap_servers or settings.kafka.bootstrap_servers
         self.topic_name = topic_name or settings.kafka.topic_name
         
-        # Producer configuration with fault tolerance for multi-broker setup
-        self.conf = {
-            'bootstrap.servers': self.bootstrap_servers,
-            'client.id': 'iot-data-producer',
-            
-            # Reliability settings
-            'acks': 'all', # Wait for all replicas to acknowledge
-            'retries': 5, # Number of retries if sending fails
-            'retry.backoff.ms': 500, # Backoff time (Delay) between retries
-            'max.in.flight.requests.per.connection': 1, # Prevent message reordering on retries
-            
-            # Performance tuning and timeout settings
-            'queue.buffering.max.ms': 5, # Time to wait before sending a batch
-            'queue.buffering.max.kbytes': 32768,  # Max total memory buffer (32 MB)
-            'batch.num.messages': 1000, # Batch size in bytes
-            'socket.timeout.ms': 30000, # Socket timeout
-            'message.timeout.ms': 10000,  # Max time to wait for acknowledgement
-
-            # Compression to reduce network bandwidth
-            'compression.type': 'snappy'    # Enable compression for efficiency
-        }
+        # Get producer configuration from settings
+        self.conf = settings.producer.get_config()
+        
+        # Override bootstrap servers if provided
+        if bootstrap_servers:
+            self.conf['bootstrap.servers'] = bootstrap_servers
         
         # Create producer instance
         self.producer = Producer(self.conf)
         log.info(f"Kafka producer initialized with bootstrap servers: {self.bootstrap_servers}")
+        log.debug(f"Producer configuration: {self.conf}")
         
         # Schema Registry
         self.schema_registry_client = schema_registry
@@ -78,34 +64,43 @@ class KafkaProducer:
             log.error(f"Error registering schema: {str(e)}")
             raise
     
-    def _ensure_topic_exists(self, num_partitions: int = 6, replication_factor: int = 3) -> None:
+    def _ensure_topic_exists(self) -> None:
         """
         Ensure that the Kafka topic exists with proper settings for a multi-broker environment.
         Creates the topic if it doesn't exist yet.
-        
-        Args:
-            num_partitions: Number of partitions for the topic (higher allows more parallelism)
-            replication_factor: Number of replicas for each partition (should be <= number of brokers)
         """
         try:
+            # Get replication factor and partitions from settings
+            num_partitions = settings.kafka.partitions
+            replication_factor = settings.kafka.replication_factor
+            
+            # Get topic configuration from settings
+            topic_config = settings.kafka.topic_config
+            
             admin_client = AdminClient({'bootstrap.servers': self.bootstrap_servers})
             
             # Check if topic already exists
             topics = admin_client.list_topics(timeout=10)
             
             if self.topic_name not in topics.topics:
-                log.info(f"Topic {self.topic_name} does not exist. Creating it with {num_partitions} partitions and replication factor {replication_factor}...")
+                log.info(f"Topic {self.topic_name} does not exist. Creating it with {num_partitions} " +
+                         f"partitions and replication factor {replication_factor}...")
+                
+                # Convert topic config dict to the format expected by NewTopic
+                config = {}
+                for k, v in topic_config.items():
+                    # Convert min_insync_replicas to min.insync.replicas format
+                    key = k.replace('_', '.')
+                    config[key] = str(v)
+
+                log.debug(f"Topic config: {config}")
+                
                 topic_list = [
                     NewTopic(
                         self.topic_name,
                         num_partitions=num_partitions,
                         replication_factor=replication_factor,
-                        # Additional topic configs for reliability
-                        config={
-                            'min.insync.replicas': '2',  # At least 2 replicas must acknowledge
-                            'retention.ms': '604800000', # 7 days retention
-                            'cleanup.policy': 'delete'   # Delete old messages
-                        }
+                        config=config
                     )
                 ]
                 
@@ -210,7 +205,8 @@ class KafkaProducer:
         
         # Flush to ensure all messages are sent
         # Longer timeout to account for multiple brokers
-        self.producer.flush(timeout=10.0)
+        flush_timeout = settings.producer.message_timeout_ms / 1000 * 3  # Convert ms to seconds and triple it
+        self.producer.flush(timeout=flush_timeout)
         
         # Log summary of sent messages
         unique_devices = len(device_count)

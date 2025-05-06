@@ -3,7 +3,7 @@ import time
 import uuid
 import random
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from faker import Faker
 
@@ -42,7 +42,8 @@ class IoTDevice:
             "longitude": float(f"{fake.longitude():2.6f}"),
             "building": fake.building_number(),
             "floor": random.randint(1, 10),
-            "zone": random.choice(["north", "south", "east", "west", "central"])
+            "zone": random.choice(["north", "south", "east", "west", "central"]),
+            "room": f"room-{random.randint(100, 999)}"  # Added room field to match updated schema
         }
         
         # Set device-specific parameters for more realistic simulation
@@ -50,9 +51,49 @@ class IoTDevice:
         
         # Set firmware version for schema compatibility
         self.firmware_version = f"{random.randint(1,3)}.{random.randint(0,9)}.{random.randint(0,20)}"
+
+        # Set device status according to new schema
+        self.status = random.choice(["ACTIVE", "IDLE", "MAINTENANCE", "ERROR", "UNKNOWN"])
+
+        # Set tags according to new schema
+        self.tags = self._generate_tags()
+        
+        # Set maintenance date according to new schema
+        self.maintenance_date = self._generate_maintenance_date() if random.random() < 0.7 else None
         
         log.info(f"Initialized IoT device: {self.device_id} of type {self.device_type}")
     
+    def _generate_tags(self) -> List[str]:
+        """
+        Generate a list of tags for the device.
+        
+        Returns:
+            List of tag strings
+        """
+        possible_tags = [
+            "indoor", "outdoor", "critical", "non-critical", 
+            "primary", "secondary", "backup", "main-floor", 
+            "building-a", "building-b", "zone-1", "zone-2",
+            "maintenance-required", "newly-installed"
+        ]
+        
+        # Generate 0-4 tags
+        num_tags = random.randint(0, 4)
+        return random.sample(possible_tags, min(num_tags, len(possible_tags)))
+    
+    def _generate_maintenance_date(self) -> str:
+        """
+        Generate a random maintenance date in ISO-8601 format.
+        
+        Returns:
+            ISO-8601 formatted date string
+        """
+        # Generate date in the past 1-180 days
+        days_ago = random.randint(1, 180)
+        date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        date = date - timedelta(days=days_ago)
+        return date.isoformat() + "Z"
+
     def _set_device_parameters(self):
         """
         Set device-specific parameters based on device type.
@@ -60,6 +101,7 @@ class IoTDevice:
         These parameters help generate more realistic data with consistent
         trends and baselines for each device.
         """
+
         # Base value ranges for different device types
         if self.device_type == "temperature":
             self.base_value = random.uniform(20.0, 25.0)  # Starting temperature in Celsius
@@ -155,8 +197,8 @@ class IoTDevice:
             unit = "unknown"
         
         # Add anomalies based on configurable probability
-        anomaly_probability = settings.iot_simulator.anomaly_probability
-        is_anomaly = random.random() < anomaly_probability
+        self.anomaly_probability = settings.iot_simulator.anomaly_probability
+        is_anomaly = random.random() < self.anomaly_probability
         
         if is_anomaly:
             if self.device_type in ["temperature", "humidity", "pressure", "light"]:
@@ -180,6 +222,14 @@ class IoTDevice:
         # Signal strength varies slightly over time
         signal_strength = round(random.uniform(-100.0, -30.0), 2)
         
+        # Battery level decreases over time
+        self.battery_level = getattr(self, 'battery_level', 100.0)
+        self.battery_level = max(0.0, self.battery_level - random.uniform(0.0, 0.5))       
+
+        # Occasionally change status
+        if random.random() < 0.01:  # 1% chance to change status
+            self.status = random.choice(["ACTIVE", "IDLE", "MAINTENANCE", "ERROR", "UNKNOWN"])
+
         # Create metadata field for additional device info
         metadata = {
             "manufacturer": random.choice(["SensorTech", "IoTDevices", "SmartSense", "TechnoIoT"]),
@@ -195,11 +245,14 @@ class IoTDevice:
             "value": float(value) if isinstance(value, (int, float)) else value,
             "unit": unit,
             "location": self.location,
-            "battery_level": round(random.uniform(0.0, 100.0), 2),
+            "battery_level": round(self.battery_level, 2),
             "signal_strength": signal_strength,
             "is_anomaly": is_anomaly,
             "firmware_version": self.firmware_version,
-            "metadata": metadata
+            "metadata": metadata,
+            "status": self.status,
+            "tags": self.tags,
+            "maintenance_date": self.maintenance_date
         }
         
         return reading

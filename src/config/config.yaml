@@ -1,0 +1,150 @@
+# IoT Data Ingestion Pipeline Configuration
+# This file contains all configuration options for the data pipeline
+
+# Kafka configuration
+kafka:
+  # Multi-broker settings
+  bootstrap_servers: kafka1:9092,kafka2:9092,kafka3:9092
+  topic_name: iot-sensor-data
+  consumer_group_id: iot-data-consumer
+  auto_offset_reset: earliest
+  
+  # Replication and partition settings for fault tolerance
+  replication_factor: 3
+  partitions: 6
+  
+  # Topic configurations
+  topic_config:
+    min_insync_replicas: 2
+    retention_ms: 604800000  # 7 days
+    cleanup_policy: delete
+
+  # Broker configurations
+  brokers:
+    # Kafka Broker 1
+    kafka1:
+      node_id: 1
+      process_roles: broker,controller
+      controller_quorum_voters: 1@kafka1:29093,2@kafka2:29093,3@kafka3:29093
+      listeners: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092
+      advertised_listeners: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092
+      listener_security_protocol_map: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      inter_broker_listener_name: PLAINTEXT
+      controller_listener_names: CONTROLLER
+      port: 9092
+      external_port: 29092
+    
+    # Kafka Broker 2
+    kafka2:
+      node_id: 2
+      process_roles: broker,controller
+      controller_quorum_voters: 1@kafka1:29093,2@kafka2:29093,3@kafka3:29093
+      listeners: PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:29093,PLAINTEXT_HOST://0.0.0.0:29092
+      advertised_listeners: PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:29093
+      listener_security_protocol_map: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      inter_broker_listener_name: PLAINTEXT
+      controller_listener_names: CONTROLLER
+      port: 9092
+      external_port: 29093
+
+    # Kafka Broker 3
+    kafka3:
+      node_id: 3
+      process_roles: broker,controller
+      controller_quorum_voters: 1@kafka1:29093,2@kafka2:29093,3@kafka3:29093
+      listeners: PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:29093,PLAINTEXT_HOST://0.0.0.0:29092
+      advertised_listeners: PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:29094
+      listener_security_protocol_map: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      inter_broker_listener_name: PLAINTEXT
+      controller_listener_names: CONTROLLER
+      port: 9092
+      external_port: 29094
+
+# Schema Registry configuration
+schema_registry:
+  url: http://schema-registry:8081
+  auto_register_schemas: true
+  compatibility_level: BACKWARD
+  subject_name_strategy: TopicNameStrategy
+  
+  # Schema paths
+  schema_dir: src/schemas
+  sensor_schema_file: iot_sensor_reading.avsc
+  
+  # Serialization settings
+  serialize_format: avro
+  
+  # Replication factor for schemas topic
+  kafkastore_topic_replication_factor: 3
+
+# IoT Simulator configuration
+iot_simulator:
+  num_devices: 8
+  data_generation_interval_sec: 1.0
+  device_types: ["temperature", "humidity", "pressure", "motion", "light"]
+  anomaly_probability: 0.05
+
+# Logging configuration
+logging:
+  level: INFO
+  format: "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+  
+  # File logging for production
+  file_logging:
+    enabled: false  # Set to true in production
+    log_dir: logs
+    max_size: 10MB  # Size before rotation
+    retention: 1 week
+    compression: zip
+    
+    # Error-specific logging
+    error_log:
+      enabled: true
+      retention: 1 month
+
+# Producer configuration
+producer:
+  client_id: iot-data-producer
+  
+  # Reliability settings
+  acks: all
+  retries: 5
+  retry_backoff_ms: 500
+  max_in_flight_requests_per_connection: 1
+  
+  # Performance tuning
+  queue_buffering_max_ms: 5
+  queue_buffering_max_kbytes: 32768
+  batch_num_messages: 1000
+  socket_timeout_ms: 30000
+  message_timeout_ms: 10000
+  
+  # Compression
+  compression_type: snappy
+
+# Consumer configuration
+consumer:
+  # Commit settings
+  enable_auto_commit: true
+  auto_commit_interval_ms: 5000
+  
+  # Performance settings
+  fetch_min_bytes: 1
+  
+  # Fault tolerance settings
+  session_timeout_ms: 30000
+  heartbeat_interval_ms: 10000
+  max_poll_interval_ms: 300000
+  
+  # Load balancing
+  partition_assignment_strategy: cooperative-sticky
+
+# UI configuration
+kafka_ui:
+  port: 8080
+  cluster_name: local-cluster
+
+# Application settings
+app:
+  name: IoT Data Pipeline (Multi-Broker with Schema Registry)
+  environment: development  # Change to production for production deployment

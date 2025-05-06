@@ -56,11 +56,8 @@ def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
             
             # Try to create a producer to test connection
             from confluent_kafka import Producer
-            producer = Producer({
-                'bootstrap.servers': bootstrap_servers,
-                'socket.timeout.ms': 10000,  # Longer timeout for multi-broker setup
-                'message.timeout.ms': 10000
-            })
+            producer_conf = settings.producer.get_config()
+            producer = Producer(producer_conf)
             producer.flush(timeout=10)  # Increased timeout for multi-broker environment
             
             log.info("Successfully connected to Kafka cluster!")
@@ -91,6 +88,21 @@ def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
             else:
                 log.error(f"Failed to connect after {max_retries} attempts")
                 return False
+            
+def log_configuration():
+    """
+    Log the current configuration settings to help with troubleshooting.
+    """
+    log.info("Current configuration:")
+    log.info(f"App name: {settings.app_name}")
+    log.info(f"Environment: {settings.environment}")
+    log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
+    log.info(f"Kafka topic: {settings.kafka.topic_name}")
+    log.info(f"Schema Registry URL: {settings.schema_registry.url}")
+    log.info(f"IoT devices: {settings.iot_simulator.num_devices}")
+    log.info(f"Device types: {settings.iot_simulator.device_types}")
+    log.info(f"Data generation interval: {settings.iot_simulator.data_generation_interval_sec} seconds")
+    log.info(f"Anomaly probability: {settings.iot_simulator.anomaly_probability}")
 
 def main():
     """
@@ -102,12 +114,9 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
+    # Log application start and configuration
     log.info("Starting IoT Data Producer Service with Avro Serialization")
-    log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
-    log.info(f"Schema Registry URL: {settings.schema_registry.url}")
-    log.info(f"Kafka topic: {settings.kafka.topic_name}")
-    log.info(f"IoT simulator configured with {settings.iot_simulator.num_devices} devices")
-    log.info(f"Data generation interval: {settings.iot_simulator.data_generation_interval_sec} seconds")
+    log_configuration()
     
     # Wait for Kafka and Schema Registry to be ready
     if not wait_for_kafka_and_schema_registry():
@@ -124,6 +133,9 @@ def main():
         # Start continuous data generation
         log.info("Starting continuous IoT data generation with Avro serialization...")
         
+        # Get the data generation interval from settings
+        interval = settings.iot_simulator.data_generation_interval_sec
+        
         while running:
             # Generate batch of readings from simulated devices
             readings = simulator.generate_batch()
@@ -132,7 +144,7 @@ def main():
             producer.send_batch(readings)
             
             # Wait before generating next batch
-            time.sleep(settings.iot_simulator.data_generation_interval_sec)
+            time.sleep(interval)
             
     except KeyboardInterrupt:
         log.info("Producer interrupted by user")
