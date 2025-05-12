@@ -1,0 +1,158 @@
+Command: /Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/rabindramanandhar/esp/esp-idf/tools/idf_monitor.py -p /dev/tty.usbserial-0001 -b 115200 --toolchain-prefix xtensa-esp32-elf- --target esp32 --revision 0 /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/ruuvitag_gateway.elf /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader/bootloader.elf -m '/Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python' '/Users/rabindramanandhar/esp/esp-idf/tools/idf.py' '-p' '/dev/tty.usbserial-0001'
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5280
+load:0x40078000,len:15400
+load:0x40080400,len:3740
+entry 0x40080618
+[0;32mI (27) boot: ESP-IDF v5.5-dev-3510-gaaebc37467 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time May 12 2025 16:14:27[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (30) boot: chip revision: v3.1[0m
+[0;32mI (33) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (37) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (40) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (51) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (57) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 001e0000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (80) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=23f10h (147216) map[0m
+[0;32mI (138) esp_image: segment 1: paddr=00033f38 vaddr=3ff80000 size=0001ch (    28) load[0m
+[0;32mI (138) esp_image: segment 2: paddr=00033f5c vaddr=3ffbdb60 size=05104h ( 20740) load[0m
+[0;32mI (150) esp_image: segment 3: paddr=00039068 vaddr=40080000 size=06fb0h ( 28592) load[0m
+[0;32mI (161) esp_image: segment 4: paddr=00040020 vaddr=400d0020 size=d42cch (869068) map[0m
+[0;32mI (459) esp_image: segment 5: paddr=001142f4 vaddr=40086fb0 size=14fdch ( 85980) load[0m
+[0;32mI (506) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (506) boot: Disabling RNG early entropy source...[0m
+[0;32mI (516) cpu_start: Multicore app[0m
+[0;32mI (525) cpu_start: Pro cpu start user code[0m
+[0;32mI (525) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (525) app_init: Application information:[0m
+[0;32mI (525) app_init: Project name:     ruuvitag_gateway[0m
+[0;32mI (529) app_init: App version:      b15ee34-dirty[0m
+[0;32mI (534) app_init: Compile time:     May 12 2025 16:14:07[0m
+[0;32mI (539) app_init: ELF file SHA256:  bfca1d1c1...[0m
+[0;32mI (543) app_init: ESP-IDF:          v5.5-dev-3510-gaaebc37467[0m
+[0;32mI (549) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (552) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (556) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (561) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (567) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (572) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (577) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (582) heap_init: At 3FFC8098 len 00017F68 (95 KiB): DRAM[0m
+[0;32mI (587) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (593) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (598) heap_init: At 4009BF8C len 00004074 (16 KiB): IRAM[0m
+[0;33mW (604) spi_flash: boya detected but related driver is not linked, please check option `SPI_FLASH_SUPPORT_BOYA_CHIP`[0m
+[0;32mI (614) spi_flash: detected chip: generic[0m
+[0;32mI (617) spi_flash: flash io: dio[0m
+[0;33mW (620) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (633) coexist: coex firmware version: 777f317b1[0m
+[0;32mI (638) main_task: Started on CPU0[0m
+[0;32mI (648) main_task: Calling app_main()[0m
+[0;32mI (678) wifi:wifi driver task: 3ffcbffc, prio:23, stack:6656, core=0[0m
+[0;32mI (688) wifi:wifi firmware version: 448230adee[0m
+[0;32mI (688) wifi:wifi certification version: v7.0[0m
+[0;32mI (688) wifi:config NVS flash: enabled[0m
+[0;32mI (688) wifi:config nano formatting: disabled[0m
+[0;32mI (688) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (698) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (698) wifi:Init management short buffer num: 32[0m
+[0;32mI (708) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (708) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (718) wifi:Init static rx buffer num: 10[0m
+[0;32mI (718) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (718) wifi_init: rx ba win: 6[0m
+[0;32mI (728) wifi_init: accept mbox: 6[0m
+[0;32mI (728) wifi_init: tcpip mbox: 32[0m
+[0;32mI (728) wifi_init: udp mbox: 6[0m
+[0;32mI (728) wifi_init: tcp mbox: 6[0m
+[0;32mI (738) wifi_init: tcp tx win: 5760[0m
+[0;32mI (738) wifi_init: tcp rx win: 5760[0m
+[0;32mI (738) wifi_init: tcp mss: 1440[0m
+[0;32mI (748) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (748) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (758) phy_init: phy_version 4860,6b7a6e5,Feb  6 2025,14:47:07[0m
+[0;32mI (838) phy_init: Saving new calibration data due to checksum failure or outdated calibration data, mode(0)[0m
+[0;32mI (908) wifi:mode : sta (fc:e8:c0:7d:c7:a0)[0m
+[0;32mI (908) wifi:enable tsf[0m
+[0;32mI (918) RUUVITAG: WiFi initialization completed, connecting to rabindra[0m
+[0;32mI (918) RUUVITAG: Waiting for WiFi connection...[0m
+[0;32mI (928) wifi:new:<7,0>, old:<1,0>, ap:<255,255>, sta:<7,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (928) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (938) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (948) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (948) wifi:state: run -> init (0x2c0)[0m
+[0;32mI (958) wifi:new:<7,0>, old:<7,0>, ap:<255,255>, sta:<7,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (958) RUUVITAG: Connection failed! Retrying...[0m
+[0;33mW (1248) wifi:tx null, bss is null[0m
+[0;32mI (3378) RUUVITAG: Connection failed! Retrying...[0m
+[0;32mI (3388) wifi:new:<7,0>, old:<7,0>, ap:<255,255>, sta:<7,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (3388) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (3398) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (3408) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (3418) wifi:connected with rabindra, aid = 22, channel 7, BW20, bssid = fc:34:97:70:81:c8[0m
+[0;32mI (3418) wifi:security: WPA2-PSK, phy: bgn, rssi: -53[0m
+[0;32mI (3428) wifi:pm start, type: 1[0m
+
+[0;32mI (3428) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us[0m
+[0;32mI (3438) wifi:<ba-add>idx:0 (ifx:0, fc:34:97:70:81:c8), tid:6, ssn:1, winSize:64[0m
+[0;32mI (3458) wifi:AP's beacon interval = 102400 us, DTIM period = 1[0m
+[0;32mI (4448) esp_netif_handlers: sta ip: 192.168.50.127, mask: 255.255.255.0, gw: 192.168.50.1[0m
+[0;32mI (4448) RUUVITAG: Connected with IP Address:192.168.50.127[0m
+[0;32mI (4448) BTDM_INIT: BT controller compile version [42e1f02][0m
+[0;32mI (4458) BTDM_INIT: Bluetooth MAC: fc:e8:c0:7d:c7:a2[0m
+[0;32mI (4528) wifi:<ba-add>idx:1 (ifx:0, fc:34:97:70:81:c8), tid:1, ssn:1, winSize:64[0m
+[1;31mE (4538) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (4538) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (4538) mqtt_client: Error transport connect[0m
+[0;32mI (4548) RUUVITAG: MQTT Error[0m
+[0;32mI (4548) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (4798) RUUVITAG: Bluetooth initialized successfully[0m
+[0;32mI (4798) RUUVITAG: RuuviTag Gateway started[0m
+[0;32mI (4798) RUUVITAG: BLE scan parameters set, starting scan[0m
+[0;32mI (4808) RUUVITAG: BLE scan started successfully[0m
+[0;32mI (5098) wifi:<ba-del>idx:1, tid:1[0m
+[0;32mI (5108) wifi:<ba-add>idx:1 (ifx:0, fc:34:97:70:81:c8), tid:0, ssn:1, winSize:64[0m
+[0;32mI (7278) RUUVITAG: Added new RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.44°C, Humidity: 34.58%, Pressure: 101458.00 Pa[0m
+[0;32mI (7278) RUUVITAG: Published data to MQTT, msg_id=9787[0m
+[0;32mI (8568) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.44°C, Humidity: 34.58%, Pressure: 101458.00 Pa[0m
+[0;32mI (8568) RUUVITAG: Published data to MQTT, msg_id=11842[0m
+[0;32mI (12418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.46°C, Humidity: 34.58%, Pressure: 101456.00 Pa[0m
+[0;32mI (12428) RUUVITAG: Published data to MQTT, msg_id=65227[0m
+[0;32mI (13708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.46°C, Humidity: 34.58%, Pressure: 101456.00 Pa[0m
+[0;32mI (13708) RUUVITAG: Published data to MQTT, msg_id=44301[0m
+[1;31mE (14628) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (14638) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (14638) mqtt_client: Error transport connect[0m
+[0;32mI (14638) RUUVITAG: MQTT Error[0m
+[0;32mI (14638) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (14988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.43°C, Humidity: 34.57%, Pressure: 101457.00 Pa[0m
+[0;32mI (14988) RUUVITAG: Published data to MQTT, msg_id=45860[0m
+[0;32mI (16278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.43°C, Humidity: 34.57%, Pressure: 101457.00 Pa[0m
+[0;32mI (16278) RUUVITAG: Published data to MQTT, msg_id=38199[0m
+[0;32mI (17558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.42°C, Humidity: 34.57%, Pressure: 101458.00 Pa[0m
+[0;32mI (17558) RUUVITAG: Published data to MQTT, msg_id=13661[0m
+[0;32mI (20128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.42°C, Humidity: 34.56%, Pressure: 101458.00 Pa[0m
+[0;32mI (20138) RUUVITAG: Published data to MQTT, msg_id=41275[0m
+[0;32mI (21418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.42°C, Humidity: 34.56%, Pressure: 101458.00 Pa[0m
+[0;32mI (21418) RUUVITAG: Published data to MQTT, msg_id=23644[0m
+[0;32mI (23988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.44°C, Humidity: 34.60%, Pressure: 101460.00 Pa[0m
+[0;32mI (23988) RUUVITAG: Published data to MQTT, msg_id=43129[0m
+[1;31mE (24668) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (24668) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (24668) mqtt_client: Error transport connect[0m
+[0;32mI (24668) RUUVITAG: MQTT Error[0m
+[0;32mI (24678) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (26558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.60%, Pressure: 101459.00 Pa[0m
+[0;32mI (26568) RUUVITAG: Published data to MQTT, msg_id=52886[0m
+[0;32mI (29138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.44°C, Humidity: 34.58%, Pressure: 101458.00 Pa[0m
+[0;32mI (29138) RUUVITAG: Published data to MQTT, msg_id=15847[0m

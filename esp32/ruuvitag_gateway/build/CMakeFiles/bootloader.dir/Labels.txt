@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/CMakeFiles/bootloader
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/CMakeFiles/bootloader.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/CMakeFiles/bootloader-complete.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

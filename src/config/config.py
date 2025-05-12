@@ -26,6 +26,124 @@ def load_yaml_config():
 yaml_config = load_yaml_config()
 
 
+class MQTTSettings(BaseSettings):
+    """
+    MQTT configuration settings for RuuviTag adapter
+
+    Attributes
+        broker_host: MQTT broker hostname or IP
+        broker_port: MQTT broker port
+        topic: MQTT topic to subscribe to
+        client_id: MQTT client ID
+        qos: Quality of Service level
+        keep_alive: Keep alive interval in seconds
+        reconnect_interval: Reconnect interval in seconds
+        username: MQTT username (optional)
+        password: MQTT password (optional)
+    """
+
+    broker_host: str = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('broker_host') or
+                        os.getenv("MQTT_BROKER", "192.168.50.240")
+    )
+
+    broker_port: int = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('broker_port') or 
+                        int(os.getenv("MQTT_PORT", "1883"))
+    )
+    
+    topic: str = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('topic') or 
+                        os.getenv("MQTT_TOPIC", "ruuvitag/data")
+    )
+    
+    client_id: str = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('client_id') or 
+                        os.getenv("MQTT_CLIENT_ID", "ruuvitag_adapter")
+    )
+    
+    qos: int = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('qos') or 
+                        int(os.getenv("MQTT_QOS", "1"))
+    )
+    
+    keep_alive: int = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('keep_alive') or 
+                        int(os.getenv("MQTT_KEEP_ALIVE", "60"))
+    )
+    
+    reconnect_interval: int = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('reconnect_interval') or 
+                        int(os.getenv("MQTT_RECONNECT_INTERVAL", "10"))
+    )
+    
+    username: Optional[str] = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('username') or 
+                        os.getenv("MQTT_USERNAME", None)
+    )
+    
+    password: Optional[str] = Field(
+        default_factory=lambda: yaml_config.get('mqtt', {}).get('password') or 
+                        os.getenv("MQTT_PASSWORD", None)
+    )
+
+class RuuviTagSettings(BaseSettings):
+    """
+    RuuviTag configuration settings.
+    
+    Attributes:
+        device_type: Device name
+        default_location: Default location for RuuviTags
+        battery: Battery parameters
+        anomaly_thresholds: Thresholds for anomaly detection
+        signal_strength: Signal strength
+        firmware_version: Firmware's version
+    """
+    device_type: str = Field(
+        default_factory=lambda:yaml_config.get('device_type', {}).get('device_type') or
+                        os.getenv("DEVICE_TYPE", "RuuviTag")
+    )
+
+    default_location: Dict[str, Any] = Field(
+        default_factory=lambda: yaml_config.get('ruuvitag', {}).get('default_location') or {
+            "latitude": 60.1699,
+            "longitude": 24.9384,
+            "building": "building-1",
+            "floor": 1,
+            "zone": "main",
+            "room": "room-101"
+        }
+    )
+
+    battery: Dict[str, float] = Field(
+        default_factory=lambda: yaml_config.get('ruuvitag', {}).get('battery') or {
+            "min_voltage": 2.0,
+            "max_voltage": 3.0
+        }
+    )
+
+    anomaly_thresholds: Dict[str, Any] = Field(
+        default_factory=lambda: yaml_config.get('ruuvitag', {}).get('anomaly_thresholds') or {
+            "temperature_min": -40,
+            "temperature_max": 85,
+            "humidity_min": 0,
+            "humidity_max": 100,
+            "pressure_min": 85000,
+            "pressure_max": 115000,
+            "battery_low": 2.0
+        }
+    )
+
+    signal_strength: Optional[int] = Field(
+        default_factory=lambda: yaml_config.get('ruuvitag', {}).get('signal_strength') or
+                        os.getenv("SIGNAL_STRENGTH", None)
+    )
+
+    firmware_version: Optional[int] = Field(
+        default_factory=lambda: yaml_config.get('ruuvitag', {}).get('firmware_version') or
+                        os.getenv("FIRMWARE_VERSION", None)
+    )
+
 class SchemaRegistrySettings(BaseSettings):
     """
     Schema Registry configuration settings.
@@ -38,33 +156,33 @@ class SchemaRegistrySettings(BaseSettings):
     """
     url: str = Field(
         default_factory=lambda: yaml_config.get('schema_registry', {}).get('url') or 
-                       os.getenv("SCHEMA_REGISTRY_URL", "http://schema-registry:8081")
+                        os.getenv("SCHEMA_REGISTRY_URL", "http://schema-registry:8081")
     )
     
     auto_register_schemas: bool = Field(
         default_factory=lambda: yaml_config.get('schema_registry', {}).get('auto_register_schemas') or 
-                       os.getenv("SCHEMA_AUTO_REGISTER", "True").lower() in ("true", "1", "yes")
+                        os.getenv("SCHEMA_AUTO_REGISTER", "True").lower() in ("true", "1", "yes")
     )
     
     compatibility_level: str = Field(
         default_factory=lambda: yaml_config.get('schema_registry', {}).get('compatibility_level') or 
-                       os.getenv("SCHEMA_COMPATIBILITY_LEVEL", "BACKWARD")
+                        os.getenv("SCHEMA_COMPATIBILITY_LEVEL", "BACKWARD")
     )
     
     subject_name_strategy: str = Field(
         default_factory=lambda: yaml_config.get('schema_registry', {}).get('subject_name_strategy') or 
-                       os.getenv("SCHEMA_SUBJECT_STRATEGY", "TopicNameStrategy")
+                        os.getenv("SCHEMA_SUBJECT_STRATEGY", "TopicNameStrategy")
     )
     
     # Schema paths
     schema_dir: str = Field(
         default_factory=lambda: yaml_config.get('schema_registry', {}).get('schema_dir') or 
-                       os.getenv("SCHEMA_DIR", "src/schemas")
+                        os.getenv("SCHEMA_DIR", "src/schemas")
     )
     
     sensor_schema_file: str = Field(
         default_factory=lambda: yaml_config.get('schema_registry', {}).get('sensor_schema_file') or 
-                       os.getenv("SENSOR_SCHEMA_FILE", "iot_sensor_reading.avsc")
+                        os.getenv("SENSOR_SCHEMA_FILE", "iot_sensor_reading.avsc")
     )
     
     # Serialization settings
@@ -83,7 +201,6 @@ class SchemaRegistrySettings(BaseSettings):
         """
         return os.path.join(self.schema_dir, self.sensor_schema_file)
 
-
 class KafkaSettings(BaseSettings):
     """
     Kafka configuration settings for a multi-broker environment.
@@ -99,34 +216,34 @@ class KafkaSettings(BaseSettings):
     # Support comma-delimited string of brokers or use default if not provided
     bootstrap_servers: str = Field(
         default_factory=lambda: yaml_config.get('kafka', {}).get('bootstrap_servers') or 
-                       os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka1:9092,kafka2:9092,kafka3:9092")
+                        os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka1:9092,kafka2:9092,kafka3:9092")
     )
     
     # Topic configuration
     topic_name: str = Field(
         default_factory=lambda: yaml_config.get('kafka', {}).get('topic_name') or 
-                       os.getenv("KAFKA_TOPIC_NAME", "iot-sensor-data")
+                        os.getenv("KAFKA_TOPIC_NAME", "iot-sensor-data")
     )
     
     consumer_group_id: str = Field(
         default_factory=lambda: yaml_config.get('kafka', {}).get('consumer_group_id') or 
-                       os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
+                        os.getenv("KAFKA_CONSUMER_GROUP_ID", "iot-data-consumer")
     )
     
     auto_offset_reset: str = Field(
         default_factory=lambda: yaml_config.get('kafka', {}).get('auto_offset_reset') or 
-                       os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
+                        os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
     )
     
     # Multi-broker specific settings for fault tolerance
     replication_factor: int = Field(
         default_factory=lambda: yaml_config.get('kafka', {}).get('replication_factor') or 
-                       int(os.getenv("KAFKA_REPLICATION_FACTOR", "3"))
+                        int(os.getenv("KAFKA_REPLICATION_FACTOR", "3"))
     )
     
     partitions: int = Field(
         default_factory=lambda: yaml_config.get('kafka', {}).get('partitions') or 
-                       int(os.getenv("KAFKA_PARTITIONS", "6"))
+                        int(os.getenv("KAFKA_PARTITIONS", "6"))
     )
 
     # Topic config
@@ -160,7 +277,6 @@ class KafkaSettings(BaseSettings):
         """
         return f"{self.topic_name}-value"
     
-
 class ProducerSettings(BaseSettings):
     """
     Kafka Producer specific settings.
@@ -173,59 +289,59 @@ class ProducerSettings(BaseSettings):
     """
     client_id: str = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('client_id') or 
-                       os.getenv("PRODUCER_CLIENT_ID", "iot-data-producer")
+                        os.getenv("PRODUCER_CLIENT_ID", "iot-data-producer")
     )
     
     acks: str = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('acks') or 
-                       os.getenv("PRODUCER_ACKS", "all")
+                        os.getenv("PRODUCER_ACKS", "all")
     )
     
     retries: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('retries') or 
-                       int(os.getenv("PRODUCER_RETRIES", "5"))
+                        int(os.getenv("PRODUCER_RETRIES", "5"))
     )
     
     retry_backoff_ms: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('retry_backoff_ms') or 
-                       int(os.getenv("PRODUCER_RETRY_BACKOFF_MS", "500"))
+                        int(os.getenv("PRODUCER_RETRY_BACKOFF_MS", "500"))
     )
     
     max_in_flight_requests_per_connection: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('max_in_flight_requests_per_connection') or 
-                       int(os.getenv("PRODUCER_MAX_IN_FLIGHT", "1"))
+                        int(os.getenv("PRODUCER_MAX_IN_FLIGHT", "1"))
     )
     
     # Performance tuning
     queue_buffering_max_ms: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('queue_buffering_max_ms') or 
-                       int(os.getenv("PRODUCER_QUEUE_BUFFERING_MAX_MS", "5"))
+                        int(os.getenv("PRODUCER_QUEUE_BUFFERING_MAX_MS", "5"))
     )
     
     queue_buffering_max_kbytes: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('queue_buffering_max_kbytes') or 
-                       int(os.getenv("PRODUCER_QUEUE_BUFFERING_MAX_KBYTES", "32768"))
+                        int(os.getenv("PRODUCER_QUEUE_BUFFERING_MAX_KBYTES", "32768"))
     )
     
     batch_num_messages: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('batch_num_messages') or 
-                       int(os.getenv("PRODUCER_BATCH_NUM_MESSAGES", "1000"))
+                        int(os.getenv("PRODUCER_BATCH_NUM_MESSAGES", "1000"))
     )
     
     socket_timeout_ms: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('socket_timeout_ms') or 
-                       int(os.getenv("PRODUCER_SOCKET_TIMEOUT_MS", "30000"))
+                        int(os.getenv("PRODUCER_SOCKET_TIMEOUT_MS", "30000"))
     )
     
     message_timeout_ms: int = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('message_timeout_ms') or 
-                       int(os.getenv("PRODUCER_MESSAGE_TIMEOUT_MS", "10000"))
+                        int(os.getenv("PRODUCER_MESSAGE_TIMEOUT_MS", "10000"))
     )
     
     # Compression
     compression_type: str = Field(
         default_factory=lambda: yaml_config.get('producer', {}).get('compression_type') or 
-                       os.getenv("PRODUCER_COMPRESSION_TYPE", "snappy")
+                        os.getenv("PRODUCER_COMPRESSION_TYPE", "snappy")
     )
     
     def get_config(self) -> Dict[str, Any]:
@@ -250,7 +366,6 @@ class ProducerSettings(BaseSettings):
             'compression.type': self.compression_type
         }
 
-
 class ConsumerSettings(BaseSettings):
     """
     Kafka Consumer specific settings.
@@ -262,39 +377,39 @@ class ConsumerSettings(BaseSettings):
     """
     enable_auto_commit: bool = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('enable_auto_commit') or 
-                       os.getenv("CONSUMER_ENABLE_AUTO_COMMIT", "True").lower() in ("true", "1", "yes")
+                        os.getenv("CONSUMER_ENABLE_AUTO_COMMIT", "True").lower() in ("true", "1", "yes")
     )
     
     auto_commit_interval_ms: int = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('auto_commit_interval_ms') or 
-                       int(os.getenv("CONSUMER_AUTO_COMMIT_INTERVAL_MS", "5000"))
+                        int(os.getenv("CONSUMER_AUTO_COMMIT_INTERVAL_MS", "5000"))
     )
     
     fetch_min_bytes: int = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('fetch_min_bytes') or 
-                       int(os.getenv("CONSUMER_FETCH_MIN_BYTES", "1"))
+                        int(os.getenv("CONSUMER_FETCH_MIN_BYTES", "1"))
     )
     
     # Fault tolerance settings
     session_timeout_ms: int = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('session_timeout_ms') or 
-                       int(os.getenv("CONSUMER_SESSION_TIMEOUT_MS", "30000"))
+                        int(os.getenv("CONSUMER_SESSION_TIMEOUT_MS", "30000"))
     )
     
     heartbeat_interval_ms: int = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('heartbeat_interval_ms') or 
-                       int(os.getenv("CONSUMER_HEARTBEAT_INTERVAL_MS", "10000"))
+                        int(os.getenv("CONSUMER_HEARTBEAT_INTERVAL_MS", "10000"))
     )
     
     max_poll_interval_ms: int = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('max_poll_interval_ms') or 
-                       int(os.getenv("CONSUMER_MAX_POLL_INTERVAL_MS", "300000"))
+                        int(os.getenv("CONSUMER_MAX_POLL_INTERVAL_MS", "300000"))
     )
     
     # Load balancing
     partition_assignment_strategy: str = Field(
         default_factory=lambda: yaml_config.get('consumer', {}).get('partition_assignment_strategy') or 
-                       os.getenv("CONSUMER_PARTITION_ASSIGNMENT_STRATEGY", "cooperative-sticky")
+                        os.getenv("CONSUMER_PARTITION_ASSIGNMENT_STRATEGY", "cooperative-sticky")
     )
     
     def get_config(self, group_id: str = None, auto_offset_reset: str = None) -> Dict[str, Any]:
@@ -321,7 +436,6 @@ class ConsumerSettings(BaseSettings):
             'partition.assignment.strategy': self.partition_assignment_strategy
         }
 
-
 class IoTSimulatorSettings(BaseSettings):
     """
     IoT simulator configuration settings.
@@ -334,23 +448,23 @@ class IoTSimulatorSettings(BaseSettings):
     """
     num_devices: int = Field(
         default_factory=lambda: yaml_config.get('iot_simulator', {}).get('num_devices') or 
-                       int(os.getenv("IOT_NUM_DEVICES", "8"))
+                        int(os.getenv("IOT_NUM_DEVICES", "8"))
     )
     
     data_generation_interval_sec: float = Field(
         default_factory=lambda: yaml_config.get('iot_simulator', {}).get('data_generation_interval_sec') or 
-                       float(os.getenv("IOT_DATA_INTERVAL_SEC", "1.0"))
+                        float(os.getenv("IOT_DATA_INTERVAL_SEC", "1.0"))
     )
     
     # Additional simulation parameters
     device_types: List[str] = Field(
         default_factory=lambda: yaml_config.get('iot_simulator', {}).get('device_types') or 
-                       os.getenv("IOT_DEVICE_TYPES", "temperature,humidity,pressure,motion,light").split(',')
+                        os.getenv("IOT_DEVICE_TYPES", "temperature,humidity,pressure,motion,light").split(',')
     )
     
     anomaly_probability: float = Field(
         default_factory=lambda: yaml_config.get('iot_simulator', {}).get('anomaly_probability') or 
-                       float(os.getenv("IOT_ANOMALY_PROBABILITY", "0.05"))
+                        float(os.getenv("IOT_ANOMALY_PROBABILITY", "0.05"))
     )
 
     @field_validator('device_types')
@@ -370,49 +484,49 @@ class LoggingSettings(BaseSettings):
     """
     level: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('level') or 
-                       os.getenv("LOG_LEVEL", "INFO")
+                        os.getenv("LOG_LEVEL", "INFO")
     )
     
     format: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('format') or 
-                       os.getenv("LOG_FORMAT", "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
+                        os.getenv("LOG_FORMAT", "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>")
     )
 
     # File logging settings
     file_logging_enabled: bool = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('enabled') or 
-                       os.getenv("LOG_FILE_ENABLED", "False").lower() in ("true", "1", "yes")
+                        os.getenv("LOG_FILE_ENABLED", "False").lower() in ("true", "1", "yes")
     )
     
     log_dir: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('log_dir') or 
-                       os.getenv("LOG_DIR", "logs")
+                        os.getenv("LOG_DIR", "logs")
     )
     
     max_size: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('max_size') or 
-                       os.getenv("LOG_MAX_SIZE", "10MB")
+                        os.getenv("LOG_MAX_SIZE", "10MB")
     )
     
     retention: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('retention') or 
-                       os.getenv("LOG_RETENTION", "1 week")
+                        os.getenv("LOG_RETENTION", "1 week")
     )
     
     compression: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('compression') or 
-                       os.getenv("LOG_COMPRESSION", "zip")
+                        os.getenv("LOG_COMPRESSION", "zip")
     )
     
     # Error log specific settings
     error_log_enabled: bool = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('error_log', {}).get('enabled') or 
-                       os.getenv("ERROR_LOG_ENABLED", "False").lower() in ("true", "1", "yes")
+                        os.getenv("ERROR_LOG_ENABLED", "False").lower() in ("true", "1", "yes")
     )
     
     error_log_retention: str = Field(
         default_factory=lambda: yaml_config.get('logging', {}).get('file_logging', {}).get('error_log', {}).get('retention') or 
-                       os.getenv("ERROR_LOG_RETENTION", "1 month")
+                        os.getenv("ERROR_LOG_RETENTION", "1 month")
     )
 
 class Settings(BaseSettings):
@@ -431,15 +545,17 @@ class Settings(BaseSettings):
     """
     app_name: str = Field(
         default_factory=lambda: yaml_config.get('app', {}).get('name') or 
-                       os.getenv("APP_NAME", "IoT Data Pipeline (Multi-Broker with Schema Registry)")
+                        os.getenv("APP_NAME", "IoT Data Pipeline (Multi-Broker with Schema Registry)")
     )
     
     environment: str = Field(
         default_factory=lambda: yaml_config.get('app', {}).get('environment') or 
-                       os.getenv("ENVIRONMENT", "development")
+                        os.getenv("ENVIRONMENT", "development")
     )
 
     kafka: KafkaSettings = KafkaSettings()
+    mqtt: MQTTSettings = MQTTSettings()
+    ruuvitag: RuuviTagSettings = RuuviTagSettings()
     schema_registry: SchemaRegistrySettings = SchemaRegistrySettings()
     iot_simulator: IoTSimulatorSettings = IoTSimulatorSettings()
     logging: LoggingSettings = LoggingSettings()

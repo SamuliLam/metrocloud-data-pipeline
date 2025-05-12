@@ -1,0 +1,1730 @@
+Command: /Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/rabindramanandhar/esp/esp-idf/tools/idf_monitor.py -p /dev/tty.usbserial-0001 -b 115200 --toolchain-prefix xtensa-esp32-elf- --target esp32 --revision 0 /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/ruuvitag_gateway.elf /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader/bootloader.elf -m '/Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python' '/Users/rabindramanandhar/esp/esp-idf/tools/idf.py' '-p' '/dev/tty.usbserial-0001'
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:5280
+load:0x40078000,len:15400
+load:0x40080400,len:3740
+entry 0x40080618
+[0;32mI (27) boot: ESP-IDF v5.5-dev-3510-gaaebc37467 2nd stage bootloader[0m
+[0;32mI (27) boot: compile time May 12 2025 16:14:27[0m
+[0;32mI (28) boot: Multicore bootloader[0m
+[0;32mI (30) boot: chip revision: v3.1[0m
+[0;32mI (33) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (37) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (40) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (51) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (57) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 001e0000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (80) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=23f10h (147216) map[0m
+[0;32mI (138) esp_image: segment 1: paddr=00033f38 vaddr=3ff80000 size=0001ch (    28) load[0m
+[0;32mI (138) esp_image: segment 2: paddr=00033f5c vaddr=3ffbdb60 size=05104h ( 20740) load[0m
+[0;32mI (150) esp_image: segment 3: paddr=00039068 vaddr=40080000 size=06fb0h ( 28592) load[0m
+[0;32mI (161) esp_image: segment 4: paddr=00040020 vaddr=400d0020 size=d42cch (869068) map[0m
+[0;32mI (459) esp_image: segment 5: paddr=001142f4 vaddr=40086fb0 size=14fdch ( 85980) load[0m
+[0;32mI (506) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (506) boot: Disabling RNG early entropy source...[0m
+[0;32mI (516) cpu_start: Multicore app[0m
+[0;32mI (525) cpu_start: Pro cpu start user code[0m
+[0;32mI (525) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (525) app_init: Application information:[0m
+[0;32mI (525) app_init: Project name:     ruuvitag_gateway[0m
+[0;32mI (529) app_init: App version:      b15ee34-dirty[0m
+[0;32mI (534) app_init: Compile time:     May 12 2025 16:14:07[0m
+[0;32mI (539) app_init: ELF file SHA256:  bfca1d1c1...[0m
+[0;32mI (543) app_init: ESP-IDF:          v5.5-dev-3510-gaaebc37467[0m
+[0;32mI (549) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (552) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (556) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (561) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (567) heap_init: At 3FFAFF10 len 000000F0 (0 KiB): DRAM[0m
+[0;32mI (572) heap_init: At 3FFB6388 len 00001C78 (7 KiB): DRAM[0m
+[0;32mI (577) heap_init: At 3FFB9A20 len 00004108 (16 KiB): DRAM[0m
+[0;32mI (582) heap_init: At 3FFC8098 len 00017F68 (95 KiB): DRAM[0m
+[0;32mI (587) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (593) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (598) heap_init: At 4009BF8C len 00004074 (16 KiB): IRAM[0m
+[0;33mW (604) spi_flash: boya detected but related driver is not linked, please check option `SPI_FLASH_SUPPORT_BOYA_CHIP`[0m
+[0;32mI (614) spi_flash: detected chip: generic[0m
+[0;32mI (617) spi_flash: flash io: dio[0m
+[0;33mW (620) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (633) coexist: coex firmware version: 777f317b1[0m
+[0;32mI (638) main_task: Started on CPU0[0m
+[0;32mI (648) main_task: Calling app_main()[0m
+[0;32mI (678) wifi:wifi driver task: 3ffcc088, prio:23, stack:6656, core=0[0m
+[0;32mI (688) wifi:wifi firmware version: 448230adee[0m
+[0;32mI (688) wifi:wifi certification version: v7.0[0m
+[0;32mI (688) wifi:config NVS flash: enabled[0m
+[0;32mI (688) wifi:config nano formatting: disabled[0m
+[0;32mI (688) wifi:Init data frame dynamic rx buffer num: 32[0m
+[0;32mI (698) wifi:Init static rx mgmt buffer num: 5[0m
+[0;32mI (698) wifi:Init management short buffer num: 32[0m
+[0;32mI (708) wifi:Init dynamic tx buffer num: 32[0m
+[0;32mI (708) wifi:Init static rx buffer size: 1600[0m
+[0;32mI (718) wifi:Init static rx buffer num: 10[0m
+[0;32mI (718) wifi:Init dynamic rx buffer num: 32[0m
+[0;32mI (718) wifi_init: rx ba win: 6[0m
+[0;32mI (728) wifi_init: accept mbox: 6[0m
+[0;32mI (728) wifi_init: tcpip mbox: 32[0m
+[0;32mI (728) wifi_init: udp mbox: 6[0m
+[0;32mI (728) wifi_init: tcp mbox: 6[0m
+[0;32mI (738) wifi_init: tcp tx win: 5760[0m
+[0;32mI (738) wifi_init: tcp rx win: 5760[0m
+[0;32mI (738) wifi_init: tcp mss: 1440[0m
+[0;32mI (748) wifi_init: WiFi IRAM OP enabled[0m
+[0;32mI (748) wifi_init: WiFi RX IRAM OP enabled[0m
+[0;32mI (758) phy_init: phy_version 4860,6b7a6e5,Feb  6 2025,14:47:07[0m
+[0;32mI (838) wifi:mode : sta (fc:e8:c0:7d:c7:a0)[0m
+[0;32mI (838) wifi:enable tsf[0m
+[0;32mI (838) RUUVITAG: WiFi initialization completed, connecting to rabindra[0m
+[0;32mI (838) RUUVITAG: Waiting for WiFi connection...[0m
+[0;32mI (928) wifi:new:<7,0>, old:<1,0>, ap:<255,255>, sta:<7,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (928) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (938) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (948) wifi:state: assoc -> init (0x2c0)[0m
+[0;32mI (968) wifi:new:<7,0>, old:<7,0>, ap:<255,255>, sta:<7,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (968) RUUVITAG: Connection failed! Retrying...[0m
+[0;32mI (3378) RUUVITAG: Connection failed! Retrying...[0m
+[0;32mI (3398) wifi:new:<7,0>, old:<7,0>, ap:<255,255>, sta:<7,0>, prof:1, snd_ch_cfg:0x0[0m
+[0;32mI (3398) wifi:state: init -> auth (0xb0)[0m
+[0;32mI (3408) wifi:state: auth -> assoc (0x0)[0m
+[0;32mI (3418) wifi:state: assoc -> run (0x10)[0m
+[0;32mI (3428) wifi:connected with rabindra, aid = 24, channel 7, BW20, bssid = fc:34:97:70:81:c8[0m
+[0;32mI (3428) wifi:security: WPA2-PSK, phy: bgn, rssi: -53[0m
+[0;32mI (3438) wifi:pm start, type: 1[0m
+
+[0;32mI (3438) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us[0m
+[0;32mI (3458) wifi:<ba-add>idx:0 (ifx:0, fc:34:97:70:81:c8), tid:6, ssn:1, winSize:64[0m
+[0;32mI (3488) wifi:AP's beacon interval = 102400 us, DTIM period = 1[0m
+[0;32mI (4468) esp_netif_handlers: sta ip: 192.168.50.127, mask: 255.255.255.0, gw: 192.168.50.1[0m
+[0;32mI (4468) RUUVITAG: Connected with IP Address:192.168.50.127[0m
+[0;32mI (4468) BTDM_INIT: BT controller compile version [42e1f02][0m
+[0;32mI (4478) BTDM_INIT: Bluetooth MAC: fc:e8:c0:7d:c7:a2[0m
+[1;31mE (4548) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (4548) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (4548) mqtt_client: Error transport connect[0m
+[0;32mI (4548) RUUVITAG: MQTT Error[0m
+[0;32mI (4558) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (4548) wifi:<ba-add>idx:1 (ifx:0, fc:34:97:70:81:c8), tid:1, ssn:1, winSize:64[0m
+[0;32mI (4808) RUUVITAG: Bluetooth initialized successfully[0m
+[0;32mI (4808) RUUVITAG: RuuviTag Gateway started[0m
+[0;32mI (4808) RUUVITAG: BLE scan parameters set, starting scan[0m
+[0;32mI (4818) RUUVITAG: BLE scan started successfully[0m
+[0;32mI (5438) RUUVITAG: Added new RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.43°C, Humidity: 34.46%, Pressure: 101457.00 Pa[0m
+[0;32mI (5448) RUUVITAG: Published data to MQTT, msg_id=37445[0m
+[0;32mI (6728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.43°C, Humidity: 34.46%, Pressure: 101457.00 Pa[0m
+[0;32mI (6738) RUUVITAG: Published data to MQTT, msg_id=13404[0m
+[0;32mI (8708) wifi:<ba-del>idx:1, tid:1[0m
+[0;32mI (8718) wifi:<ba-add>idx:1 (ifx:0, fc:34:97:70:81:c8), tid:0, ssn:1, winSize:64[0m
+[0;32mI (9298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.46%, Pressure: 101456.00 Pa[0m
+[0;32mI (9298) RUUVITAG: Published data to MQTT, msg_id=36798[0m
+[0;32mI (10578) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.47%, Pressure: 101459.00 Pa[0m
+[0;32mI (10578) RUUVITAG: Published data to MQTT, msg_id=45288[0m
+[0;32mI (13148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.46°C, Humidity: 34.47%, Pressure: 101459.00 Pa[0m
+[0;32mI (13148) RUUVITAG: Published data to MQTT, msg_id=49995[0m
+[0;32mI (15728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.46%, Pressure: 101461.00 Pa[0m
+[0;32mI (15728) RUUVITAG: Published data to MQTT, msg_id=36588[0m
+[1;31mE (19678) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (19678) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (19678) mqtt_client: Error transport connect[0m
+[0;32mI (19678) RUUVITAG: MQTT Error[0m
+[0;32mI (19688) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (23448) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.47%, Pressure: 101456.00 Pa[0m
+[0;32mI (23448) RUUVITAG: Published data to MQTT, msg_id=58354[0m
+[0;32mI (24728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.47%, Pressure: 101456.00 Pa[0m
+[0;32mI (24728) RUUVITAG: Published data to MQTT, msg_id=48696[0m
+[0;32mI (25998) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.47°C, Humidity: 34.48%, Pressure: 101456.00 Pa[0m
+[0;32mI (25998) RUUVITAG: Published data to MQTT, msg_id=63829[0m
+[0;32mI (27288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.47°C, Humidity: 34.48%, Pressure: 101456.00 Pa[0m
+[0;32mI (27288) RUUVITAG: Published data to MQTT, msg_id=40501[0m
+[0;32mI (31138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.46%, Pressure: 101459.00 Pa[0m
+[0;32mI (31138) RUUVITAG: Published data to MQTT, msg_id=7487[0m
+[0;32mI (32428) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.46%, Pressure: 101459.00 Pa[0m
+[0;32mI (32428) RUUVITAG: Published data to MQTT, msg_id=32472[0m
+[1;31mE (34828) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (34828) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (34828) mqtt_client: Error transport connect[0m
+[0;32mI (34838) RUUVITAG: MQTT Error[0m
+[0;32mI (34838) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (36278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.46°C, Humidity: 34.45%, Pressure: 101457.00 Pa[0m
+[0;32mI (36278) RUUVITAG: Published data to MQTT, msg_id=16443[0m
+[0;32mI (41428) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.44°C, Humidity: 34.46%, Pressure: 101455.00 Pa[0m
+[0;32mI (41428) RUUVITAG: Published data to MQTT, msg_id=7699[0m
+[0;32mI (43988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.46%, Pressure: 101461.00 Pa[0m
+[0;32mI (43998) RUUVITAG: Published data to MQTT, msg_id=17688[0m
+[0;32mI (45278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.46%, Pressure: 101461.00 Pa[0m
+[0;32mI (45278) RUUVITAG: Published data to MQTT, msg_id=25165[0m
+[0;32mI (47848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.44%, Pressure: 101460.00 Pa[0m
+[0;32mI (47848) RUUVITAG: Published data to MQTT, msg_id=33696[0m
+[0;32mI (49148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.44%, Pressure: 101457.00 Pa[0m
+[0;32mI (49148) RUUVITAG: Published data to MQTT, msg_id=20096[0m
+[1;31mE (49988) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (49988) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (49988) mqtt_client: Error transport connect[0m
+[0;32mI (49988) RUUVITAG: MQTT Error[0m
+[0;32mI (49988) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (52998) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.45%, Pressure: 101457.00 Pa[0m
+[0;32mI (52998) RUUVITAG: Published data to MQTT, msg_id=13872[0m
+[0;32mI (56848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.46°C, Humidity: 34.45%, Pressure: 101457.00 Pa[0m
+[0;32mI (56848) RUUVITAG: Published data to MQTT, msg_id=28844[0m
+[0;32mI (58128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.46°C, Humidity: 34.45%, Pressure: 101457.00 Pa[0m
+[0;32mI (58128) RUUVITAG: Published data to MQTT, msg_id=65223[0m
+[1;31mE (60118) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (60118) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (60118) mqtt_client: Error transport connect[0m
+[0;32mI (60128) RUUVITAG: MQTT Error[0m
+[0;32mI (60128) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (61978) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.44%, Pressure: 101457.00 Pa[0m
+[0;32mI (61988) RUUVITAG: Published data to MQTT, msg_id=9994[0m
+[0;32mI (63278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.44%, Pressure: 101457.00 Pa[0m
+[0;32mI (63278) RUUVITAG: Published data to MQTT, msg_id=55532[0m
+[0;32mI (64548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.46%, Pressure: 101459.00 Pa[0m
+[0;32mI (64548) RUUVITAG: Published data to MQTT, msg_id=31033[0m
+[0;32mI (65828) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.46%, Pressure: 101459.00 Pa[0m
+[0;32mI (65838) RUUVITAG: Published data to MQTT, msg_id=161[0m
+[0;32mI (67118) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.45%, Pressure: 101457.00 Pa[0m
+[0;32mI (67128) RUUVITAG: Published data to MQTT, msg_id=19322[0m
+[1;31mE (70258) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (70258) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (70258) mqtt_client: Error transport connect[0m
+[0;32mI (70268) RUUVITAG: MQTT Error[0m
+[0;32mI (70268) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (70988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.43%, Pressure: 101457.00 Pa[0m
+[0;32mI (70988) RUUVITAG: Published data to MQTT, msg_id=35472[0m
+[0;32mI (72258) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.47°C, Humidity: 34.43%, Pressure: 101452.00 Pa[0m
+[0;32mI (72258) RUUVITAG: Published data to MQTT, msg_id=40030[0m
+[0;32mI (73548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.47°C, Humidity: 34.43%, Pressure: 101452.00 Pa[0m
+[0;32mI (73548) RUUVITAG: Published data to MQTT, msg_id=32701[0m
+[0;32mI (74828) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.44%, Pressure: 101457.00 Pa[0m
+[0;32mI (74828) RUUVITAG: Published data to MQTT, msg_id=56003[0m
+[0;32mI (78688) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.41%, Pressure: 101456.00 Pa[0m
+[0;32mI (78688) RUUVITAG: Published data to MQTT, msg_id=5535[0m
+[0;32mI (83818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.42%, Pressure: 101455.00 Pa[0m
+[0;32mI (83828) RUUVITAG: Published data to MQTT, msg_id=51516[0m
+[1;31mE (85418) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (85418) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (85418) mqtt_client: Error transport connect[0m
+[0;32mI (85418) RUUVITAG: MQTT Error[0m
+[0;32mI (85418) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (86398) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.42%, Pressure: 101457.00 Pa[0m
+[0;32mI (86398) RUUVITAG: Published data to MQTT, msg_id=26977[0m
+[0;32mI (87688) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.45%, Pressure: 101455.00 Pa[0m
+[0;32mI (87688) RUUVITAG: Published data to MQTT, msg_id=45157[0m
+[0;32mI (90248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.42%, Pressure: 101455.00 Pa[0m
+[0;32mI (90258) RUUVITAG: Published data to MQTT, msg_id=5946[0m
+[0;32mI (91548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.42%, Pressure: 101455.00 Pa[0m
+[0;32mI (91548) RUUVITAG: Published data to MQTT, msg_id=32621[0m
+[0;32mI (95388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.45%, Pressure: 101457.00 Pa[0m
+[0;32mI (95398) RUUVITAG: Published data to MQTT, msg_id=9789[0m
+[1;31mE (95448) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (95448) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (95448) mqtt_client: Error transport connect[0m
+[0;32mI (95458) RUUVITAG: MQTT Error[0m
+[0;32mI (95458) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (97958) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.44%, Pressure: 101458.00 Pa[0m
+[0;32mI (97958) RUUVITAG: Published data to MQTT, msg_id=10519[0m
+[0;32mI (99248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.44%, Pressure: 101458.00 Pa[0m
+[0;32mI (99248) RUUVITAG: Published data to MQTT, msg_id=18280[0m
+[0;32mI (100528) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.44%, Pressure: 101452.00 Pa[0m
+[0;32mI (100528) RUUVITAG: Published data to MQTT, msg_id=27034[0m
+[0;32mI (104398) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.40%, Pressure: 101457.00 Pa[0m
+[0;32mI (104398) RUUVITAG: Published data to MQTT, msg_id=13085[0m
+[0;32mI (109528) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.38%, Pressure: 101457.00 Pa[0m
+[0;32mI (109538) RUUVITAG: Published data to MQTT, msg_id=37406[0m
+[1;31mE (110498) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (110508) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (110508) mqtt_client: Error transport connect[0m
+[0;32mI (110508) RUUVITAG: MQTT Error[0m
+[0;32mI (110508) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (113388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.36%, Pressure: 101457.00 Pa[0m
+[0;32mI (113388) RUUVITAG: Published data to MQTT, msg_id=51443[0m
+[0;32mI (117248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.48°C, Humidity: 34.38%, Pressure: 101453.00 Pa[0m
+[0;32mI (117258) RUUVITAG: Published data to MQTT, msg_id=39214[0m
+[1;31mE (120558) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (120558) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (120558) mqtt_client: Error transport connect[0m
+[0;32mI (120568) RUUVITAG: MQTT Error[0m
+[0;32mI (120568) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (121088) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.35%, Pressure: 101453.00 Pa[0m
+[0;32mI (121098) RUUVITAG: Published data to MQTT, msg_id=2988[0m
+[0;32mI (122388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.35%, Pressure: 101453.00 Pa[0m
+[0;32mI (122388) RUUVITAG: Published data to MQTT, msg_id=22173[0m
+[0;32mI (124938) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.37%, Pressure: 101452.00 Pa[0m
+[0;32mI (124948) RUUVITAG: Published data to MQTT, msg_id=10050[0m
+[0;32mI (126228) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.33%, Pressure: 101455.00 Pa[0m
+[0;32mI (126228) RUUVITAG: Published data to MQTT, msg_id=6593[0m
+[0;32mI (127518) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.33%, Pressure: 101455.00 Pa[0m
+[0;32mI (127528) RUUVITAG: Published data to MQTT, msg_id=28871[0m
+[0;32mI (128798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.50°C, Humidity: 34.35%, Pressure: 101455.00 Pa[0m
+[0;32mI (128798) RUUVITAG: Published data to MQTT, msg_id=19863[0m
+[0;32mI (130078) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.50°C, Humidity: 34.35%, Pressure: 101455.00 Pa[0m
+[0;32mI (130088) RUUVITAG: Published data to MQTT, msg_id=64386[0m
+[1;31mE (130678) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (130678) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (130678) mqtt_client: Error transport connect[0m
+[0;32mI (130678) RUUVITAG: MQTT Error[0m
+[0;32mI (130688) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (135238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.49°C, Humidity: 34.37%, Pressure: 101455.00 Pa[0m
+[0;32mI (135238) RUUVITAG: Published data to MQTT, msg_id=25890[0m
+[0;32mI (139078) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.50°C, Humidity: 34.35%, Pressure: 101452.00 Pa[0m
+[0;32mI (139078) RUUVITAG: Published data to MQTT, msg_id=39030[0m
+[0;32mI (141648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.35%, Pressure: 101452.00 Pa[0m
+[0;32mI (141648) RUUVITAG: Published data to MQTT, msg_id=19924[0m
+[0;32mI (142938) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.35%, Pressure: 101452.00 Pa[0m
+[0;32mI (142938) RUUVITAG: Published data to MQTT, msg_id=50942[0m
+[1;31mE (145728) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (145728) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (145728) mqtt_client: Error transport connect[0m
+[0;32mI (145728) RUUVITAG: MQTT Error[0m
+[0;32mI (145738) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (146788) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.35%, Pressure: 101455.00 Pa[0m
+[0;32mI (146788) RUUVITAG: Published data to MQTT, msg_id=5723[0m
+[0;32mI (150648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.32%, Pressure: 101452.00 Pa[0m
+[0;32mI (150648) RUUVITAG: Published data to MQTT, msg_id=59275[0m
+[0;32mI (151948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.35%, Pressure: 101454.00 Pa[0m
+[0;32mI (151948) RUUVITAG: Published data to MQTT, msg_id=25207[0m
+[0;32mI (155788) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.30%, Pressure: 101451.00 Pa[0m
+[0;32mI (155788) RUUVITAG: Published data to MQTT, msg_id=63547[0m
+[1;31mE (160778) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (160788) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (160788) mqtt_client: Error transport connect[0m
+[0;32mI (160788) RUUVITAG: MQTT Error[0m
+[0;32mI (160788) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (160938) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.29%, Pressure: 101454.00 Pa[0m
+[0;32mI (160938) RUUVITAG: Published data to MQTT, msg_id=24784[0m
+[0;32mI (163498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.29%, Pressure: 101452.00 Pa[0m
+[0;32mI (163498) RUUVITAG: Published data to MQTT, msg_id=51107[0m
+[0;32mI (164778) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.26%, Pressure: 101454.00 Pa[0m
+[0;32mI (164788) RUUVITAG: Published data to MQTT, msg_id=7480[0m
+[0;32mI (167468) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.27%, Pressure: 101452.00 Pa[0m
+[0;32mI (167478) RUUVITAG: Published data to MQTT, msg_id=52423[0m
+[0;32mI (168648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.27%, Pressure: 101452.00 Pa[0m
+[0;32mI (168648) RUUVITAG: Published data to MQTT, msg_id=10850[0m
+[1;31mE (170808) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (170818) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (170818) mqtt_client: Error transport connect[0m
+[0;32mI (170818) RUUVITAG: MQTT Error[0m
+[0;32mI (170818) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (172478) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.53°C, Humidity: 34.28%, Pressure: 101454.00 Pa[0m
+[0;32mI (172488) RUUVITAG: Published data to MQTT, msg_id=33066[0m
+[0;32mI (176348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.53°C, Humidity: 34.26%, Pressure: 101454.00 Pa[0m
+[0;32mI (176348) RUUVITAG: Published data to MQTT, msg_id=61428[0m
+[0;32mI (177628) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.24%, Pressure: 101454.00 Pa[0m
+[0;32mI (177628) RUUVITAG: Published data to MQTT, msg_id=20729[0m
+[0;32mI (180198) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.53°C, Humidity: 34.23%, Pressure: 101454.00 Pa[0m
+[0;32mI (180198) RUUVITAG: Published data to MQTT, msg_id=548[0m
+[1;31mE (180948) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (180958) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (180958) mqtt_client: Error transport connect[0m
+[0;32mI (180958) RUUVITAG: MQTT Error[0m
+[0;32mI (180958) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (181488) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.53°C, Humidity: 34.23%, Pressure: 101454.00 Pa[0m
+[0;32mI (181488) RUUVITAG: Published data to MQTT, msg_id=12252[0m
+[0;32mI (185348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.24%, Pressure: 101454.00 Pa[0m
+[0;32mI (185358) RUUVITAG: Published data to MQTT, msg_id=29769[0m
+[0;32mI (186628) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.24%, Pressure: 101454.00 Pa[0m
+[0;32mI (186628) RUUVITAG: Published data to MQTT, msg_id=60496[0m
+[0;32mI (189198) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.21%, Pressure: 101452.00 Pa[0m
+[0;32mI (189198) RUUVITAG: Published data to MQTT, msg_id=12988[0m
+[0;32mI (190478) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.50°C, Humidity: 34.21%, Pressure: 101456.00 Pa[0m
+[0;32mI (190478) RUUVITAG: Published data to MQTT, msg_id=28796[0m
+[1;31mE (190998) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (190998) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (190998) mqtt_client: Error transport connect[0m
+[0;32mI (191008) RUUVITAG: MQTT Error[0m
+[0;32mI (191008) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (191778) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.50°C, Humidity: 34.21%, Pressure: 101456.00 Pa[0m
+[0;32mI (191778) RUUVITAG: Published data to MQTT, msg_id=2504[0m
+[0;32mI (193048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.21%, Pressure: 101454.00 Pa[0m
+[0;32mI (193048) RUUVITAG: Published data to MQTT, msg_id=2086[0m
+[0;32mI (194338) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.21%, Pressure: 101454.00 Pa[0m
+[0;32mI (194338) RUUVITAG: Published data to MQTT, msg_id=20694[0m
+[0;32mI (198198) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.53°C, Humidity: 34.19%, Pressure: 101454.00 Pa[0m
+[0;32mI (198208) RUUVITAG: Published data to MQTT, msg_id=21046[0m
+[0;32mI (202048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.19%, Pressure: 101455.00 Pa[0m
+[0;32mI (202048) RUUVITAG: Published data to MQTT, msg_id=7793[0m
+[0;32mI (203328) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.54°C, Humidity: 34.17%, Pressure: 101455.00 Pa[0m
+[0;32mI (203328) RUUVITAG: Published data to MQTT, msg_id=29613[0m
+[0;32mI (205888) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.18%, Pressure: 101452.00 Pa[0m
+[0;32mI (205898) RUUVITAG: Published data to MQTT, msg_id=43278[0m
+[1;31mE (206148) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (206148) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (206148) mqtt_client: Error transport connect[0m
+[0;32mI (206158) RUUVITAG: MQTT Error[0m
+[0;32mI (206158) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (207198) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.51°C, Humidity: 34.18%, Pressure: 101452.00 Pa[0m
+[0;32mI (207198) RUUVITAG: Published data to MQTT, msg_id=48877[0m
+[0;32mI (209748) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.15%, Pressure: 101454.00 Pa[0m
+[0;32mI (209748) RUUVITAG: Published data to MQTT, msg_id=48659[0m
+[0;32mI (211038) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.15%, Pressure: 101453.00 Pa[0m
+[0;32mI (211038) RUUVITAG: Published data to MQTT, msg_id=38833[0m
+[0;32mI (212318) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.15%, Pressure: 101453.00 Pa[0m
+[0;32mI (212328) RUUVITAG: Published data to MQTT, msg_id=39191[0m
+[0;32mI (214898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.53°C, Humidity: 34.17%, Pressure: 101452.00 Pa[0m
+[0;32mI (214898) RUUVITAG: Published data to MQTT, msg_id=36913[0m
+[1;31mE (216178) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (216178) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (216178) mqtt_client: Error transport connect[0m
+[0;32mI (216178) RUUVITAG: MQTT Error[0m
+[0;32mI (216188) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (218748) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.15%, Pressure: 101454.00 Pa[0m
+[0;32mI (218748) RUUVITAG: Published data to MQTT, msg_id=44494[0m
+[0;32mI (220038) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.15%, Pressure: 101454.00 Pa[0m
+[0;32mI (220038) RUUVITAG: Published data to MQTT, msg_id=57545[0m
+[0;32mI (223898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.14%, Pressure: 101453.00 Pa[0m
+[0;32mI (223898) RUUVITAG: Published data to MQTT, msg_id=31374[0m
+[0;32mI (225188) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.14%, Pressure: 101453.00 Pa[0m
+[0;32mI (225198) RUUVITAG: Published data to MQTT, msg_id=48246[0m
+[0;32mI (226488) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.12%, Pressure: 101453.00 Pa[0m
+[0;32mI (226498) RUUVITAG: Published data to MQTT, msg_id=25917[0m
+[1;31mE (231238) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (231238) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (231238) mqtt_client: Error transport connect[0m
+[0;32mI (231248) RUUVITAG: MQTT Error[0m
+[0;32mI (231248) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (231588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.54°C, Humidity: 34.14%, Pressure: 101454.00 Pa[0m
+[0;32mI (231598) RUUVITAG: Published data to MQTT, msg_id=46500[0m
+[0;32mI (232878) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.54°C, Humidity: 34.14%, Pressure: 101454.00 Pa[0m
+[0;32mI (232878) RUUVITAG: Published data to MQTT, msg_id=29529[0m
+[0;32mI (235578) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.12%, Pressure: 101455.00 Pa[0m
+[0;32mI (235578) RUUVITAG: Published data to MQTT, msg_id=38439[0m
+[0;32mI (236728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.13%, Pressure: 101454.00 Pa[0m
+[0;32mI (236738) RUUVITAG: Published data to MQTT, msg_id=55043[0m
+[0;32mI (238038) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.52°C, Humidity: 34.13%, Pressure: 101454.00 Pa[0m
+[0;32mI (238038) RUUVITAG: Published data to MQTT, msg_id=5071[0m
+[0;32mI (240598) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.13%, Pressure: 101454.00 Pa[0m
+[0;32mI (240598) RUUVITAG: Published data to MQTT, msg_id=54274[0m
+[0;32mI (243168) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.13%, Pressure: 101454.00 Pa[0m
+[0;32mI (243168) RUUVITAG: Published data to MQTT, msg_id=27912[0m
+[0;32mI (244448) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.13%, Pressure: 101455.00 Pa[0m
+[0;32mI (244448) RUUVITAG: Published data to MQTT, msg_id=50777[0m
+[0;32mI (245738) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.13%, Pressure: 101455.00 Pa[0m
+[0;32mI (245738) RUUVITAG: Published data to MQTT, msg_id=30196[0m
+[1;31mE (246388) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (246388) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (246398) mqtt_client: Error transport connect[0m
+[0;32mI (246398) RUUVITAG: MQTT Error[0m
+[0;32mI (246398) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (249588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.12%, Pressure: 101453.00 Pa[0m
+[0;32mI (249588) RUUVITAG: Published data to MQTT, msg_id=8808[0m
+[0;32mI (250878) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.12%, Pressure: 101453.00 Pa[0m
+[0;32mI (250878) RUUVITAG: Published data to MQTT, msg_id=32347[0m
+[1;31mE (256528) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (256528) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (256528) mqtt_client: Error transport connect[0m
+[0;32mI (256538) RUUVITAG: MQTT Error[0m
+[0;32mI (256538) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (257298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.11%, Pressure: 101454.00 Pa[0m
+[0;32mI (257298) RUUVITAG: Published data to MQTT, msg_id=40535[0m
+[0;32mI (258588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.11%, Pressure: 101454.00 Pa[0m
+[0;32mI (258588) RUUVITAG: Published data to MQTT, msg_id=12226[0m
+[0;32mI (262438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.10%, Pressure: 101452.00 Pa[0m
+[0;32mI (262438) RUUVITAG: Published data to MQTT, msg_id=50342[0m
+[0;32mI (266298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.10%, Pressure: 101454.00 Pa[0m
+[0;32mI (266298) RUUVITAG: Published data to MQTT, msg_id=31880[0m
+[1;31mE (266668) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (266668) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (266668) mqtt_client: Error transport connect[0m
+[0;32mI (266668) RUUVITAG: MQTT Error[0m
+[0;32mI (266678) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (270148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.12%, Pressure: 101455.00 Pa[0m
+[0;32mI (270148) RUUVITAG: Published data to MQTT, msg_id=45247[0m
+[0;32mI (271438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.12%, Pressure: 101455.00 Pa[0m
+[0;32mI (271438) RUUVITAG: Published data to MQTT, msg_id=10319[0m
+[0;32mI (275278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.13%, Pressure: 101453.00 Pa[0m
+[0;32mI (275278) RUUVITAG: Published data to MQTT, msg_id=19974[0m
+[0;32mI (277848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.11%, Pressure: 101453.00 Pa[0m
+[0;32mI (277858) RUUVITAG: Published data to MQTT, msg_id=14361[0m
+[0;32mI (279138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.11%, Pressure: 101453.00 Pa[0m
+[0;32mI (279138) RUUVITAG: Published data to MQTT, msg_id=2607[0m
+[0;32mI (280428) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.12%, Pressure: 101452.00 Pa[0m
+[0;32mI (280428) RUUVITAG: Published data to MQTT, msg_id=25700[0m
+[1;31mE (281718) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (281718) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (281718) mqtt_client: Error transport connect[0m
+[0;32mI (281728) RUUVITAG: MQTT Error[0m
+[0;32mI (281728) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (282998) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.10%, Pressure: 101450.00 Pa[0m
+[0;32mI (282998) RUUVITAG: Published data to MQTT, msg_id=24487[0m
+[0;32mI (284288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.10%, Pressure: 101450.00 Pa[0m
+[0;32mI (284288) RUUVITAG: Published data to MQTT, msg_id=60517[0m
+[0;32mI (286848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.11%, Pressure: 101453.00 Pa[0m
+[0;32mI (286858) RUUVITAG: Published data to MQTT, msg_id=41563[0m
+[0;32mI (288128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.54°C, Humidity: 34.12%, Pressure: 101453.00 Pa[0m
+[0;32mI (288128) RUUVITAG: Published data to MQTT, msg_id=60154[0m
+[0;32mI (291998) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.12%, Pressure: 101454.00 Pa[0m
+[0;32mI (292008) RUUVITAG: Published data to MQTT, msg_id=18056[0m
+[0;32mI (295848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.08%, Pressure: 101454.00 Pa[0m
+[0;32mI (295848) RUUVITAG: Published data to MQTT, msg_id=48255[0m
+[1;31mE (296768) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (296768) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (296768) mqtt_client: Error transport connect[0m
+[0;32mI (296778) RUUVITAG: MQTT Error[0m
+[0;32mI (296778) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (297138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.08%, Pressure: 101454.00 Pa[0m
+[0;32mI (297138) RUUVITAG: Published data to MQTT, msg_id=13715[0m
+[0;32mI (302278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.07%, Pressure: 101453.00 Pa[0m
+[0;32mI (302288) RUUVITAG: Published data to MQTT, msg_id=59987[0m
+[0;32mI (303548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.06%, Pressure: 101454.00 Pa[0m
+[0;32mI (303558) RUUVITAG: Published data to MQTT, msg_id=42589[0m
+[0;32mI (304848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.06%, Pressure: 101454.00 Pa[0m
+[0;32mI (304858) RUUVITAG: Published data to MQTT, msg_id=30809[0m
+[1;31mE (306808) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (306808) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (306808) mqtt_client: Error transport connect[0m
+[0;32mI (306808) RUUVITAG: MQTT Error[0m
+[0;32mI (306818) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (308698) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 34.06%, Pressure: 101452.00 Pa[0m
+[0;32mI (308698) RUUVITAG: Published data to MQTT, msg_id=50488[0m
+[0;32mI (310008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 34.06%, Pressure: 101452.00 Pa[0m
+[0;32mI (310008) RUUVITAG: Published data to MQTT, msg_id=30277[0m
+[0;32mI (313838) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.07%, Pressure: 101451.00 Pa[0m
+[0;32mI (313838) RUUVITAG: Published data to MQTT, msg_id=26794[0m
+[0;32mI (315128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.07%, Pressure: 101451.00 Pa[0m
+[0;32mI (315138) RUUVITAG: Published data to MQTT, msg_id=64157[0m
+[0;32mI (317698) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.06%, Pressure: 101447.00 Pa[0m
+[0;32mI (317698) RUUVITAG: Published data to MQTT, msg_id=4012[0m
+[1;31mE (321858) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (321858) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (321858) mqtt_client: Error transport connect[0m
+[0;32mI (321858) RUUVITAG: MQTT Error[0m
+[0;32mI (321868) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (322828) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 34.08%, Pressure: 101454.00 Pa[0m
+[0;32mI (322828) RUUVITAG: Published data to MQTT, msg_id=47494[0m
+[0;32mI (325408) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.55°C, Humidity: 34.08%, Pressure: 101447.00 Pa[0m
+[0;32mI (325408) RUUVITAG: Published data to MQTT, msg_id=25915[0m
+[0;32mI (326688) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.10%, Pressure: 101448.00 Pa[0m
+[0;32mI (326688) RUUVITAG: Published data to MQTT, msg_id=9205[0m
+[0;32mI (329248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.08%, Pressure: 101454.00 Pa[0m
+[0;32mI (329248) RUUVITAG: Published data to MQTT, msg_id=35382[0m
+[0;32mI (330538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.08%, Pressure: 101454.00 Pa[0m
+[0;32mI (330538) RUUVITAG: Published data to MQTT, msg_id=24109[0m
+[0;32mI (334388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.06%, Pressure: 101454.00 Pa[0m
+[0;32mI (334388) RUUVITAG: Published data to MQTT, msg_id=58025[0m
+[1;31mE (336908) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (336908) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (336908) mqtt_client: Error transport connect[0m
+[0;32mI (336918) RUUVITAG: MQTT Error[0m
+[0;32mI (336918) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (338248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.05%, Pressure: 101452.00 Pa[0m
+[0;32mI (338248) RUUVITAG: Published data to MQTT, msg_id=50058[0m
+[0;32mI (339528) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.04%, Pressure: 101452.00 Pa[0m
+[0;32mI (339538) RUUVITAG: Published data to MQTT, msg_id=1001[0m
+[0;32mI (340828) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.04%, Pressure: 101452.00 Pa[0m
+[0;32mI (340828) RUUVITAG: Published data to MQTT, msg_id=65200[0m
+[0;32mI (342098) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.04%, Pressure: 101452.00 Pa[0m
+[0;32mI (342098) RUUVITAG: Published data to MQTT, msg_id=2075[0m
+[0;32mI (343388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.04%, Pressure: 101452.00 Pa[0m
+[0;32mI (343388) RUUVITAG: Published data to MQTT, msg_id=64722[0m
+[0;32mI (345958) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.02%, Pressure: 101452.00 Pa[0m
+[0;32mI (345958) RUUVITAG: Published data to MQTT, msg_id=60909[0m
+[0;32mI (348538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.56°C, Humidity: 34.01%, Pressure: 101452.00 Pa[0m
+[0;32mI (348538) RUUVITAG: Published data to MQTT, msg_id=42363[0m
+[0;32mI (351108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.99%, Pressure: 101451.00 Pa[0m
+[0;32mI (351108) RUUVITAG: Published data to MQTT, msg_id=46583[0m
+[1;31mE (351958) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (351958) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (351958) mqtt_client: Error transport connect[0m
+[0;32mI (351968) RUUVITAG: MQTT Error[0m
+[0;32mI (351968) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (354948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 34.00%, Pressure: 101448.00 Pa[0m
+[0;32mI (354948) RUUVITAG: Published data to MQTT, msg_id=36157[0m
+[0;32mI (356238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 34.00%, Pressure: 101448.00 Pa[0m
+[0;32mI (356238) RUUVITAG: Published data to MQTT, msg_id=37124[0m
+[0;32mI (360088) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.99%, Pressure: 101450.00 Pa[0m
+[0;32mI (360088) RUUVITAG: Published data to MQTT, msg_id=51190[0m
+[0;32mI (361378) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.99%, Pressure: 101450.00 Pa[0m
+[0;32mI (361388) RUUVITAG: Published data to MQTT, msg_id=9165[0m
+[1;31mE (362018) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (362018) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (362018) mqtt_client: Error transport connect[0m
+[0;32mI (362018) RUUVITAG: MQTT Error[0m
+[0;32mI (362028) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (363948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 34.00%, Pressure: 101447.00 Pa[0m
+[0;32mI (363948) RUUVITAG: Published data to MQTT, msg_id=21253[0m
+[0;32mI (365228) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.99%, Pressure: 101452.00 Pa[0m
+[0;32mI (365228) RUUVITAG: Published data to MQTT, msg_id=29875[0m
+[0;32mI (367808) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.99%, Pressure: 101450.00 Pa[0m
+[0;32mI (367808) RUUVITAG: Published data to MQTT, msg_id=10173[0m
+[0;32mI (369108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.99%, Pressure: 101450.00 Pa[0m
+[0;32mI (369108) RUUVITAG: Published data to MQTT, msg_id=3766[0m
+[0;32mI (371708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 34.01%, Pressure: 101447.00 Pa[0m
+[0;32mI (371708) RUUVITAG: Published data to MQTT, msg_id=59595[0m
+[0;32mI (372938) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.99%, Pressure: 101444.00 Pa[0m
+[0;32mI (372938) RUUVITAG: Published data to MQTT, msg_id=55944[0m
+[0;32mI (374228) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.99%, Pressure: 101444.00 Pa[0m
+[0;32mI (374228) RUUVITAG: Published data to MQTT, msg_id=18789[0m
+[1;31mE (377148) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (377148) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (377158) mqtt_client: Error transport connect[0m
+[0;32mI (377158) RUUVITAG: MQTT Error[0m
+[0;32mI (377158) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (378078) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 34.01%, Pressure: 101449.00 Pa[0m
+[0;32mI (378088) RUUVITAG: Published data to MQTT, msg_id=5699[0m
+[0;32mI (380648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.98%, Pressure: 101448.00 Pa[0m
+[0;32mI (380648) RUUVITAG: Published data to MQTT, msg_id=62365[0m
+[0;32mI (381938) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.98%, Pressure: 101448.00 Pa[0m
+[0;32mI (381938) RUUVITAG: Published data to MQTT, msg_id=6528[0m
+[0;32mI (385788) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.96%, Pressure: 101450.00 Pa[0m
+[0;32mI (385788) RUUVITAG: Published data to MQTT, msg_id=35385[0m
+[1;31mE (387288) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (387288) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (387288) mqtt_client: Error transport connect[0m
+[0;32mI (387298) RUUVITAG: MQTT Error[0m
+[0;32mI (387298) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (389648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.97%, Pressure: 101447.00 Pa[0m
+[0;32mI (389648) RUUVITAG: Published data to MQTT, msg_id=49117[0m
+[0;32mI (390928) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.97%, Pressure: 101448.00 Pa[0m
+[0;32mI (390928) RUUVITAG: Published data to MQTT, msg_id=13912[0m
+[0;32mI (393508) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.99%, Pressure: 101452.00 Pa[0m
+[0;32mI (393508) RUUVITAG: Published data to MQTT, msg_id=35617[0m
+[0;32mI (394798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.99%, Pressure: 101452.00 Pa[0m
+[0;32mI (394798) RUUVITAG: Published data to MQTT, msg_id=18736[0m
+[1;31mE (397428) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (397428) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (397428) mqtt_client: Error transport connect[0m
+[0;32mI (397438) RUUVITAG: MQTT Error[0m
+[0;32mI (397438) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (398658) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.95%, Pressure: 101450.00 Pa[0m
+[0;32mI (398658) RUUVITAG: Published data to MQTT, msg_id=60600[0m
+[0;32mI (402498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.57°C, Humidity: 33.96%, Pressure: 101452.00 Pa[0m
+[0;32mI (402498) RUUVITAG: Published data to MQTT, msg_id=17743[0m
+[0;32mI (406358) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.95%, Pressure: 101450.00 Pa[0m
+[0;32mI (406358) RUUVITAG: Published data to MQTT, msg_id=544[0m
+[0;32mI (407638) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.95%, Pressure: 101450.00 Pa[0m
+[0;32mI (407638) RUUVITAG: Published data to MQTT, msg_id=17049[0m
+[0;32mI (411488) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.95%, Pressure: 101452.00 Pa[0m
+[0;32mI (411488) RUUVITAG: Published data to MQTT, msg_id=13045[0m
+[1;31mE (412578) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (412578) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (412588) mqtt_client: Error transport connect[0m
+[0;32mI (412588) RUUVITAG: MQTT Error[0m
+[0;32mI (412588) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (414058) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.94%, Pressure: 101448.00 Pa[0m
+[0;32mI (414058) RUUVITAG: Published data to MQTT, msg_id=44911[0m
+[0;32mI (416628) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.94%, Pressure: 101448.00 Pa[0m
+[0;32mI (416638) RUUVITAG: Published data to MQTT, msg_id=57890[0m
+[0;32mI (419208) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.93%, Pressure: 101449.00 Pa[0m
+[0;32mI (419208) RUUVITAG: Published data to MQTT, msg_id=24457[0m
+[0;32mI (420488) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.93%, Pressure: 101449.00 Pa[0m
+[0;32mI (420488) RUUVITAG: Published data to MQTT, msg_id=60534[0m
+[1;31mE (422718) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (422718) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (422718) mqtt_client: Error transport connect[0m
+[0;32mI (422718) RUUVITAG: MQTT Error[0m
+[0;32mI (422728) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (423058) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.94%, Pressure: 101450.00 Pa[0m
+[0;32mI (423058) RUUVITAG: Published data to MQTT, msg_id=42939[0m
+[0;32mI (424338) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.93%, Pressure: 101447.00 Pa[0m
+[0;32mI (424338) RUUVITAG: Published data to MQTT, msg_id=41166[0m
+[0;32mI (425628) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.93%, Pressure: 101447.00 Pa[0m
+[0;32mI (425628) RUUVITAG: Published data to MQTT, msg_id=51487[0m
+[0;32mI (429478) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.93%, Pressure: 101444.00 Pa[0m
+[0;32mI (429478) RUUVITAG: Published data to MQTT, msg_id=18953[0m
+[0;32mI (432048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.94%, Pressure: 101449.00 Pa[0m
+[0;32mI (432048) RUUVITAG: Published data to MQTT, msg_id=28418[0m
+[0;32mI (433338) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.94%, Pressure: 101449.00 Pa[0m
+[0;32mI (433338) RUUVITAG: Published data to MQTT, msg_id=32145[0m
+[0;32mI (435908) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.93%, Pressure: 101444.00 Pa[0m
+[0;32mI (435908) RUUVITAG: Published data to MQTT, msg_id=53378[0m
+[0;32mI (437188) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.92%, Pressure: 101451.00 Pa[0m
+[0;32mI (437188) RUUVITAG: Published data to MQTT, msg_id=35888[0m
+[1;31mE (437878) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (437878) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (437878) mqtt_client: Error transport connect[0m
+[0;32mI (437878) RUUVITAG: MQTT Error[0m
+[0;32mI (437888) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (444898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.94%, Pressure: 101450.00 Pa[0m
+[0;32mI (444898) RUUVITAG: Published data to MQTT, msg_id=2912[0m
+[0;32mI (446208) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.94%, Pressure: 101450.00 Pa[0m
+[0;32mI (446208) RUUVITAG: Published data to MQTT, msg_id=29701[0m
+[0;32mI (451338) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.94%, Pressure: 101450.00 Pa[0m
+[0;32mI (451338) RUUVITAG: Published data to MQTT, msg_id=40839[0m
+[1;31mE (453028) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (453028) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (453028) mqtt_client: Error transport connect[0m
+[0;32mI (453038) RUUVITAG: MQTT Error[0m
+[0;32mI (453038) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (453898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.94%, Pressure: 101446.00 Pa[0m
+[0;32mI (453898) RUUVITAG: Published data to MQTT, msg_id=43839[0m
+[0;32mI (456468) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.94%, Pressure: 101449.00 Pa[0m
+[0;32mI (456468) RUUVITAG: Published data to MQTT, msg_id=50035[0m
+[0;32mI (457748) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.93%, Pressure: 101450.00 Pa[0m
+[0;32mI (457748) RUUVITAG: Published data to MQTT, msg_id=17417[0m
+[0;32mI (459058) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.58°C, Humidity: 33.93%, Pressure: 101450.00 Pa[0m
+[0;32mI (459058) RUUVITAG: Published data to MQTT, msg_id=65473[0m
+[0;32mI (462888) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.94%, Pressure: 101451.00 Pa[0m
+[0;32mI (462888) RUUVITAG: Published data to MQTT, msg_id=57065[0m
+[0;32mI (465458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.65°C, Humidity: 33.95%, Pressure: 101449.00 Pa[0m
+[0;32mI (465458) RUUVITAG: Published data to MQTT, msg_id=22025[0m
+[1;31mE (468188) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (468188) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (468188) mqtt_client: Error transport connect[0m
+[0;32mI (468188) RUUVITAG: MQTT Error[0m
+[0;32mI (468198) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (470598) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.91%, Pressure: 101448.00 Pa[0m
+[0;32mI (470598) RUUVITAG: Published data to MQTT, msg_id=21069[0m
+[0;32mI (471878) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.91%, Pressure: 101448.00 Pa[0m
+[0;32mI (471888) RUUVITAG: Published data to MQTT, msg_id=41835[0m
+[0;32mI (474448) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.94%, Pressure: 101446.00 Pa[0m
+[0;32mI (474458) RUUVITAG: Published data to MQTT, msg_id=5233[0m
+[0;32mI (475738) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.90%, Pressure: 101451.00 Pa[0m
+[0;32mI (475738) RUUVITAG: Published data to MQTT, msg_id=52730[0m
+[0;32mI (479598) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.59°C, Humidity: 33.93%, Pressure: 101446.00 Pa[0m
+[0;32mI (479608) RUUVITAG: Published data to MQTT, msg_id=3637[0m
+[1;31mE (483238) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (483238) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (483238) mqtt_client: Error transport connect[0m
+[0;32mI (483248) RUUVITAG: MQTT Error[0m
+[0;32mI (483248) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (483458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.93%, Pressure: 101450.00 Pa[0m
+[0;32mI (483458) RUUVITAG: Published data to MQTT, msg_id=64630[0m
+[0;32mI (484738) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.93%, Pressure: 101450.00 Pa[0m
+[0;32mI (484738) RUUVITAG: Published data to MQTT, msg_id=41565[0m
+[0;32mI (487308) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.60°C, Humidity: 33.92%, Pressure: 101450.00 Pa[0m
+[0;32mI (487308) RUUVITAG: Published data to MQTT, msg_id=46506[0m
+[0;32mI (488608) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.90%, Pressure: 101450.00 Pa[0m
+[0;32mI (488608) RUUVITAG: Published data to MQTT, msg_id=30404[0m
+[0;32mI (491158) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.92%, Pressure: 101450.00 Pa[0m
+[0;32mI (491158) RUUVITAG: Published data to MQTT, msg_id=51958[0m
+[0;32mI (497588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.92%, Pressure: 101444.00 Pa[0m
+[0;32mI (497588) RUUVITAG: Published data to MQTT, msg_id=10637[0m
+[1;31mE (498288) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (498288) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (498298) mqtt_client: Error transport connect[0m
+[0;32mI (498298) RUUVITAG: MQTT Error[0m
+[0;32mI (498298) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (500158) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.90%, Pressure: 101446.00 Pa[0m
+[0;32mI (500158) RUUVITAG: Published data to MQTT, msg_id=14175[0m
+[0;32mI (501428) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.65°C, Humidity: 33.90%, Pressure: 101453.00 Pa[0m
+[0;32mI (501438) RUUVITAG: Published data to MQTT, msg_id=19386[0m
+[0;32mI (504008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.87%, Pressure: 101450.00 Pa[0m
+[0;32mI (504008) RUUVITAG: Published data to MQTT, msg_id=24268[0m
+[0;32mI (505298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.87%, Pressure: 101450.00 Pa[0m
+[0;32mI (505298) RUUVITAG: Published data to MQTT, msg_id=2454[0m
+[1;31mE (508428) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (508428) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (508428) mqtt_client: Error transport connect[0m
+[0;32mI (508438) RUUVITAG: MQTT Error[0m
+[0;32mI (508438) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (510438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.63°C, Humidity: 33.90%, Pressure: 101446.00 Pa[0m
+[0;32mI (510438) RUUVITAG: Published data to MQTT, msg_id=34320[0m
+[0;32mI (513008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.94%, Pressure: 101450.00 Pa[0m
+[0;32mI (513008) RUUVITAG: Published data to MQTT, msg_id=27212[0m
+[0;32mI (514288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.93%, Pressure: 101448.00 Pa[0m
+[0;32mI (514288) RUUVITAG: Published data to MQTT, msg_id=32092[0m
+[0;32mI (515588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.93%, Pressure: 101448.00 Pa[0m
+[0;32mI (515588) RUUVITAG: Published data to MQTT, msg_id=32314[0m
+[0;32mI (519428) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.90%, Pressure: 101444.00 Pa[0m
+[0;32mI (519438) RUUVITAG: Published data to MQTT, msg_id=6922[0m
+[0;32mI (521988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.89%, Pressure: 101446.00 Pa[0m
+[0;32mI (521998) RUUVITAG: Published data to MQTT, msg_id=28013[0m
+[0;32mI (523288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.89%, Pressure: 101446.00 Pa[0m
+[0;32mI (523288) RUUVITAG: Published data to MQTT, msg_id=57144[0m
+[1;31mE (523578) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (523588) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (523588) mqtt_client: Error transport connect[0m
+[0;32mI (523588) RUUVITAG: MQTT Error[0m
+[0;32mI (523588) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (525848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.89%, Pressure: 101446.00 Pa[0m
+[0;32mI (525848) RUUVITAG: Published data to MQTT, msg_id=34079[0m
+[0;32mI (527128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.94%, Pressure: 101444.00 Pa[0m
+[0;32mI (527138) RUUVITAG: Published data to MQTT, msg_id=29254[0m
+[0;32mI (532278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.61°C, Humidity: 33.91%, Pressure: 101448.00 Pa[0m
+[0;32mI (532278) RUUVITAG: Published data to MQTT, msg_id=49931[0m
+[1;31mE (533608) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (533608) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (533608) mqtt_client: Error transport connect[0m
+[0;32mI (533618) RUUVITAG: MQTT Error[0m
+[0;32mI (533618) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (534848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.63°C, Humidity: 33.90%, Pressure: 101452.00 Pa[0m
+[0;32mI (534848) RUUVITAG: Published data to MQTT, msg_id=35195[0m
+[0;32mI (536138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.63°C, Humidity: 33.90%, Pressure: 101452.00 Pa[0m
+[0;32mI (536148) RUUVITAG: Published data to MQTT, msg_id=4148[0m
+[0;32mI (538708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.65°C, Humidity: 33.92%, Pressure: 101448.00 Pa[0m
+[0;32mI (538708) RUUVITAG: Published data to MQTT, msg_id=53611[0m
+[0;32mI (539988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.92%, Pressure: 101448.00 Pa[0m
+[0;32mI (539988) RUUVITAG: Published data to MQTT, msg_id=14135[0m
+[0;32mI (542548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.92%, Pressure: 101450.00 Pa[0m
+[0;32mI (542558) RUUVITAG: Published data to MQTT, msg_id=34697[0m
+[0;32mI (543838) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.92%, Pressure: 101450.00 Pa[0m
+[0;32mI (543838) RUUVITAG: Published data to MQTT, msg_id=65123[0m
+[1;31mE (548718) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (548728) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (548728) mqtt_client: Error transport connect[0m
+[0;32mI (548728) RUUVITAG: MQTT Error[0m
+[0;32mI (548728) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (548988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.62°C, Humidity: 33.91%, Pressure: 101446.00 Pa[0m
+[0;32mI (548988) RUUVITAG: Published data to MQTT, msg_id=31066[0m
+[0;32mI (551558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.65°C, Humidity: 33.88%, Pressure: 101450.00 Pa[0m
+[0;32mI (551558) RUUVITAG: Published data to MQTT, msg_id=21756[0m
+[0;32mI (552838) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101450.00 Pa[0m
+[0;32mI (552838) RUUVITAG: Published data to MQTT, msg_id=6674[0m
+[0;32mI (555408) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101444.00 Pa[0m
+[0;32mI (555408) RUUVITAG: Published data to MQTT, msg_id=56608[0m
+[0;32mI (556708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101444.00 Pa[0m
+[0;32mI (556708) RUUVITAG: Published data to MQTT, msg_id=6805[0m
+[1;31mE (558848) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (558858) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (558858) mqtt_client: Error transport connect[0m
+[0;32mI (558858) RUUVITAG: MQTT Error[0m
+[0;32mI (558858) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (560538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.63°C, Humidity: 33.89%, Pressure: 101446.00 Pa[0m
+[0;32mI (560548) RUUVITAG: Published data to MQTT, msg_id=33355[0m
+[0;32mI (561838) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.63°C, Humidity: 33.89%, Pressure: 101446.00 Pa[0m
+[0;32mI (561838) RUUVITAG: Published data to MQTT, msg_id=24221[0m
+[0;32mI (563128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101450.00 Pa[0m
+[0;32mI (563128) RUUVITAG: Published data to MQTT, msg_id=61823[0m
+[0;32mI (564408) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101450.00 Pa[0m
+[0;32mI (564408) RUUVITAG: Published data to MQTT, msg_id=28305[0m
+[0;32mI (565688) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.92%, Pressure: 101450.00 Pa[0m
+[0;32mI (565688) RUUVITAG: Published data to MQTT, msg_id=43539[0m
+[0;32mI (568248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101452.00 Pa[0m
+[0;32mI (568258) RUUVITAG: Published data to MQTT, msg_id=7394[0m
+[1;31mE (568988) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (568988) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (568988) mqtt_client: Error transport connect[0m
+[0;32mI (568998) RUUVITAG: MQTT Error[0m
+[0;32mI (568998) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (569538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.90%, Pressure: 101452.00 Pa[0m
+[0;32mI (569538) RUUVITAG: Published data to MQTT, msg_id=48025[0m
+[0;32mI (577248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.65°C, Humidity: 33.92%, Pressure: 101452.00 Pa[0m
+[0;32mI (577258) RUUVITAG: Published data to MQTT, msg_id=3208[0m
+[0;32mI (578538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.89%, Pressure: 101451.00 Pa[0m
+[0;32mI (578538) RUUVITAG: Published data to MQTT, msg_id=21862[0m
+[1;31mE (579128) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (579138) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (579138) mqtt_client: Error transport connect[0m
+[0;32mI (579138) RUUVITAG: MQTT Error[0m
+[0;32mI (579138) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (582398) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.63°C, Humidity: 33.90%, Pressure: 101449.00 Pa[0m
+[0;32mI (582398) RUUVITAG: Published data to MQTT, msg_id=28713[0m
+[0;32mI (586238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.90%, Pressure: 101448.00 Pa[0m
+[0;32mI (586248) RUUVITAG: Published data to MQTT, msg_id=30098[0m
+[0;32mI (588818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.90%, Pressure: 101450.00 Pa[0m
+[0;32mI (588818) RUUVITAG: Published data to MQTT, msg_id=33929[0m
+[1;31mE (589218) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (589218) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (589228) mqtt_client: Error transport connect[0m
+[0;32mI (589228) RUUVITAG: MQTT Error[0m
+[0;32mI (589228) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (590108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.90%, Pressure: 101450.00 Pa[0m
+[0;32mI (590108) RUUVITAG: Published data to MQTT, msg_id=4632[0m
+[0;32mI (591408) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.91%, Pressure: 101446.00 Pa[0m
+[0;32mI (591418) RUUVITAG: Published data to MQTT, msg_id=22775[0m
+[0;32mI (593958) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.93%, Pressure: 101446.00 Pa[0m
+[0;32mI (593958) RUUVITAG: Published data to MQTT, msg_id=110[0m
+[0;32mI (595248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.64°C, Humidity: 33.93%, Pressure: 101446.00 Pa[0m
+[0;32mI (595258) RUUVITAG: Published data to MQTT, msg_id=44433[0m
+[1;31mE (599308) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (599308) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (599308) mqtt_client: Error transport connect[0m
+[0;32mI (599318) RUUVITAG: MQTT Error[0m
+[0;32mI (599318) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (600378) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.92%, Pressure: 101444.00 Pa[0m
+[0;32mI (600388) RUUVITAG: Published data to MQTT, msg_id=5596[0m
+[0;32mI (608108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.93%, Pressure: 101442.00 Pa[0m
+[0;32mI (608118) RUUVITAG: Published data to MQTT, msg_id=64108[0m
+[0;32mI (610658) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.91%, Pressure: 101440.00 Pa[0m
+[0;32mI (610658) RUUVITAG: Published data to MQTT, msg_id=47147[0m
+[0;32mI (611958) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.91%, Pressure: 101443.00 Pa[0m
+[0;32mI (611958) RUUVITAG: Published data to MQTT, msg_id=28270[0m
+[1;31mE (614458) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (614458) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (614458) mqtt_client: Error transport connect[0m
+[0;32mI (614458) RUUVITAG: MQTT Error[0m
+[0;32mI (614468) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (615798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.90%, Pressure: 101438.00 Pa[0m
+[0;32mI (615808) RUUVITAG: Published data to MQTT, msg_id=7232[0m
+[0;32mI (617088) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.90%, Pressure: 101441.00 Pa[0m
+[0;32mI (617088) RUUVITAG: Published data to MQTT, msg_id=2[0m
+[0;32mI (619658) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.90%, Pressure: 101442.00 Pa[0m
+[0;32mI (619658) RUUVITAG: Published data to MQTT, msg_id=46376[0m
+[0;32mI (620948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.90%, Pressure: 101442.00 Pa[0m
+[0;32mI (620948) RUUVITAG: Published data to MQTT, msg_id=39997[0m
+[0;32mI (624808) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.90%, Pressure: 101441.00 Pa[0m
+[0;32mI (624808) RUUVITAG: Published data to MQTT, msg_id=13789[0m
+[0;32mI (626078) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.90%, Pressure: 101441.00 Pa[0m
+[0;32mI (626088) RUUVITAG: Published data to MQTT, msg_id=37581[0m
+[0;32mI (628658) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.91%, Pressure: 101440.00 Pa[0m
+[0;32mI (628658) RUUVITAG: Published data to MQTT, msg_id=757[0m
+[1;31mE (629608) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (629608) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (629608) mqtt_client: Error transport connect[0m
+[0;32mI (629618) RUUVITAG: MQTT Error[0m
+[0;32mI (629618) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (629938) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.90%, Pressure: 101441.00 Pa[0m
+[0;32mI (629938) RUUVITAG: Published data to MQTT, msg_id=47754[0m
+[0;32mI (632498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.91%, Pressure: 101441.00 Pa[0m
+[0;32mI (632498) RUUVITAG: Published data to MQTT, msg_id=47629[0m
+[0;32mI (633788) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.66°C, Humidity: 33.91%, Pressure: 101441.00 Pa[0m
+[0;32mI (633788) RUUVITAG: Published data to MQTT, msg_id=7009[0m
+[0;32mI (637638) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.93%, Pressure: 101438.00 Pa[0m
+[0;32mI (637648) RUUVITAG: Published data to MQTT, msg_id=22850[0m
+[1;31mE (639708) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (639708) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (639708) mqtt_client: Error transport connect[0m
+[0;32mI (639708) RUUVITAG: MQTT Error[0m
+[0;32mI (639718) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (640208) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.91%, Pressure: 101439.00 Pa[0m
+[0;32mI (640208) RUUVITAG: Published data to MQTT, msg_id=26108[0m
+[0;32mI (641498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.91%, Pressure: 101439.00 Pa[0m
+[0;32mI (641498) RUUVITAG: Published data to MQTT, msg_id=26034[0m
+[0;32mI (642788) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.67°C, Humidity: 33.94%, Pressure: 101437.00 Pa[0m
+[0;32mI (642788) RUUVITAG: Published data to MQTT, msg_id=58814[0m
+[0;32mI (645358) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.94%, Pressure: 101440.00 Pa[0m
+[0;32mI (645358) RUUVITAG: Published data to MQTT, msg_id=12595[0m
+[0;32mI (646648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.94%, Pressure: 101440.00 Pa[0m
+[0;32mI (646648) RUUVITAG: Published data to MQTT, msg_id=14252[0m
+[0;32mI (650488) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.69°C, Humidity: 33.90%, Pressure: 101440.00 Pa[0m
+[0;32mI (650488) RUUVITAG: Published data to MQTT, msg_id=6431[0m
+[1;31mE (654758) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (654758) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (654758) mqtt_client: Error transport connect[0m
+[0;32mI (654768) RUUVITAG: MQTT Error[0m
+[0;32mI (654768) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (655638) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.69°C, Humidity: 33.90%, Pressure: 101441.00 Pa[0m
+[0;32mI (655638) RUUVITAG: Published data to MQTT, msg_id=14409[0m
+[0;32mI (658208) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.91%, Pressure: 101441.00 Pa[0m
+[0;32mI (658208) RUUVITAG: Published data to MQTT, msg_id=37567[0m
+[0;32mI (659498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.91%, Pressure: 101441.00 Pa[0m
+[0;32mI (659498) RUUVITAG: Published data to MQTT, msg_id=28250[0m
+[0;32mI (663358) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.92%, Pressure: 101439.00 Pa[0m
+[0;32mI (663358) RUUVITAG: Published data to MQTT, msg_id=62034[0m
+[1;31mE (664788) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (664788) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (664788) mqtt_client: Error transport connect[0m
+[0;32mI (664798) RUUVITAG: MQTT Error[0m
+[0;32mI (664798) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (665918) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.94%, Pressure: 101439.00 Pa[0m
+[0;32mI (665918) RUUVITAG: Published data to MQTT, msg_id=1270[0m
+[0;32mI (671048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.69°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (671048) RUUVITAG: Published data to MQTT, msg_id=31752[0m
+[0;32mI (672328) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.69°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (672338) RUUVITAG: Published data to MQTT, msg_id=49127[0m
+[0;32mI (674908) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.90%, Pressure: 101436.00 Pa[0m
+[0;32mI (674908) RUUVITAG: Published data to MQTT, msg_id=47171[0m
+[0;32mI (676188) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.93%, Pressure: 101435.00 Pa[0m
+[0;32mI (676188) RUUVITAG: Published data to MQTT, msg_id=20507[0m
+[1;31mE (679888) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (679888) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (679888) mqtt_client: Error transport connect[0m
+[0;32mI (679898) RUUVITAG: MQTT Error[0m
+[0;32mI (679898) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (683908) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.92%, Pressure: 101436.00 Pa[0m
+[0;32mI (683908) RUUVITAG: Published data to MQTT, msg_id=5578[0m
+[0;32mI (685218) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.92%, Pressure: 101436.00 Pa[0m
+[0;32mI (685218) RUUVITAG: Published data to MQTT, msg_id=7619[0m
+[0;32mI (689048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.90%, Pressure: 101431.00 Pa[0m
+[0;32mI (689048) RUUVITAG: Published data to MQTT, msg_id=37019[0m
+[1;31mE (689978) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (689988) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (689988) mqtt_client: Error transport connect[0m
+[0;32mI (689988) RUUVITAG: MQTT Error[0m
+[0;32mI (689988) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (696748) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.93%, Pressure: 101435.00 Pa[0m
+[0;32mI (696758) RUUVITAG: Published data to MQTT, msg_id=59653[0m
+[0;32mI (698048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.93%, Pressure: 101435.00 Pa[0m
+[0;32mI (698048) RUUVITAG: Published data to MQTT, msg_id=48092[0m
+[1;31mE (700178) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (700178) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (700178) mqtt_client: Error transport connect[0m
+[0;32mI (700178) RUUVITAG: MQTT Error[0m
+[0;32mI (700188) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (700708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.69°C, Humidity: 33.92%, Pressure: 101431.00 Pa[0m
+[0;32mI (700718) RUUVITAG: Published data to MQTT, msg_id=16053[0m
+[0;32mI (702098) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.91%, Pressure: 101432.00 Pa[0m
+[0;32mI (702108) RUUVITAG: Published data to MQTT, msg_id=30095[0m
+[0;32mI (703188) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.91%, Pressure: 101432.00 Pa[0m
+[0;32mI (703188) RUUVITAG: Published data to MQTT, msg_id=3787[0m
+[0;32mI (708318) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.94%, Pressure: 101430.00 Pa[0m
+[0;32mI (708328) RUUVITAG: Published data to MQTT, msg_id=63488[0m
+[0;32mI (710898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.91%, Pressure: 101430.00 Pa[0m
+[0;32mI (710898) RUUVITAG: Published data to MQTT, msg_id=35749[0m
+[0;32mI (713458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.94%, Pressure: 101430.00 Pa[0m
+[0;32mI (713468) RUUVITAG: Published data to MQTT, msg_id=214[0m
+[0;32mI (714738) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.91%, Pressure: 101426.00 Pa[0m
+[0;32mI (714738) RUUVITAG: Published data to MQTT, msg_id=49796[0m
+[1;31mE (715318) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (715318) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (715328) mqtt_client: Error transport connect[0m
+[0;32mI (715328) RUUVITAG: MQTT Error[0m
+[0;32mI (715328) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (723738) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.91%, Pressure: 101436.00 Pa[0m
+[0;32mI (723738) RUUVITAG: Published data to MQTT, msg_id=6451[0m
+[1;31mE (725468) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (725468) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (725468) mqtt_client: Error transport connect[0m
+[0;32mI (725468) RUUVITAG: MQTT Error[0m
+[0;32mI (725478) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (726308) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.91%, Pressure: 101436.00 Pa[0m
+[0;32mI (726318) RUUVITAG: Published data to MQTT, msg_id=59059[0m
+[0;32mI (727588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.90%, Pressure: 101433.00 Pa[0m
+[0;32mI (727588) RUUVITAG: Published data to MQTT, msg_id=6563[0m
+[0;32mI (731458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.90%, Pressure: 101434.00 Pa[0m
+[0;32mI (731458) RUUVITAG: Published data to MQTT, msg_id=14277[0m
+[0;32mI (734018) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.68°C, Humidity: 33.90%, Pressure: 101433.00 Pa[0m
+[0;32mI (734028) RUUVITAG: Published data to MQTT, msg_id=14853[0m
+[0;32mI (736588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.90%, Pressure: 101436.00 Pa[0m
+[0;32mI (736588) RUUVITAG: Published data to MQTT, msg_id=45196[0m
+[0;32mI (740438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (740438) RUUVITAG: Published data to MQTT, msg_id=25394[0m
+[1;31mE (740568) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (740568) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (740568) mqtt_client: Error transport connect[0m
+[0;32mI (740578) RUUVITAG: MQTT Error[0m
+[0;32mI (740578) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (743008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.91%, Pressure: 101434.00 Pa[0m
+[0;32mI (743018) RUUVITAG: Published data to MQTT, msg_id=3458[0m
+[0;32mI (744308) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.91%, Pressure: 101434.00 Pa[0m
+[0;32mI (744308) RUUVITAG: Published data to MQTT, msg_id=12546[0m
+[0;32mI (748148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.92%, Pressure: 101436.00 Pa[0m
+[0;32mI (748148) RUUVITAG: Published data to MQTT, msg_id=62508[0m
+[0;32mI (749438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.92%, Pressure: 101436.00 Pa[0m
+[0;32mI (749438) RUUVITAG: Published data to MQTT, msg_id=61623[0m
+[0;32mI (752018) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.94%, Pressure: 101436.00 Pa[0m
+[0;32mI (752018) RUUVITAG: Published data to MQTT, msg_id=46049[0m
+[0;32mI (753288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.92%, Pressure: 101434.00 Pa[0m
+[0;32mI (753288) RUUVITAG: Published data to MQTT, msg_id=34750[0m
+[1;31mE (755618) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (755618) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (755618) mqtt_client: Error transport connect[0m
+[0;32mI (755628) RUUVITAG: MQTT Error[0m
+[0;32mI (755628) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (755858) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.92%, Pressure: 101435.00 Pa[0m
+[0;32mI (755858) RUUVITAG: Published data to MQTT, msg_id=51547[0m
+[0;32mI (757348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.92%, Pressure: 101435.00 Pa[0m
+[0;32mI (757358) RUUVITAG: Published data to MQTT, msg_id=59957[0m
+[0;32mI (760998) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (761008) RUUVITAG: Published data to MQTT, msg_id=48005[0m
+[0;32mI (762288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (762288) RUUVITAG: Published data to MQTT, msg_id=49584[0m
+[0;32mI (764858) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.71°C, Humidity: 33.93%, Pressure: 101440.00 Pa[0m
+[0;32mI (764858) RUUVITAG: Published data to MQTT, msg_id=61869[0m
+[0;32mI (766138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.94%, Pressure: 101436.00 Pa[0m
+[0;32mI (766138) RUUVITAG: Published data to MQTT, msg_id=17501[0m
+[0;32mI (768718) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.93%, Pressure: 101440.00 Pa[0m
+[0;32mI (768718) RUUVITAG: Published data to MQTT, msg_id=20857[0m
+[0;32mI (770018) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.93%, Pressure: 101440.00 Pa[0m
+[0;32mI (770018) RUUVITAG: Published data to MQTT, msg_id=54337[0m
+[1;31mE (770828) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (770828) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (770828) mqtt_client: Error transport connect[0m
+[0;32mI (770838) RUUVITAG: MQTT Error[0m
+[0;32mI (770838) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (773848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101439.00 Pa[0m
+[0;32mI (773848) RUUVITAG: Published data to MQTT, msg_id=65059[0m
+[0;32mI (777708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.93%, Pressure: 101440.00 Pa[0m
+[0;32mI (777708) RUUVITAG: Published data to MQTT, msg_id=27115[0m
+[0;32mI (778988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.94%, Pressure: 101440.00 Pa[0m
+[0;32mI (778988) RUUVITAG: Published data to MQTT, msg_id=52005[0m
+[1;31mE (780868) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (780868) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (780868) mqtt_client: Error transport connect[0m
+[0;32mI (780878) RUUVITAG: MQTT Error[0m
+[0;32mI (780878) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (781568) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.94%, Pressure: 101440.00 Pa[0m
+[0;32mI (781568) RUUVITAG: Published data to MQTT, msg_id=20794[0m
+[0;32mI (787988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.92%, Pressure: 101442.00 Pa[0m
+[0;32mI (787998) RUUVITAG: Published data to MQTT, msg_id=19117[0m
+[0;32mI (790558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.94%, Pressure: 101439.00 Pa[0m
+[0;32mI (790558) RUUVITAG: Published data to MQTT, msg_id=23214[0m
+[0;32mI (792068) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (792068) RUUVITAG: Published data to MQTT, msg_id=882[0m
+[0;32mI (794418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.90%, Pressure: 101440.00 Pa[0m
+[0;32mI (794418) RUUVITAG: Published data to MQTT, msg_id=24458[0m
+[0;32mI (795698) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.90%, Pressure: 101440.00 Pa[0m
+[0;32mI (795698) RUUVITAG: Published data to MQTT, msg_id=15103[0m
+[1;31mE (795968) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (795968) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (795968) mqtt_client: Error transport connect[0m
+[0;32mI (795968) RUUVITAG: MQTT Error[0m
+[0;32mI (795978) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (799548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (799548) RUUVITAG: Published data to MQTT, msg_id=43235[0m
+[0;32mI (800838) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (800838) RUUVITAG: Published data to MQTT, msg_id=57759[0m
+[0;32mI (803418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.93%, Pressure: 101440.00 Pa[0m
+[0;32mI (803418) RUUVITAG: Published data to MQTT, msg_id=56350[0m
+[0;32mI (804688) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.94%, Pressure: 101436.00 Pa[0m
+[0;32mI (804688) RUUVITAG: Published data to MQTT, msg_id=26247[0m
+[0;32mI (807268) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (807268) RUUVITAG: Published data to MQTT, msg_id=61157[0m
+[0;32mI (808548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (808548) RUUVITAG: Published data to MQTT, msg_id=61949[0m
+[1;31mE (811068) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (811068) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (811078) mqtt_client: Error transport connect[0m
+[0;32mI (811078) RUUVITAG: MQTT Error[0m
+[0;32mI (811078) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (812388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.70°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (812398) RUUVITAG: Published data to MQTT, msg_id=32277[0m
+[0;32mI (816248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.90%, Pressure: 101438.00 Pa[0m
+[0;32mI (816258) RUUVITAG: Published data to MQTT, msg_id=28538[0m
+[0;32mI (820108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.91%, Pressure: 101441.00 Pa[0m
+[0;32mI (820108) RUUVITAG: Published data to MQTT, msg_id=19697[0m
+[1;31mE (821108) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (821108) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (821118) mqtt_client: Error transport connect[0m
+[0;32mI (821118) RUUVITAG: MQTT Error[0m
+[0;32mI (821118) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (821388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.91%, Pressure: 101441.00 Pa[0m
+[0;32mI (821398) RUUVITAG: Published data to MQTT, msg_id=9478[0m
+[0;32mI (825248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.92%, Pressure: 101436.00 Pa[0m
+[0;32mI (825248) RUUVITAG: Published data to MQTT, msg_id=20761[0m
+[0;32mI (826538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.92%, Pressure: 101436.00 Pa[0m
+[0;32mI (826548) RUUVITAG: Published data to MQTT, msg_id=7045[0m
+[0;32mI (829108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.95%, Pressure: 101440.00 Pa[0m
+[0;32mI (829108) RUUVITAG: Published data to MQTT, msg_id=21156[0m
+[0;32mI (830388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.93%, Pressure: 101442.00 Pa[0m
+[0;32mI (830388) RUUVITAG: Published data to MQTT, msg_id=40733[0m
+[1;31mE (831158) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (831158) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (831158) mqtt_client: Error transport connect[0m
+[0;32mI (831158) RUUVITAG: MQTT Error[0m
+[0;32mI (831168) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (832948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (832958) RUUVITAG: Published data to MQTT, msg_id=33471[0m
+[0;32mI (834238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101440.00 Pa[0m
+[0;32mI (834248) RUUVITAG: Published data to MQTT, msg_id=14810[0m
+[0;32mI (836808) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.92%, Pressure: 101442.00 Pa[0m
+[0;32mI (836808) RUUVITAG: Published data to MQTT, msg_id=20959[0m
+[0;32mI (839388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.92%, Pressure: 101442.00 Pa[0m
+[0;32mI (839388) RUUVITAG: Published data to MQTT, msg_id=52473[0m
+[0;32mI (843238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.94%, Pressure: 101440.00 Pa[0m
+[0;32mI (843238) RUUVITAG: Published data to MQTT, msg_id=44383[0m
+[0;32mI (845818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.93%, Pressure: 101442.00 Pa[0m
+[0;32mI (845818) RUUVITAG: Published data to MQTT, msg_id=41028[0m
+[1;31mE (846288) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (846288) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (846298) mqtt_client: Error transport connect[0m
+[0;32mI (846298) RUUVITAG: MQTT Error[0m
+[0;32mI (846298) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (847118) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.93%, Pressure: 101442.00 Pa[0m
+[0;32mI (847118) RUUVITAG: Published data to MQTT, msg_id=55783[0m
+[0;32mI (849668) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.94%, Pressure: 101441.00 Pa[0m
+[0;32mI (849668) RUUVITAG: Published data to MQTT, msg_id=51480[0m
+[0;32mI (850948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.91%, Pressure: 101443.00 Pa[0m
+[0;32mI (850948) RUUVITAG: Published data to MQTT, msg_id=39597[0m
+[0;32mI (852238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.72°C, Humidity: 33.91%, Pressure: 101443.00 Pa[0m
+[0;32mI (852248) RUUVITAG: Published data to MQTT, msg_id=17251[0m
+[0;32mI (854798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.90%, Pressure: 101440.00 Pa[0m
+[0;32mI (854808) RUUVITAG: Published data to MQTT, msg_id=7398[0m
+[0;32mI (856088) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.91%, Pressure: 101444.00 Pa[0m
+[0;32mI (856088) RUUVITAG: Published data to MQTT, msg_id=15215[0m
+[1;31mE (856378) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (856378) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (856388) mqtt_client: Error transport connect[0m
+[0;32mI (856388) RUUVITAG: MQTT Error[0m
+[0;32mI (856388) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (858648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.92%, Pressure: 101443.00 Pa[0m
+[0;32mI (858658) RUUVITAG: Published data to MQTT, msg_id=42809[0m
+[0;32mI (859948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.92%, Pressure: 101443.00 Pa[0m
+[0;32mI (859948) RUUVITAG: Published data to MQTT, msg_id=63779[0m
+[0;32mI (862518) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.92%, Pressure: 101439.00 Pa[0m
+[0;32mI (862518) RUUVITAG: Published data to MQTT, msg_id=2415[0m
+[0;32mI (863798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.73°C, Humidity: 33.92%, Pressure: 101439.00 Pa[0m
+[0;32mI (863798) RUUVITAG: Published data to MQTT, msg_id=46571[0m
+[1;31mE (866408) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (866408) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (866408) mqtt_client: Error transport connect[0m
+[0;32mI (866408) RUUVITAG: MQTT Error[0m
+[0;32mI (866418) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (867658) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.94%, Pressure: 101441.00 Pa[0m
+[0;32mI (867658) RUUVITAG: Published data to MQTT, msg_id=15667[0m
+[0;32mI (871518) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.92%, Pressure: 101444.00 Pa[0m
+[0;32mI (871518) RUUVITAG: Published data to MQTT, msg_id=14545[0m
+[0;32mI (872798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.92%, Pressure: 101444.00 Pa[0m
+[0;32mI (872798) RUUVITAG: Published data to MQTT, msg_id=33768[0m
+[0;32mI (876638) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.94%, Pressure: 101442.00 Pa[0m
+[0;32mI (876648) RUUVITAG: Published data to MQTT, msg_id=14207[0m
+[0;32mI (879218) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.74°C, Humidity: 33.92%, Pressure: 101437.00 Pa[0m
+[0;32mI (879218) RUUVITAG: Published data to MQTT, msg_id=33014[0m
+[1;31mE (881468) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (881468) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (881468) mqtt_client: Error transport connect[0m
+[0;32mI (881478) RUUVITAG: MQTT Error[0m
+[0;32mI (881478) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (881788) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.92%, Pressure: 101442.00 Pa[0m
+[0;32mI (881788) RUUVITAG: Published data to MQTT, msg_id=18980[0m
+[0;32mI (884348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.92%, Pressure: 101439.00 Pa[0m
+[0;32mI (884348) RUUVITAG: Published data to MQTT, msg_id=33775[0m
+[0;32mI (885638) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.92%, Pressure: 101439.00 Pa[0m
+[0;32mI (885638) RUUVITAG: Published data to MQTT, msg_id=57837[0m
+[0;32mI (889498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.93%, Pressure: 101444.00 Pa[0m
+[0;32mI (889498) RUUVITAG: Published data to MQTT, msg_id=11618[0m
+[1;31mE (891498) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (891498) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (891498) mqtt_client: Error transport connect[0m
+[0;32mI (891508) RUUVITAG: MQTT Error[0m
+[0;32mI (891508) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (892098) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.91%, Pressure: 101443.00 Pa[0m
+[0;32mI (892098) RUUVITAG: Published data to MQTT, msg_id=1053[0m
+[0;32mI (894638) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.91%, Pressure: 101444.00 Pa[0m
+[0;32mI (894638) RUUVITAG: Published data to MQTT, msg_id=45035[0m
+[0;32mI (897208) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.89%, Pressure: 101441.00 Pa[0m
+[0;32mI (897208) RUUVITAG: Published data to MQTT, msg_id=29889[0m
+[0;32mI (898498) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.89%, Pressure: 101441.00 Pa[0m
+[0;32mI (898498) RUUVITAG: Published data to MQTT, msg_id=45836[0m
+[1;31mE (901598) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (901598) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (901598) mqtt_client: Error transport connect[0m
+[0;32mI (901608) RUUVITAG: MQTT Error[0m
+[0;32mI (901608) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (902348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.89%, Pressure: 101439.00 Pa[0m
+[0;32mI (902348) RUUVITAG: Published data to MQTT, msg_id=12718[0m
+[0;32mI (910058) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.89%, Pressure: 101441.00 Pa[0m
+[0;32mI (910058) RUUVITAG: Published data to MQTT, msg_id=64648[0m
+[0;32mI (911338) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.89%, Pressure: 101441.00 Pa[0m
+[0;32mI (911348) RUUVITAG: Published data to MQTT, msg_id=63916[0m
+[1;31mE (911678) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (911678) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (911678) mqtt_client: Error transport connect[0m
+[0;32mI (911688) RUUVITAG: MQTT Error[0m
+[0;32mI (911688) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (913908) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.89%, Pressure: 101442.00 Pa[0m
+[0;32mI (913908) RUUVITAG: Published data to MQTT, msg_id=31311[0m
+[0;32mI (915198) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.91%, Pressure: 101442.00 Pa[0m
+[0;32mI (915198) RUUVITAG: Published data to MQTT, msg_id=62073[0m
+[0;32mI (917768) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.91%, Pressure: 101444.00 Pa[0m
+[0;32mI (917768) RUUVITAG: Published data to MQTT, msg_id=143[0m
+[0;32mI (919058) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.91%, Pressure: 101444.00 Pa[0m
+[0;32mI (919058) RUUVITAG: Published data to MQTT, msg_id=46207[0m
+[0;32mI (924188) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.88%, Pressure: 101442.00 Pa[0m
+[0;32mI (924188) RUUVITAG: Published data to MQTT, msg_id=4577[0m
+[1;31mE (926728) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (926738) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (926738) mqtt_client: Error transport connect[0m
+[0;32mI (926738) RUUVITAG: MQTT Error[0m
+[0;32mI (926738) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (926768) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.88%, Pressure: 101443.00 Pa[0m
+[0;32mI (926768) RUUVITAG: Published data to MQTT, msg_id=33141[0m
+[0;32mI (928048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.89%, Pressure: 101444.00 Pa[0m
+[0;32mI (928048) RUUVITAG: Published data to MQTT, msg_id=46195[0m
+[0;32mI (930618) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.88%, Pressure: 101442.00 Pa[0m
+[0;32mI (930618) RUUVITAG: Published data to MQTT, msg_id=12308[0m
+[0;32mI (935758) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.87%, Pressure: 101440.00 Pa[0m
+[0;32mI (935758) RUUVITAG: Published data to MQTT, msg_id=43373[0m
+[1;31mE (936758) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (936758) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (936758) mqtt_client: Error transport connect[0m
+[0;32mI (936768) RUUVITAG: MQTT Error[0m
+[0;32mI (936768) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (937048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.87%, Pressure: 101440.00 Pa[0m
+[0;32mI (937048) RUUVITAG: Published data to MQTT, msg_id=48061[0m
+[0;32mI (939608) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.88%, Pressure: 101443.00 Pa[0m
+[0;32mI (939608) RUUVITAG: Published data to MQTT, msg_id=18719[0m
+[0;32mI (940918) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.88%, Pressure: 101442.00 Pa[0m
+[0;32mI (940918) RUUVITAG: Published data to MQTT, msg_id=31612[0m
+[0;32mI (943468) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (943468) RUUVITAG: Published data to MQTT, msg_id=57318[0m
+[0;32mI (944748) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (944758) RUUVITAG: Published data to MQTT, msg_id=6249[0m
+[0;32mI (947328) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.86%, Pressure: 101443.00 Pa[0m
+[0;32mI (947328) RUUVITAG: Published data to MQTT, msg_id=15162[0m
+[0;32mI (948598) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.89%, Pressure: 101443.00 Pa[0m
+[0;32mI (948608) RUUVITAG: Published data to MQTT, msg_id=18575[0m
+[0;32mI (949898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.89%, Pressure: 101443.00 Pa[0m
+[0;32mI (949898) RUUVITAG: Published data to MQTT, msg_id=23054[0m
+[1;31mE (951818) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (951818) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (951818) mqtt_client: Error transport connect[0m
+[0;32mI (951828) RUUVITAG: MQTT Error[0m
+[0;32mI (951828) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (952468) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.87%, Pressure: 101443.00 Pa[0m
+[0;32mI (952468) RUUVITAG: Published data to MQTT, msg_id=24605[0m
+[0;32mI (956318) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.87%, Pressure: 101443.00 Pa[0m
+[0;32mI (956318) RUUVITAG: Published data to MQTT, msg_id=16638[0m
+[0;32mI (961448) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.84%, Pressure: 101441.00 Pa[0m
+[0;32mI (961448) RUUVITAG: Published data to MQTT, msg_id=52178[0m
+[0;32mI (965308) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.83%, Pressure: 101442.00 Pa[0m
+[0;32mI (965308) RUUVITAG: Published data to MQTT, msg_id=14510[0m
+[0;32mI (966598) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.83%, Pressure: 101437.00 Pa[0m
+[0;32mI (966598) RUUVITAG: Published data to MQTT, msg_id=26719[0m
+[1;31mE (966928) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (966928) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (966928) mqtt_client: Error transport connect[0m
+[0;32mI (966928) RUUVITAG: MQTT Error[0m
+[0;32mI (966938) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (967888) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.77°C, Humidity: 33.83%, Pressure: 101437.00 Pa[0m
+[0;32mI (967898) RUUVITAG: Published data to MQTT, msg_id=30523[0m
+[0;32mI (969168) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.84%, Pressure: 101438.00 Pa[0m
+[0;32mI (969168) RUUVITAG: Published data to MQTT, msg_id=10090[0m
+[0;32mI (970448) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.84%, Pressure: 101438.00 Pa[0m
+[0;32mI (970448) RUUVITAG: Published data to MQTT, msg_id=7615[0m
+[0;32mI (975588) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (975598) RUUVITAG: Published data to MQTT, msg_id=19352[0m
+[0;32mI (978168) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (978168) RUUVITAG: Published data to MQTT, msg_id=28023[0m
+[1;31mE (982028) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (982028) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (982028) mqtt_client: Error transport connect[0m
+[0;32mI (982028) RUUVITAG: MQTT Error[0m
+[0;32mI (982038) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (987148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (987148) RUUVITAG: Published data to MQTT, msg_id=47952[0m
+[0;32mI (988438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.76°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (988448) RUUVITAG: Published data to MQTT, msg_id=57375[0m
+[0;32mI (989718) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.84%, Pressure: 101442.00 Pa[0m
+[0;32mI (989718) RUUVITAG: Published data to MQTT, msg_id=43193[0m
+[0;32mI (991018) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.84%, Pressure: 101442.00 Pa[0m
+[0;32mI (991018) RUUVITAG: Published data to MQTT, msg_id=57567[0m
+[0;32mI (992288) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.86%, Pressure: 101442.00 Pa[0m
+[0;32mI (992288) RUUVITAG: Published data to MQTT, msg_id=36997[0m
+[0;32mI (994858) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.86%, Pressure: 101441.00 Pa[0m
+[0;32mI (994858) RUUVITAG: Published data to MQTT, msg_id=50370[0m
+[0;32mI (996148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.75°C, Humidity: 33.86%, Pressure: 101441.00 Pa[0m
+[0;32mI (996148) RUUVITAG: Published data to MQTT, msg_id=43299[0m
+[1;31mE (997048) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (997048) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (997048) mqtt_client: Error transport connect[0m
+[0;32mI (997048) RUUVITAG: MQTT Error[0m
+[0;32mI (997058) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (998728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.83%, Pressure: 101440.00 Pa[0m
+[0;32mI (998738) RUUVITAG: Published data to MQTT, msg_id=54059[0m
+[0;32mI (1000008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1000008) RUUVITAG: Published data to MQTT, msg_id=3249[0m
+[0;32mI (1001298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1001298) RUUVITAG: Published data to MQTT, msg_id=31935[0m
+[0;32mI (1003868) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.83%, Pressure: 101442.00 Pa[0m
+[0;32mI (1003868) RUUVITAG: Published data to MQTT, msg_id=25684[0m
+[0;32mI (1005138) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.83%, Pressure: 101442.00 Pa[0m
+[0;32mI (1005148) RUUVITAG: Published data to MQTT, msg_id=26832[0m
+[0;32mI (1007718) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.84%, Pressure: 101441.00 Pa[0m
+[0;32mI (1007718) RUUVITAG: Published data to MQTT, msg_id=39212[0m
+[0;32mI (1008998) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.84%, Pressure: 101441.00 Pa[0m
+[0;32mI (1009008) RUUVITAG: Published data to MQTT, msg_id=63676[0m
+[1;31mE (1012088) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1012088) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1012088) mqtt_client: Error transport connect[0m
+[0;32mI (1012098) RUUVITAG: MQTT Error[0m
+[0;32mI (1012098) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1012848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.83%, Pressure: 101442.00 Pa[0m
+[0;32mI (1012848) RUUVITAG: Published data to MQTT, msg_id=44030[0m
+[0;32mI (1016708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.83%, Pressure: 101443.00 Pa[0m
+[0;32mI (1016718) RUUVITAG: Published data to MQTT, msg_id=20562[0m
+[0;32mI (1017988) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.84%, Pressure: 101442.00 Pa[0m
+[0;32mI (1017998) RUUVITAG: Published data to MQTT, msg_id=22878[0m
+[0;32mI (1020558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.84%, Pressure: 101442.00 Pa[0m
+[0;32mI (1020568) RUUVITAG: Published data to MQTT, msg_id=30142[0m
+[1;31mE (1027148) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1027148) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1027148) mqtt_client: Error transport connect[0m
+[0;32mI (1027158) RUUVITAG: MQTT Error[0m
+[0;32mI (1027158) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1028268) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (1028268) RUUVITAG: Published data to MQTT, msg_id=19908[0m
+[0;32mI (1029558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.85%, Pressure: 101442.00 Pa[0m
+[0;32mI (1029558) RUUVITAG: Published data to MQTT, msg_id=41074[0m
+[0;32mI (1030848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.85%, Pressure: 101444.00 Pa[0m
+[0;32mI (1030848) RUUVITAG: Published data to MQTT, msg_id=18754[0m
+[0;32mI (1033418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.83%, Pressure: 101448.00 Pa[0m
+[0;32mI (1033418) RUUVITAG: Published data to MQTT, msg_id=25862[0m
+[0;32mI (1034708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.78°C, Humidity: 33.83%, Pressure: 101448.00 Pa[0m
+[0;32mI (1034708) RUUVITAG: Published data to MQTT, msg_id=20046[0m
+[0;32mI (1037268) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.82%, Pressure: 101444.00 Pa[0m
+[0;32mI (1037268) RUUVITAG: Published data to MQTT, msg_id=52089[0m
+[0;32mI (1038548) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1038548) RUUVITAG: Published data to MQTT, msg_id=60076[0m
+[0;32mI (1039838) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1039848) RUUVITAG: Published data to MQTT, msg_id=50296[0m
+[1;31mE (1042198) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1042198) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1042198) mqtt_client: Error transport connect[0m
+[0;32mI (1042208) RUUVITAG: MQTT Error[0m
+[0;32mI (1042208) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1042418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.79%, Pressure: 101449.00 Pa[0m
+[0;32mI (1042418) RUUVITAG: Published data to MQTT, msg_id=58643[0m
+[0;32mI (1043698) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.78%, Pressure: 101450.00 Pa[0m
+[0;32mI (1043698) RUUVITAG: Published data to MQTT, msg_id=49322[0m
+[0;32mI (1046258) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.77%, Pressure: 101444.00 Pa[0m
+[0;32mI (1046268) RUUVITAG: Published data to MQTT, msg_id=47054[0m
+[0;32mI (1047558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.79°C, Humidity: 33.77%, Pressure: 101444.00 Pa[0m
+[0;32mI (1047558) RUUVITAG: Published data to MQTT, msg_id=33713[0m
+[0;32mI (1050118) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.77%, Pressure: 101445.00 Pa[0m
+[0;32mI (1050118) RUUVITAG: Published data to MQTT, msg_id=1666[0m
+[0;32mI (1052708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.78%, Pressure: 101444.00 Pa[0m
+[0;32mI (1052708) RUUVITAG: Published data to MQTT, msg_id=59958[0m
+[0;32mI (1055258) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.78%, Pressure: 101449.00 Pa[0m
+[0;32mI (1055258) RUUVITAG: Published data to MQTT, msg_id=35240[0m
+[1;31mE (1057248) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1057248) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1057248) mqtt_client: Error transport connect[0m
+[0;32mI (1057258) RUUVITAG: MQTT Error[0m
+[0;32mI (1057258) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1059108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.79%, Pressure: 101442.00 Pa[0m
+[0;32mI (1059108) RUUVITAG: Published data to MQTT, msg_id=52803[0m
+[0;32mI (1060398) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.79%, Pressure: 101442.00 Pa[0m
+[0;32mI (1060398) RUUVITAG: Published data to MQTT, msg_id=20410[0m
+[0;32mI (1064248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.78%, Pressure: 101443.00 Pa[0m
+[0;32mI (1064248) RUUVITAG: Published data to MQTT, msg_id=35722[0m
+[0;32mI (1065538) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.78%, Pressure: 101443.00 Pa[0m
+[0;32mI (1065548) RUUVITAG: Published data to MQTT, msg_id=7257[0m
+[0;32mI (1066898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.79%, Pressure: 101442.00 Pa[0m
+[0;32mI (1066898) RUUVITAG: Published data to MQTT, msg_id=42476[0m
+[1;31mE (1067288) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1067288) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1067288) mqtt_client: Error transport connect[0m
+[0;32mI (1067288) RUUVITAG: MQTT Error[0m
+[0;32mI (1067298) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1068108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.79%, Pressure: 101442.00 Pa[0m
+[0;32mI (1068108) RUUVITAG: Published data to MQTT, msg_id=16143[0m
+[0;32mI (1069388) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.79%, Pressure: 101438.00 Pa[0m
+[0;32mI (1069388) RUUVITAG: Published data to MQTT, msg_id=54154[0m
+[0;32mI (1071968) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.78%, Pressure: 101437.00 Pa[0m
+[0;32mI (1071968) RUUVITAG: Published data to MQTT, msg_id=58611[0m
+[0;32mI (1073248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.78%, Pressure: 101437.00 Pa[0m
+[0;32mI (1073248) RUUVITAG: Published data to MQTT, msg_id=15912[0m
+[0;32mI (1075818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.79%, Pressure: 101441.00 Pa[0m
+[0;32mI (1075818) RUUVITAG: Published data to MQTT, msg_id=21092[0m
+[0;32mI (1080968) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.80%, Pressure: 101445.00 Pa[0m
+[0;32mI (1080968) RUUVITAG: Published data to MQTT, msg_id=65312[0m
+[1;31mE (1082338) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1082338) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1082348) mqtt_client: Error transport connect[0m
+[0;32mI (1082348) RUUVITAG: MQTT Error[0m
+[0;32mI (1082348) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1084818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1084818) RUUVITAG: Published data to MQTT, msg_id=45663[0m
+[0;32mI (1086088) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.81°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1086088) RUUVITAG: Published data to MQTT, msg_id=32669[0m
+[0;32mI (1088668) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.80%, Pressure: 101442.00 Pa[0m
+[0;32mI (1088678) RUUVITAG: Published data to MQTT, msg_id=34997[0m
+[0;32mI (1090068) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1090068) RUUVITAG: Published data to MQTT, msg_id=55780[0m
+[1;31mE (1092378) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1092378) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1092378) mqtt_client: Error transport connect[0m
+[0;32mI (1092388) RUUVITAG: MQTT Error[0m
+[0;32mI (1092388) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1095088) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.78%, Pressure: 101449.00 Pa[0m
+[0;32mI (1095098) RUUVITAG: Published data to MQTT, msg_id=48339[0m
+[0;32mI (1097668) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.78%, Pressure: 101442.00 Pa[0m
+[0;32mI (1097668) RUUVITAG: Published data to MQTT, msg_id=60396[0m
+[0;32mI (1098948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.78%, Pressure: 101442.00 Pa[0m
+[0;32mI (1098948) RUUVITAG: Published data to MQTT, msg_id=50276[0m
+[0;32mI (1101518) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.78%, Pressure: 101442.00 Pa[0m
+[0;32mI (1101518) RUUVITAG: Published data to MQTT, msg_id=11864[0m
+[0;32mI (1102898) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.81%, Pressure: 101446.00 Pa[0m
+[0;32mI (1102908) RUUVITAG: Published data to MQTT, msg_id=51823[0m
+[1;31mE (1107418) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1107418) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1107428) mqtt_client: Error transport connect[0m
+[0;32mI (1107428) RUUVITAG: MQTT Error[0m
+[0;32mI (1107428) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1110508) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.79%, Pressure: 101443.00 Pa[0m
+[0;32mI (1110508) RUUVITAG: Published data to MQTT, msg_id=58565[0m
+[0;32mI (1111818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.79%, Pressure: 101443.00 Pa[0m
+[0;32mI (1111828) RUUVITAG: Published data to MQTT, msg_id=35875[0m
+[0;32mI (1115648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.80%, Pressure: 101441.00 Pa[0m
+[0;32mI (1115648) RUUVITAG: Published data to MQTT, msg_id=2485[0m
+[1;31mE (1117468) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1117468) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1117468) mqtt_client: Error transport connect[0m
+[0;32mI (1117478) RUUVITAG: MQTT Error[0m
+[0;32mI (1117478) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1118248) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.79%, Pressure: 101439.00 Pa[0m
+[0;32mI (1118248) RUUVITAG: Published data to MQTT, msg_id=17585[0m
+[0;32mI (1123358) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.78%, Pressure: 101443.00 Pa[0m
+[0;32mI (1123358) RUUVITAG: Published data to MQTT, msg_id=37153[0m
+[0;32mI (1124648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.78%, Pressure: 101443.00 Pa[0m
+[0;32mI (1124658) RUUVITAG: Published data to MQTT, msg_id=28400[0m
+[0;32mI (1127218) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.78%, Pressure: 101443.00 Pa[0m
+[0;32mI (1127218) RUUVITAG: Published data to MQTT, msg_id=1126[0m
+[0;32mI (1128518) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.81%, Pressure: 101443.00 Pa[0m
+[0;32mI (1128518) RUUVITAG: Published data to MQTT, msg_id=18104[0m
+[0;32mI (1131068) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.79%, Pressure: 101443.00 Pa[0m
+[0;32mI (1131078) RUUVITAG: Published data to MQTT, msg_id=50075[0m
+[0;32mI (1132358) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.79%, Pressure: 101443.00 Pa[0m
+[0;32mI (1132358) RUUVITAG: Published data to MQTT, msg_id=14712[0m
+[1;31mE (1132518) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1132528) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1132528) mqtt_client: Error transport connect[0m
+[0;32mI (1132528) RUUVITAG: MQTT Error[0m
+[0;32mI (1132528) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1133648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.83%, Pressure: 101443.00 Pa[0m
+[0;32mI (1133648) RUUVITAG: Published data to MQTT, msg_id=50055[0m
+[0;32mI (1136208) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1136208) RUUVITAG: Published data to MQTT, msg_id=38234[0m
+[0;32mI (1137508) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.81%, Pressure: 101442.00 Pa[0m
+[0;32mI (1137508) RUUVITAG: Published data to MQTT, msg_id=26574[0m
+[0;32mI (1140068) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.83%, Pressure: 101442.00 Pa[0m
+[0;32mI (1140068) RUUVITAG: Published data to MQTT, msg_id=16437[0m
+[0;32mI (1141348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.80°C, Humidity: 33.81%, Pressure: 101443.00 Pa[0m
+[0;32mI (1141348) RUUVITAG: Published data to MQTT, msg_id=56675[0m
+[1;31mE (1142558) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1142558) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1142558) mqtt_client: Error transport connect[0m
+[0;32mI (1142558) RUUVITAG: MQTT Error[0m
+[0;32mI (1142568) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1143918) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.81%, Pressure: 101443.00 Pa[0m
+[0;32mI (1143918) RUUVITAG: Published data to MQTT, msg_id=3188[0m
+[0;32mI (1150348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.81%, Pressure: 101443.00 Pa[0m
+[0;32mI (1150358) RUUVITAG: Published data to MQTT, msg_id=39994[0m
+[0;32mI (1152918) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.80%, Pressure: 101443.00 Pa[0m
+[0;32mI (1152918) RUUVITAG: Published data to MQTT, msg_id=11040[0m
+[0;32mI (1154198) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.81%, Pressure: 101445.00 Pa[0m
+[0;32mI (1154198) RUUVITAG: Published data to MQTT, msg_id=7327[0m
+[0;32mI (1156768) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.78%, Pressure: 101444.00 Pa[0m
+[0;32mI (1156778) RUUVITAG: Published data to MQTT, msg_id=61661[0m
+[1;31mE (1157608) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1157608) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1157608) mqtt_client: Error transport connect[0m
+[0;32mI (1157618) RUUVITAG: MQTT Error[0m
+[0;32mI (1157618) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1158058) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.78%, Pressure: 101444.00 Pa[0m
+[0;32mI (1158058) RUUVITAG: Published data to MQTT, msg_id=57481[0m
+[0;32mI (1165758) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.76%, Pressure: 101446.00 Pa[0m
+[0;32mI (1165758) RUUVITAG: Published data to MQTT, msg_id=3891[0m
+[0;32mI (1167068) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.74%, Pressure: 101445.00 Pa[0m
+[0;32mI (1167078) RUUVITAG: Published data to MQTT, msg_id=51723[0m
+[1;31mE (1167678) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1167678) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1167678) mqtt_client: Error transport connect[0m
+[0;32mI (1167688) RUUVITAG: MQTT Error[0m
+[0;32mI (1167688) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1168348) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.74%, Pressure: 101445.00 Pa[0m
+[0;32mI (1168348) RUUVITAG: Published data to MQTT, msg_id=5140[0m
+[0;32mI (1169618) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.74%, Pressure: 101445.00 Pa[0m
+[0;32mI (1169628) RUUVITAG: Published data to MQTT, msg_id=38880[0m
+[0;32mI (1174758) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.70%, Pressure: 101445.00 Pa[0m
+[0;32mI (1174768) RUUVITAG: Published data to MQTT, msg_id=52057[0m
+[0;32mI (1176048) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.70%, Pressure: 101445.00 Pa[0m
+[0;32mI (1176048) RUUVITAG: Published data to MQTT, msg_id=65508[0m
+[0;32mI (1178618) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.82°C, Humidity: 33.69%, Pressure: 101443.00 Pa[0m
+[0;32mI (1178628) RUUVITAG: Published data to MQTT, msg_id=46025[0m
+[0;32mI (1179888) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.68%, Pressure: 101443.00 Pa[0m
+[0;32mI (1179898) RUUVITAG: Published data to MQTT, msg_id=36367[0m
+[0;32mI (1182468) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.68%, Pressure: 101449.00 Pa[0m
+[0;32mI (1182478) RUUVITAG: Published data to MQTT, msg_id=47030[0m
+[1;31mE (1182708) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1182708) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1182708) mqtt_client: Error transport connect[0m
+[0;32mI (1182718) RUUVITAG: MQTT Error[0m
+[0;32mI (1182718) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1183758) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.68%, Pressure: 101449.00 Pa[0m
+[0;32mI (1183758) RUUVITAG: Published data to MQTT, msg_id=3576[0m
+[0;32mI (1187618) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.71%, Pressure: 101444.00 Pa[0m
+[0;32mI (1187618) RUUVITAG: Published data to MQTT, msg_id=702[0m
+[0;32mI (1191458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.72%, Pressure: 101445.00 Pa[0m
+[0;32mI (1191468) RUUVITAG: Published data to MQTT, msg_id=31583[0m
+[1;31mE (1192748) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1192748) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1192748) mqtt_client: Error transport connect[0m
+[0;32mI (1192758) RUUVITAG: MQTT Error[0m
+[0;32mI (1192758) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1195318) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.72%, Pressure: 101449.00 Pa[0m
+[0;32mI (1195318) RUUVITAG: Published data to MQTT, msg_id=61720[0m
+[0;32mI (1196598) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.72%, Pressure: 101449.00 Pa[0m
+[0;32mI (1196608) RUUVITAG: Published data to MQTT, msg_id=36954[0m
+[0;32mI (1199168) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.68%, Pressure: 101445.00 Pa[0m
+[0;32mI (1199178) RUUVITAG: Published data to MQTT, msg_id=17308[0m
+[0;32mI (1200458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.70%, Pressure: 101443.00 Pa[0m
+[0;32mI (1200458) RUUVITAG: Published data to MQTT, msg_id=22037[0m
+[1;31mE (1207808) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1207808) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1207808) mqtt_client: Error transport connect[0m
+[0;32mI (1207808) RUUVITAG: MQTT Error[0m
+[0;32mI (1207818) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1208168) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.69%, Pressure: 101444.00 Pa[0m
+[0;32mI (1208168) RUUVITAG: Published data to MQTT, msg_id=23957[0m
+[0;32mI (1209458) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.69%, Pressure: 101444.00 Pa[0m
+[0;32mI (1209458) RUUVITAG: Published data to MQTT, msg_id=36495[0m
+[0;32mI (1213318) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.71%, Pressure: 101445.00 Pa[0m
+[0;32mI (1213328) RUUVITAG: Published data to MQTT, msg_id=64645[0m
+[0;32mI (1215868) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.69%, Pressure: 101444.00 Pa[0m
+[0;32mI (1215878) RUUVITAG: Published data to MQTT, msg_id=55830[0m
+[0;32mI (1217158) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.69%, Pressure: 101444.00 Pa[0m
+[0;32mI (1217158) RUUVITAG: Published data to MQTT, msg_id=11362[0m
+[0;32mI (1219738) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.69%, Pressure: 101445.00 Pa[0m
+[0;32mI (1219738) RUUVITAG: Published data to MQTT, msg_id=36315[0m
+[0;32mI (1221018) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.69%, Pressure: 101445.00 Pa[0m
+[0;32mI (1221018) RUUVITAG: Published data to MQTT, msg_id=41167[0m
+[0;32mI (1222298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.69%, Pressure: 101445.00 Pa[0m
+[0;32mI (1222298) RUUVITAG: Published data to MQTT, msg_id=27011[0m
+[1;31mE (1222858) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1222858) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1222858) mqtt_client: Error transport connect[0m
+[0;32mI (1222868) RUUVITAG: MQTT Error[0m
+[0;32mI (1222868) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1224878) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.69%, Pressure: 101446.00 Pa[0m
+[0;32mI (1224878) RUUVITAG: Published data to MQTT, msg_id=33389[0m
+[0;32mI (1226158) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.69%, Pressure: 101450.00 Pa[0m
+[0;32mI (1226158) RUUVITAG: Published data to MQTT, msg_id=717[0m
+[0;32mI (1228728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.68%, Pressure: 101444.00 Pa[0m
+[0;32mI (1228728) RUUVITAG: Published data to MQTT, msg_id=22765[0m
+[0;32mI (1233868) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.70%, Pressure: 101443.00 Pa[0m
+[0;32mI (1233868) RUUVITAG: Published data to MQTT, msg_id=40037[0m
+[0;32mI (1235148) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.70%, Pressure: 101443.00 Pa[0m
+[0;32mI (1235158) RUUVITAG: Published data to MQTT, msg_id=6964[0m
+[0;32mI (1237718) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.69%, Pressure: 101442.00 Pa[0m
+[0;32mI (1237718) RUUVITAG: Published data to MQTT, msg_id=30064[0m
+[1;31mE (1237908) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1237908) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1237908) mqtt_client: Error transport connect[0m
+[0;32mI (1237918) RUUVITAG: MQTT Error[0m
+[0;32mI (1237918) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1239008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.67%, Pressure: 101444.00 Pa[0m
+[0;32mI (1239008) RUUVITAG: Published data to MQTT, msg_id=33453[0m
+[0;32mI (1240298) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.67%, Pressure: 101444.00 Pa[0m
+[0;32mI (1240298) RUUVITAG: Published data to MQTT, msg_id=44241[0m
+[0;32mI (1241578) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.65%, Pressure: 101447.00 Pa[0m
+[0;32mI (1241578) RUUVITAG: Published data to MQTT, msg_id=13855[0m
+[0;32mI (1242868) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.65%, Pressure: 101447.00 Pa[0m
+[0;32mI (1242868) RUUVITAG: Published data to MQTT, msg_id=64841[0m
+[0;32mI (1245438) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.65%, Pressure: 101444.00 Pa[0m
+[0;32mI (1245438) RUUVITAG: Published data to MQTT, msg_id=28606[0m
+[0;32mI (1248008) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.65%, Pressure: 101444.00 Pa[0m
+[0;32mI (1248008) RUUVITAG: Published data to MQTT, msg_id=5468[0m
+[0;32mI (1250578) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.66%, Pressure: 101445.00 Pa[0m
+[0;32mI (1250578) RUUVITAG: Published data to MQTT, msg_id=33664[0m
+[0;32mI (1251848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.65%, Pressure: 101443.00 Pa[0m
+[0;32mI (1251858) RUUVITAG: Published data to MQTT, msg_id=7859[0m
+[1;31mE (1252968) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1252968) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1252968) mqtt_client: Error transport connect[0m
+[0;32mI (1252978) RUUVITAG: MQTT Error[0m
+[0;32mI (1252978) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1254418) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.66%, Pressure: 101441.00 Pa[0m
+[0;32mI (1254428) RUUVITAG: Published data to MQTT, msg_id=56537[0m
+[0;32mI (1255708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.66%, Pressure: 101441.00 Pa[0m
+[0;32mI (1255708) RUUVITAG: Published data to MQTT, msg_id=25249[0m
+[0;32mI (1259558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.70%, Pressure: 101440.00 Pa[0m
+[0;32mI (1259558) RUUVITAG: Published data to MQTT, msg_id=2766[0m
+[0;32mI (1263428) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.68%, Pressure: 101441.00 Pa[0m
+[0;32mI (1263428) RUUVITAG: Published data to MQTT, msg_id=65292[0m
+[0;32mI (1264728) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.69%, Pressure: 101441.00 Pa[0m
+[0;32mI (1264728) RUUVITAG: Published data to MQTT, msg_id=2504[0m
+[0;32mI (1267278) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.68%, Pressure: 101444.00 Pa[0m
+[0;32mI (1267278) RUUVITAG: Published data to MQTT, msg_id=52094[0m
+[1;31mE (1268018) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1268028) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1268028) mqtt_client: Error transport connect[0m
+[0;32mI (1268028) RUUVITAG: MQTT Error[0m
+[0;32mI (1268028) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1268558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.68%, Pressure: 101444.00 Pa[0m
+[0;32mI (1268558) RUUVITAG: Published data to MQTT, msg_id=5920[0m
+[0;32mI (1269848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.65%, Pressure: 101443.00 Pa[0m
+[0;32mI (1269848) RUUVITAG: Published data to MQTT, msg_id=8587[0m
+[0;32mI (1273708) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.63%, Pressure: 101443.00 Pa[0m
+[0;32mI (1273708) RUUVITAG: Published data to MQTT, msg_id=62975[0m
+[0;32mI (1277558) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.61%, Pressure: 101445.00 Pa[0m
+[0;32mI (1277558) RUUVITAG: Published data to MQTT, msg_id=53868[0m
+[1;31mE (1278068) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1278068) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1278068) mqtt_client: Error transport connect[0m
+[0;32mI (1278078) RUUVITAG: MQTT Error[0m
+[0;32mI (1278078) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1278848) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.61%, Pressure: 101445.00 Pa[0m
+[0;32mI (1278848) RUUVITAG: Published data to MQTT, msg_id=38242[0m
+[0;32mI (1280128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.62%, Pressure: 101443.00 Pa[0m
+[0;32mI (1280128) RUUVITAG: Published data to MQTT, msg_id=47063[0m
+[0;32mI (1281408) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.83°C, Humidity: 33.62%, Pressure: 101443.00 Pa[0m
+[0;32mI (1281408) RUUVITAG: Published data to MQTT, msg_id=29846[0m
+[0;32mI (1282698) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.63%, Pressure: 101444.00 Pa[0m
+[0;32mI (1282698) RUUVITAG: Published data to MQTT, msg_id=16273[0m
+[0;32mI (1285268) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101443.00 Pa[0m
+[0;32mI (1285268) RUUVITAG: Published data to MQTT, msg_id=40254[0m
+[0;32mI (1289118) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.61%, Pressure: 101443.00 Pa[0m
+[0;32mI (1289128) RUUVITAG: Published data to MQTT, msg_id=47515[0m
+[0;32mI (1290398) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.62%, Pressure: 101444.00 Pa[0m
+[0;32mI (1290408) RUUVITAG: Published data to MQTT, msg_id=20635[0m
+[0;32mI (1292968) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101444.00 Pa[0m
+[0;32mI (1292978) RUUVITAG: Published data to MQTT, msg_id=62499[0m
+[1;31mE (1293128) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1293128) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1293128) mqtt_client: Error transport connect[0m
+[0;32mI (1293138) RUUVITAG: MQTT Error[0m
+[0;32mI (1293138) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1294258) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101444.00 Pa[0m
+[0;32mI (1294258) RUUVITAG: Published data to MQTT, msg_id=12111[0m
+[0;32mI (1298128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.88°C, Humidity: 33.62%, Pressure: 101443.00 Pa[0m
+[0;32mI (1298128) RUUVITAG: Published data to MQTT, msg_id=52926[0m
+[0;32mI (1299408) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.88°C, Humidity: 33.62%, Pressure: 101443.00 Pa[0m
+[0;32mI (1299418) RUUVITAG: Published data to MQTT, msg_id=25250[0m
+[0;32mI (1301978) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101443.00 Pa[0m
+[0;32mI (1301978) RUUVITAG: Published data to MQTT, msg_id=38441[0m
+[1;31mE (1303258) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1303258) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1303258) mqtt_client: Error transport connect[0m
+[0;32mI (1303258) RUUVITAG: MQTT Error[0m
+[0;32mI (1303268) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1305828) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101441.00 Pa[0m
+[0;32mI (1305828) RUUVITAG: Published data to MQTT, msg_id=56792[0m
+[0;32mI (1307128) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101441.00 Pa[0m
+[0;32mI (1307128) RUUVITAG: Published data to MQTT, msg_id=58992[0m
+[0;32mI (1310958) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101439.00 Pa[0m
+[0;32mI (1310968) RUUVITAG: Published data to MQTT, msg_id=898[0m
+[0;32mI (1312258) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101439.00 Pa[0m
+[0;32mI (1312258) RUUVITAG: Published data to MQTT, msg_id=50170[0m
+[0;32mI (1316108) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.64%, Pressure: 101441.00 Pa[0m
+[0;32mI (1316118) RUUVITAG: Published data to MQTT, msg_id=53230[0m
+[1;31mE (1318408) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1318418) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1318418) mqtt_client: Error transport connect[0m
+[0;32mI (1318418) RUUVITAG: MQTT Error[0m
+[0;32mI (1318418) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1318668) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101441.00 Pa[0m
+[0;32mI (1318668) RUUVITAG: Published data to MQTT, msg_id=18658[0m
+[0;32mI (1319958) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101441.00 Pa[0m
+[0;32mI (1319958) RUUVITAG: Published data to MQTT, msg_id=1933[0m
+[0;32mI (1321238) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.62%, Pressure: 101444.00 Pa[0m
+[0;32mI (1321248) RUUVITAG: Published data to MQTT, msg_id=11979[0m
+[0;32mI (1323818) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101439.00 Pa[0m
+[0;32mI (1323828) RUUVITAG: Published data to MQTT, msg_id=14967[0m
+[0;32mI (1325098) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101439.00 Pa[0m
+[0;32mI (1325108) RUUVITAG: Published data to MQTT, msg_id=9899[0m
+[0;32mI (1327678) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.63%, Pressure: 101439.00 Pa[0m
+[0;32mI (1327678) RUUVITAG: Published data to MQTT, msg_id=5827[0m
+[1;31mE (1328458) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1328458) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1328458) mqtt_client: Error transport connect[0m
+[0;32mI (1328468) RUUVITAG: MQTT Error[0m
+[0;32mI (1328468) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1328948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.63%, Pressure: 101442.00 Pa[0m
+[0;32mI (1328958) RUUVITAG: Published data to MQTT, msg_id=53684[0m
+[0;32mI (1332808) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.65%, Pressure: 101445.00 Pa[0m
+[0;32mI (1332818) RUUVITAG: Published data to MQTT, msg_id=60289[0m
+[0;32mI (1336678) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.64%, Pressure: 101443.00 Pa[0m
+[0;32mI (1336678) RUUVITAG: Published data to MQTT, msg_id=21463[0m
+[0;32mI (1337948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.64%, Pressure: 101443.00 Pa[0m
+[0;32mI (1337948) RUUVITAG: Published data to MQTT, msg_id=58050[0m
+[1;31mE (1338588) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1338588) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1338588) mqtt_client: Error transport connect[0m
+[0;32mI (1338588) RUUVITAG: MQTT Error[0m
+[0;32mI (1338598) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1340518) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.65%, Pressure: 101442.00 Pa[0m
+[0;32mI (1340518) RUUVITAG: Published data to MQTT, msg_id=8732[0m
+[0;32mI (1341798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.65%, Pressure: 101444.00 Pa[0m
+[0;32mI (1341798) RUUVITAG: Published data to MQTT, msg_id=3852[0m
+[0;32mI (1344378) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.65%, Pressure: 101446.00 Pa[0m
+[0;32mI (1344378) RUUVITAG: Published data to MQTT, msg_id=2369[0m
+[0;32mI (1345658) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.65%, Pressure: 101446.00 Pa[0m
+[0;32mI (1345668) RUUVITAG: Published data to MQTT, msg_id=59222[0m
+[0;32mI (1346948) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.84°C, Humidity: 33.66%, Pressure: 101444.00 Pa[0m
+[0;32mI (1346948) RUUVITAG: Published data to MQTT, msg_id=27016[0m
+[0;32mI (1349508) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.65%, Pressure: 101444.00 Pa[0m
+[0;32mI (1349518) RUUVITAG: Published data to MQTT, msg_id=20063[0m
+[0;32mI (1350798) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.65%, Pressure: 101444.00 Pa[0m
+[0;32mI (1350798) RUUVITAG: Published data to MQTT, msg_id=14382[0m
+[0;32mI (1353378) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.85°C, Humidity: 33.65%, Pressure: 101446.00 Pa[0m
+[0;32mI (1353378) RUUVITAG: Published data to MQTT, msg_id=28765[0m
+[1;31mE (1353758) esp-tls: [sock=54] delayed connect error: Connection reset by peer[0m
+[1;31mE (1353758) transport_base: Failed to open a new connection: 32772[0m
+[1;31mE (1353758) mqtt_client: Error transport connect[0m
+[0;32mI (1353758) RUUVITAG: MQTT Error[0m
+[0;32mI (1353768) RUUVITAG: MQTT Disconnected from broker[0m
+[0;32mI (1354648) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.86°C, Humidity: 33.62%, Pressure: 101439.00 Pa[0m
+[0;32mI (1354648) RUUVITAG: Published data to MQTT, msg_id=12316[0m
+[0;32mI (1357228) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.64%, Pressure: 101444.00 Pa[0m
+[0;32mI (1357228) RUUVITAG: Published data to MQTT, msg_id=46437[0m
+[0;32mI (1358508) RUUVITAG: Updated RuuviTag: c6:8d:c6:26:39:a6, Temp: 23.87°C, Humidity: 33.64%, Pressure: 101444.00 Pa[0m
+[0;32mI (1358508) RUUVITAG: Published data to MQTT, msg_id=36689[0m

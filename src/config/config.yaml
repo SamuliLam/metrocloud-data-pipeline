@@ -60,6 +60,20 @@ kafka:
       port: 9092
       external_port: 29094
 
+# MQTT configuration
+mqtt:
+  broker_host: 192.168.50.240
+  broker_port: 1883
+  topic: ruuvitag/data
+  client_id: ruuvitag_adapter
+  qos: 1
+  keep_alive: 60
+  reconnect_interval: 10
+
+  # Security 
+  # username: mqtt_user
+  # password: mqtt_password
+
 # Schema Registry configuration
 schema_registry:
   url: http://schema-registry:8081
@@ -84,6 +98,34 @@ iot_simulator:
   device_types: ["temperature", "humidity", "pressure", "motion", "light"]
   anomaly_probability: 0.05
 
+# RuuviTag configuration
+ruuviTag:
+  # Device parameters
+  device_type: ruuvitag
+  default_location:
+    latitude: 60.1699
+    longitude: 24.9384
+    building: buidling-1
+    floor: 1
+    zone: main
+    room: room-101
+  battery:
+    # RuuviTag uses CR2477 battery (3.9V nominal)
+    # Map voltage to percentage (approx)
+    # 3.0V = 100%, 2.0V = 0%
+    min_voltage: 2.0
+    max_voltage: 3.0
+  anomaly_thresholds:
+    temperature_min: -30
+    temperature_max: 45
+    humidity_min: 0
+    humidity_max: 100
+    pressure_min: 85000
+    pressure_max: 115000
+    battery_low: 2.0
+  # signal_strength: signal_strength # (actual BLE RSSI could be used if available)
+  # firmware_version: firmware_version # (actual firmware version could be used if available)
+  
 # Logging configuration
 logging:
   level: INFO
@@ -148,3 +190,4 @@ kafka_ui:
 app:
   name: IoT Data Pipeline (Multi-Broker with Schema Registry)
   environment: development  # Change to production for production deployment
+

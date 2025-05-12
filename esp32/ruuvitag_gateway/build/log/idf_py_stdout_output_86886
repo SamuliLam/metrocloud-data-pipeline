@@ -1,0 +1,87 @@
+Command: ninja flash
+[1/5] cd /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/esp-idf/esptool_py && /Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/rabindramanandhar/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/partition_table/partition-table.bin /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/ruuvitag_gateway.bin
+ruuvitag_gateway.bin binary size 0x119300 bytes. Smallest app partition is 0x1e0000 bytes. 0xc6d00 bytes (41%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader/esp-idf/esptool_py && /Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/rabindramanandhar/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build/bootloader/bootloader.bin
+Bootloader binary size 0x5fc0 bytes. 0x1040 bytes (15%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /Users/rabindramanandhar/esp/esp-idf/components/esptool_py && /opt/homebrew/bin/cmake -D IDF_PATH=/Users/rabindramanandhar/esp/esp-idf -D "SERIAL_TOOL=/Users/rabindramanandhar/.espressif/python_env/idf5.5_py3.12_env/bin/python;;/Users/rabindramanandhar/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build -P /Users/rabindramanandhar/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32 -p /dev/tty.usbserial-0001 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 ruuvitag_gateway.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.9.dev7
+Serial port /dev/tty.usbserial-0001
+Connecting.....
+Chip is ESP32-D0WD-V3 (revision v3.1)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: fc:e8:c0:7d:c7:a0
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00006fff...
+Flash will be erased from 0x00010000 to 0x00129fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 24512 bytes to 15628...
+Writing at 0x00001000... (100 %)
+Wrote 24512 bytes (15628 compressed) at 0x00001000 in 0.7 seconds (effective 266.1 kbit/s)...
+Hash of data verified.
+Compressed 1151744 bytes to 753330...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001df59... (4 %)
+Writing at 0x00029b8c... (6 %)
+Writing at 0x000329ee... (8 %)
+Writing at 0x0003c7a7... (10 %)
+Writing at 0x00042452... (13 %)
+Writing at 0x0004782f... (15 %)
+Writing at 0x0004d458... (17 %)
+Writing at 0x0005289a... (19 %)
+Writing at 0x00057d85... (21 %)
+Writing at 0x0005d2ab... (23 %)
+Writing at 0x0006321f... (26 %)
+Writing at 0x00068e90... (28 %)
+Writing at 0x0006eaad... (30 %)
+Writing at 0x000744d2... (32 %)
+Writing at 0x0007a23f... (34 %)
+Writing at 0x0007fbc2... (36 %)
+Writing at 0x0008534a... (39 %)
+Writing at 0x0008a8a9... (41 %)
+Writing at 0x0008fdd3... (43 %)
+Writing at 0x0009554f... (45 %)
+Writing at 0x0009b0b5... (47 %)
+Writing at 0x000a057f... (50 %)
+Writing at 0x000a5817... (52 %)
+Writing at 0x000aab86... (54 %)
+Writing at 0x000b0357... (56 %)
+Writing at 0x000b5b86... (58 %)
+Writing at 0x000bae3e... (60 %)
+Writing at 0x000c0393... (63 %)
+Writing at 0x000c5f08... (65 %)
+Writing at 0x000cae0a... (67 %)
+Writing at 0x000d037c... (69 %)
+Writing at 0x000d5631... (71 %)
+Writing at 0x000da854... (73 %)
+Writing at 0x000df8be... (76 %)
+Writing at 0x000e4c74... (78 %)
+Writing at 0x000ea82b... (80 %)
+Writing at 0x000f065c... (82 %)
+Writing at 0x000f6919... (84 %)
+Writing at 0x000fd572... (86 %)
+Writing at 0x00106673... (89 %)
+Writing at 0x0010d411... (91 %)
+Writing at 0x00112c91... (93 %)
+Writing at 0x0011860f... (95 %)
+Writing at 0x0011e5c2... (97 %)
+Writing at 0x00123c1d... (100 %)
+Wrote 1151744 bytes (753330 compressed) at 0x00010000 in 18.4 seconds (effective 499.8 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.1 seconds (effective 348.5 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
