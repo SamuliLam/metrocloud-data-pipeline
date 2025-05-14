@@ -27,4 +27,4 @@ ENV CONFIG_FILE_PATH=/app/config.yaml
 ENV PYTHONUNBUFFERED=1
 
 # Run the consumer script with wait for Schema Registry and Producer
-CMD ["/usr/local/bin/wait-for-it.sh", "schema-registry:8081", "-t", "180", "--", "/usr/local/bin/wait-for-it.sh", "kafka-producer:9092", "-t", "60", "--", "python", "run_consumer.py"]
+CMD ["/bin/bash", "-c", "/usr/local/bin/wait-for-it.sh schema-registry:8081 -t 180 && python run_consumer.py"]

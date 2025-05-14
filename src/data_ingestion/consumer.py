@@ -286,3 +286,127 @@ class KafkaConsumer:
                 
             self.consumer.close()
             log.info("Kafka consumer closed")
+
+class IoTAlertConsumer(KafkaConsumer):
+    """
+    Custom consumer that processes IoT data with Avro deserialization and generates alerts.
+    This implementation is aware of the multi-broker setup and 
+    includes logic to handle broker failovers.
+    """
+    
+    def process_message(self, message):
+        """
+        Process a received IoT sensor reading and generate alerts 
+        based on specified thresholds.
+        
+        Args:
+            message: Dictionary containing the deserialized Avro IoT sensor reading
+        """
+        device_id = message.get('device_id', 'unknown')
+        device_type = message.get('device_type', 'unknown')
+        value = message.get('value', 'unknown')
+        unit = message.get('unit', '')
+        timestamp = message.get('timestamp', 'unknown')
+        firmware_version = message.get('firmware_version', 'unknown')
+        is_anomaly = message.get('is_anomaly', False)
+        status = message.get('status', 'UNKNOWN')  # Get status from updated schema
+        tags = message.get('tags', [])  # Get tags from updated schema
+
+        # Get metadata
+        metadata = message.get('metadata', {})
+
+        # Extract additional sensor data from metadata for enhanced logging
+        humidity = metadata.get('humidity', 'N/A')
+        pressure = metadata.get('pressure', 'N/A')
+        battery_level = message.get('battery_level', 'N/A')
+
+        # Format numeric values nicely
+        if isinstance(value, (int, float)):
+            formatted_value = f"{value:.2f}"
+        else:
+            formatted_value = str(value)
+        
+        # Enhanced logging for Avro-deserialized messages
+        if is_anomaly:
+            log.warning(f"[ANOMALY] Device: {device_id} | Type: {device_type} | TEMPERATURE: {formatted_value}{unit} | "
+                      f"Time: {timestamp} | Status: {status}")
+        
+        # Check for anomalies or specific conditions
+        try:            
+            # Process based on device type
+            if device_type.lower() in ["ruuvitag", "temperature"]:
+                #Process temperature readings
+                if isinstance(value, (int, float)):
+                    if value > settings.ruuvitag.anomaly_thresholds.get("temerature_max", 50):
+                        log.warning(f"HIGH TEMPERATURE ALERT: Device {device_id} | Reading: {formatted_value}{unit} | Time: {timestamp}")
+                    elif value < settings.ruuvitag.anomaly_thresholds.get("temperature_min", -50):
+                        log.warning(f"LOW TEMPERATURE ALERT: Device {device_id} | Reading: {formatted_value}{unit} | Time: {timestamp}")
+                    else:
+                        # Normal temperature reading
+                        log.info(f"Device: {device_id} ({device_type}) | Temperature: {formatted_value}{unit} | "
+                                f"Humidity: {humidity}% | Pressure: {pressure} Pa | Battery: {battery_level}% | "
+                                f"Metadata: {metadata}")
+                else:
+                    log.info(f"Device: {device_id} ({device_type}) | Reading: {formatted_value}{unit} | Status: {status}")
+                
+            # Process humidity if available
+            elif device_type.lower() == "humidity" or (device_type.lower() == "ruuvitag" and humidity != 'N/A'):
+                try:
+                    humidity_val = float(humidity)
+                    if humidity_val > settings.ruuvitag.anomaly_thresholds.get("humidity_max", 100):
+                        log.warning(f"HIGH HUMIDITY ALERT: Device {device_id} | Reading: {humidity}% | Time: {timestamp}") 
+                    elif humidity_val < settings.ruuvitag.anomaly_thresholds.get("humidity_min", 15):
+                        log.warning(f"LOW HUMIDITY ALERT: Device {device_id} | Reading: {humidity}% | Time: {timestamp}")
+                    else:
+                        log.info(f"Device: {device_id} ({device_type}) | Humidity: {humidity}% | "
+                                f"Temperature: {formatted_value}{unit} | Status: {status}")
+                except (ValueError, TypeError):
+                    pass
+
+            # Process pressure if available
+            elif device_type.lower() == "pressure" or (device_type.lower() == "ruuvitag" and pressure != 'N/A'):
+                try:
+                    pressure_val = float(pressure)
+                    if pressure_val > settings.ruuvitag.anomaly_thresholds.get("pressure_max", 108500):
+                        log.warning(f"HIGH PRESSURE ALERT: Device {device_id} | Reading: {pressure}% | Time: {timestamp}") 
+                    elif pressure_val < settings.ruuvitag.anomaly_thresholds.get("pressure_min", 87000):
+                        log.warning(f"LOW PRESSURE ALERT: Device {device_id} | Reading: {pressure}% | Time: {timestamp}")
+                    else:
+                        log.info(f"Device: {device_id} ({device_type}) | Pressure: {pressure}% | "
+                                f"Temperature: {formatted_value}{unit} | Status: {status}")
+                except (ValueError, TypeError):
+                    pass
+
+            # Handle motion detection
+            elif device_type == "motion" and value == 1:
+                log.info(f"MOTION DETECTED: Device {device_id} | Time: {timestamp}")
+
+            # Handle light level
+            elif device_type == "light" and float(value) < 10:
+                log.info(f"LOW LIGHT LEVEL: Device {device_id} | Reading: {value}{unit} | Time: {timestamp}")
+
+            # Check for error status
+            elif status == "ERROR":
+                log.warning(f"ERROR ALERT: Device {device_id} | Type: {device_type} | Status: {status}")
+            
+            # Default case for other device types or when no specific condition is met
+            else:
+                # Include firmware version and metadata in standard logs
+                metadata_items = []
+                for k, v in metadata.items():
+                    if k not in ['humidity', 'pressure']:  # Skip items we already displayed
+                        metadata_items.append(f"{k}: {v}")
+                metadata_str = ", ".join(metadata_items) if metadata_items else "none"
+
+                # Include tags in logs if present
+                tags_str = f"[{', '.join(tags)}]" if tags else ""
+
+                # Standard log
+                log.info(f"Device {device_id} | Type: ({device_type} v{firmware_version}) | "
+                        f"Reading: {formatted_value}{unit} | Status: {status} | "
+                        f"Tags: {tags_str} | Metadata: {metadata_str}")
+                
+        except (ValueError, TypeError) as e:
+            # Handle case where value conversion fails
+            log.error(f"Error processing value from device {device_id}: {str(e)}")
+            log.info(f"Raw message: {message}")

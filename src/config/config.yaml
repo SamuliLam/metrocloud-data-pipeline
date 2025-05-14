@@ -62,7 +62,7 @@ kafka:
 
 # MQTT configuration
 mqtt:
-  broker_host: 192.168.50.108
+  broker_host: mosquitto
   broker_port: 1883
   topic: ruuvitag/data
   client_id: ruuvitag_adapter
@@ -116,15 +116,15 @@ ruuviTag:
     min_voltage: 2.0
     max_voltage: 3.0
   anomaly_thresholds:
-    temperature_min: -30
-    temperature_max: 45
-    humidity_min: 0
+    temperature_min: -50
+    temperature_max: 50
+    humidity_min: 15
     humidity_max: 100
-    pressure_min: 85000
-    pressure_max: 115000
+    pressure_min: 87000
+    pressure_max: 108500
     battery_low: 2.0
-  # signal_strength: signal_strength # (actual BLE RSSI could be used if available)
-  # firmware_version: firmware_version # (actual firmware version could be used if available)
+  signal_strength: -80 # (actual BLE RSSI could be used if available)
+  firmware_version: 3.31.1 # (actual firmware version could be used if available)
   
 # Logging configuration
 logging:

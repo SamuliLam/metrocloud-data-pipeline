@@ -208,32 +208,49 @@ services:
     networks:
       - kafka-net # Access Kafka over Docker network
 
-  # Kafka Producer 
-  kafka-producer:
+  # MQTT Broker for ESP32 Gateway
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mosquitto
+    ports:
+      - "1883:1883" # MQTT port
+      - "9001:9001" # WebSockets port
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+      - ../mqtt/config:/mosquitto/config
+    networks:
+      - kafka-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RuuviTag Adapter Service (Replaces the original producer)
+  ruuvitag-adapter:
     build:
-      context: .. # Project root directory
-      dockerfile: docker/Dockerfile.producer
-    container_name: kafka-producer
-    environment:
-      # Configure producer to connect all brokers inside docker for fault tolerance
-      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
-      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data} # Topic to publish simulated data
-      # Schema Registry Configuration
-      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
-      # Settings for IoT data simulation
-      IOT_NUM_DEVICES: ${IOT_NUM_DEVICES:-8} # Number of virtual IoT devices
-      IOT_DATA_INTERVAL_SEC: ${IOT_DATA_INTERVAL_SEC:-1.0} # How often each device sends data
-      PYTHONUNBUFFERED: 1 # Ensures real-time stdout logging
-      CONFIG_FILE_PATH: /app/config.yaml # Path to the config file inside the container
+      context: ..
+      dockerfile: docker/Dockerfile.ruuvitag_adapter
+    container_name: ruuvitag_adapter
+    hostname: ruuvitag-adapter
     volumes:
       - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
+    environment:
+      PYTHONUNBUFFERED: 1
+      # Add debugging environment variables
+      PYTHONTRACEMALLOC: 1
+      PYTHONFAULTHANDLER: 1
     depends_on:
       - kafka1
       - kafka2
       - kafka3
       - schema-registry
+      - mosquitto
     networks:
       - kafka-net
+    restart: unless-stopped
 
   # Kafka Consumer
   kafka-consumer:
@@ -257,61 +274,9 @@ services:
       - kafka2
       - kafka3
       - schema-registry
-      - kafka-producer # Wait until producer is available
+      - ruuvitag-adapter # Wait until ruuvitag-adapter is available
     networks:
       - kafka-net
-
-  # MQTT Broker for ESP32 Gateway
-  mosquitto:
-    image: eclipse-mosquitto:2.0
-    container_name: mosquitto
-    ports:
-      - "1884:1883"
-      - "9001:9001"
-    volumes:
-      - mosquitto_data:/mosquitto/data
-      - mosquitto_log:/mosquitto/log
-      - ../mqtt/config:/mosquitto/config
-    networks:
-      - kafka-net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$$"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # RuuviTag Adapter Service
-  ruuvitag-adapter:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.ruuvitag_adapter
-    container_name: ruuvitag_adapter
-    hostname: ruuvitag-adapter
-    environment:
-      # MQTT configuration - specific to ESP32 setup
-      MQTT_BROKER: ${MQTT_BROKER:-"192.168.50.240"}
-      MQTT_PORT: ${MQTT_PORT:-1883}
-      MQTT_TOPIC: ${MQTT_TOPIC:-"ruuvitag/data"}
-      # Kafka configuration
-      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092} # Kafka broker inside Docker network
-      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data} # Topic to publish RuuviTag data
-      # Schema Registry configuration
-      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
-      # Logging
-      PYTHONUNBUFFERED: 1 # Ensures real-time stdout logging
-      CONFIG_FILE_PATH: /app/config.yaml # Path to the config file inside the container
-    volumes:
-      - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
-    depends_on:
-      - kafka1
-      - kafka2
-      - kafka3
-      - schema-registry
-      - mosquitto
-    networks:
-      - kafka-net
-    restart: unless-stopped
 
 # Docker Volume for Kafka Storage
 volumes:
@@ -325,13 +290,13 @@ volumes:
     driver: local
   kafka-ui:
     driver: local
-  kafka-producer:
-    driver: local
-  kafka-consumer:
-    driver: local
   mosquitto_data:
     driver: local
   mosquitto_log:
+    driver: local
+  ruuvitag-adapter:
+    driver: local
+  kafka-consumer:
     driver: local
 
 # Docker Network for All Services

@@ -12,7 +12,7 @@ import os
 
 from src.utils.logger import log
 from src.config.config import settings
-from src.data_ingestion.consumer import KafkaConsumer
+from src.data_ingestion.consumer import KafkaConsumer, IoTAlertConsumer
 from src.utils.schema_registry import schema_registry
 
 def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
@@ -97,77 +97,12 @@ def log_configuration():
     log.info(f"Heartbeat interval: {settings.consumer.heartbeat_interval_ms}ms")
     log.info(f"Partition assignment strategy: {settings.consumer.partition_assignment_strategy}")
 
-
-class IoTAlertConsumer(KafkaConsumer):
-    """
-    Custom consumer that processes IoT data with Avro deserialization and generates alerts.
-    This implementation is aware of the multi-broker setup and 
-    includes logic to handle broker failovers.
-    """
-    
-    def process_message(self, message):
-        """
-        Process a received IoT sensor reading and generate alerts 
-        based on specified thresholds.
-        
-        Args:
-            message: Dictionary containing the deserialized Avro IoT sensor reading
-        """
-        device_id = message.get('device_id', 'unknown')
-        device_type = message.get('device_type', 'unknown')
-        value = message.get('value', 'unknown')
-        unit = message.get('unit', '')
-        timestamp = message.get('timestamp', 'unknown')
-        firmware_version = message.get('firmware_version', 'unknown')
-        is_anomaly = message.get('is_anomaly', False)
-        status = message.get('status', 'UNKNOWN')  # Get status from updated schema
-        tags = message.get('tags', [])  # Get tags from updated schema
-
-        # Enhanced logging for Avro-deserialized messages
-        if is_anomaly:
-            log.info(f"Processing anomalous reading from device {device_id} (v{firmware_version}, status: {status})")
-        
-        # Check for anomalies or specific conditions
-        try:
-            # Convert value to float for numeric comparisons
-            # but handle the case where value might be non-numeric (like boolean for motion)
-            if device_type == "temperature" and float(value) > 30:
-                log.warning(f"HIGH TEMPERATURE ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
-
-                # Add status and tags information to alerts
-                if tags:
-                    log.warning(f"Device tags: {', '.join(tags)}")
-
-            elif device_type == "humidity" and float(value) > 70:
-                log.warning(f"HIGH HUMIDITY ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
-
-            elif device_type == "pressure" and float(value) < 990:
-                log.warning(f"LOW PRESSURE ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
-
-            elif device_type == "motion" and value == 1:
-                log.info(f"MOTION DETECTED: Device {device_id} at {timestamp}")
-
-            elif device_type == "light" and float(value) < 10:
-                log.info(f"LOW LIGHT LEVEL: Device {device_id} reported {value}{unit} at {timestamp}")
-
-            # Check for error status
-            elif status == "ERROR":
-                log.warning(f"ERROR ALERT: Device {device_id} is reporting ERROR status")
-            else:
-                # Include firmware version and metadata in standard logs
-                metadata = message.get('metadata', {})
-                metadata_str = ", ".join(f"{k}: {v}" for k, v in metadata.items()) if metadata else "none"
-
-                # Include tags in logs if present
-                tags_str = f", tags: [{', '.join(tags)}]" if tags else ""
-
-                log.info(f"Device {device_id} ({device_type}, v{firmware_version}), status: {status}{tags_str}: "
-                         f"{value}{unit}, metadata: {metadata_str}")
-                
-        except (ValueError, TypeError) as e:
-            # Handle case where value conversion fails
-            log.error(f"Error processing value from device {device_id}: {str(e)}")
-            log.info(f"Raw message: {message}")
+    # Log RuuviTag configuration if available
+    if hasattr(settings, 'ruuvitag'):
+        log.info("RuuviTag configuration:")
+        log.info(f"Temperature thresholds: {settings.ruuvitag.anomaly_thresholds.get('temperature_min', -40)}°C to {settings.ruuvitag.anomaly_thresholds.get('temperature_max', 85)}°C")
+        log.info(f"Humidity thresholds: {settings.ruuvitag.anomaly_thresholds.get('humidity_min', 0)}% to {settings.ruuvitag.anomaly_thresholds.get('humidity_max', 100)}%")
+        log.info(f"Pressure thresholds: {settings.ruuvitag.anomaly_thresholds.get('pressure_min', 85000)} to {settings.ruuvitag.anomaly_thresholds.get('pressure_max', 115000)} Pa")
 
 def main():
     """
@@ -186,6 +121,14 @@ def main():
     try:
         # Create and start the consumer with multi-broker awareness and Avro deserialization
         consumer = IoTAlertConsumer()
+
+        # Setup signal handlers
+        def signal_handler(sig, frame):
+            log.info(f"Caught signal {sig}. Stopping consumer...")
+            consumer.running = False
+        
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
         
         # Start consuming messages in a continuous loop
         log.info("Starting continuous IoT data consumption with Avro deserialization...")

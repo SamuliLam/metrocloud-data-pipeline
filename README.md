@@ -194,7 +194,7 @@ If you haven't installed ESP-IDF yet, follow these steps:
 3. Configure MQTT Broker
 
     The MQTT broker is set up automatically in Docker, but you may need to:
-    - Verify port 1883 is accessible
+    - Verify port 1883 is accessible for docker (If mosquitto broker service is active in local machine at port 1883, stop the service in the local machine)
     - Check MQTT broker logs in Docker
     - Test connectivity with MQTT clients
 
@@ -222,20 +222,20 @@ If you haven't installed ESP-IDF yet, follow these steps:
     docker-compose logs -f ruuvitag-adapter # check RuuviTag adapter logs
     docker-compose logs -f kafka-broker-1 kafka-broker-2 kafka-broker-3 # check kafka broker logs
     docker-compose logs -f schema-registry # check schema registry logs
-    docker-compose logs -f kafka-producer # check Kafka producer logs
+    docker-compose logs -f kafka-producer # check Kafka producer logs (for simulated IoT sensor data only, it is replaced by ruuvitag-adapter for real IoT data using RuuviTag sensors)
     docker-compose logs -f kafka-consumer # check Kafka consumer logs
     ```
 
 6. Interact with Kafka using command-line tools
     ```bash
     # List Kafka topics
-    docker exec kafka-broker kafka-topics --bootstrap-server kafka:9092 --list
+    docker exec -it kafka-broker-1 kafka-topics --bootstrap-server kafka:9092 --list
 
     # View messages on the topic
-    docker exec kafka-broker kafka-console-consumer --bootstrap-server kafka:9092 --topic iot-sensor-data --from-beginning
+    docker exec -it kafka-broker-1 kafka-consumer --bootstrap-server kafka:9092 --topic iot-sensor-data --from-beginning
     ```
 
-7. Access the Kafka UI:
+7. Access the Kafka UI
     - Open your browser and navigate to http://localhost:8080
     - This allows you to monitor:
         - Kafka broker health
@@ -244,9 +244,23 @@ If you haven't installed ESP-IDF yet, follow these steps:
         - Consumer groups
         - Partitions and their replication status
 
-8. Shutdown
+9. Shutdown
     ```bash
     docker-compose down -v
+    ```
+
+10. Other services
+    - Build individual image
+    ```bash
+    docker-compose build <image-name>
+    ```
+    - Restart the individual service
+    ```bash
+    docker-compose restart <service-name>
+    ```
+    - Check if any service started correctly
+    ```bash
+    docker-compose ps <service-name>
     ```
 
 ## Data Flow
@@ -305,8 +319,7 @@ The Kafka pipeline remains unchanged:
 - Topic partitioning for scalability
 - Kafka UI for monitoring
 
-## Configuration
-### Kafka Cluster Configuration
+### Kafka Cluster
 #### Multi-Broker Setup
 This project uses 3 Kafka brokers in a KRaft quorum:
 
@@ -316,15 +329,24 @@ This project uses 3 Kafka brokers in a KRaft quorum:
 | Kafka2 |      9092     |     29093     | broker + controller |
 | Kafka3 |      9092     |     29094     | broker + controller |
 
-#### Kafka Listeners Configuration
+Benefits:
+- High Availabliity: No single point of failure with data replicated across multiple brokers
+- Scalability: Horizontal scaling by adding more brokers to handle increased load
+- Fault Tolerance: System continues to operate even if one or more brokers fail
+- Performance: Multiple brokers can handle more concurrent produceres and consumers
+
+#### KRaft Mode (Kafka Raft)
+This setup uses KRaft mode which eliminates the ZooKeeper dependency:
+- All brokers participate in the Raft quorum
+- Controllers quorum handles metadata management
+- Each broker runs both controller and broker roles
+
+#### Kafka Listeners
 The Kafka configuration contains several listener configurations that are essential for proper network communication:
 
 `KAFKA_LISTENERS`: 'PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092'
-
 `KAFKA_ADVERTISED_LISTENERS`: 'PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092'
-
 - `PLAINTEXT`: Used for internal communication between brokers and clients within Docker network
-
 - `CONTROLLER`: Used for controller-to-controller communication in KRaft mode
 - `PLAINTEXT_HOST`: Used for external access from the host machine
 
@@ -335,23 +357,11 @@ The KRaft controller quorum is configured with:
 
 This defines the voting members of the Raft quorum, where each broker participates in the controller election process.
 
-### Multi-Broker Kafka Benefits
-- High Availabliity: No single point of failure with data replicated across multiple brokers
-- Scalability: Horizontal scaling by adding more brokers to handle increased load
-- Fault Tolerance: System continues to operate even if one or more brokers fail
-- Performance: Multiple brokers can handle more concurrent produceres and consumers 
-
-#### KRaft Mode (Kafka Raft)
-This setup uses KRaft mode which eliminates the ZooKeeper dependency:
-- All brokers participate in the Raft quorum
-- Controllers quorum handles metadata management
-- Each broker runs both controller and broker roles
-
-#### Topic Configuration
+#### Kafka Topic
 Topics are created with fault tolerance in mind:
 - Replication Factor: 3 (data stored on all brokers)
 - Partitions: 6 (allows parallel consumption)
-- Min In-Sync Replicas: 2(requires at least 3 brokers to acknowledge writes)
+- Min In-Sync Replicas: 2(requires at least 3 brokers to acknowledge writes) 
 
 ### Avro Schema and Schema Registry
 #### Schema Registry
@@ -373,23 +383,22 @@ The IoT sensor data schema (`iot_sensor_reading.avsc`) includes:
 ## Configuration Options
 The application can be configured through environment variables:
 
+### ESP32 Configuration Options
 #### WiFI credentials
 - `#define WIFI_SSID` "Your_WiFi_SSID"
 - `#define WIFI_PASSWORD` "Your_WiFi_Password"
 
-#### MQTT Broker IP
+#### MQTT settings
 - `#define MQTT_BROKER_URL` "mqtt://<Your_MQTT_Broker_IP>:1883"
+- `#define MQTT_TOPIC` "ruuvitag/data"
+- `#define MQTT_QOS` 1
 
 #### Optional: RuuviTag settings
-- `#define MAX_RUUVITAGS` 1  //Increase if you have more RuuviTags
+- `#define MAX_RUUVITAGS` 10 //Increase if you have more RuuviTags
 
-#### Kafka Configuration
-- `KAFKA_BOOTSTRAP_SERVERS`kafka1:9092,kafka2:9092,kafka3:9092
-- `KAFKA_TOPIC_NAME`=iot-sensor-data
-- `KAFKA_CONSUMER_GROUP_ID`=iot-data-consumer
-- `KAFKA_AUTO_OFFSET_RESET`=earliest
-- `KAFKA_REPLICATION_FACTOR`=3
-- `KAFKA_PARTITIONS`=6
+### Docker Compose Configuration Options
+#### Kafka Cluster Configuration
+`Note:` `docker-compose.yml`
 
 #### IoT Simulator Configuration
 - `IOT_NUM_DEVICES`=8
@@ -397,14 +406,23 @@ The application can be configured through environment variables:
 - `IOT_DEVICE_TYPES`=temperature,humidity,pressure,motion,light
 - `IOT_ANOMALY_PROBABILITY`=0.05
 
-#### Logging Configuration
-- `LOG_LEVEL`=INFO
+#### Schema Registry Configuration
+`Note:` `docker-compose.yml`
 
-#### Schema Registry configuration
-- `SCHEMA_REGISTRY_URL`=http://schema-registry:8081
-- `SCHEMA_AUTO_REGISTER`=True
-- `SCHEMA_COMPATIBILITY_LEVEL`=BACKWARD
-- `SCHEMA_SUBJECT_STRATEGY`=TopicNameStrategy
+#### Kafka UI Configuration
+`Note:` `docker-compose.yml`
+
+#### MQTT Broker Configuration
+`Note:` `docker-compose.yml`
+
+#### RuuviTag Adapter Configuration
+`Note:` `docker-compose.yml`
+
+#### Kafka Consumer
+`Note:` `docker-compose.yml`
+
+### Logging Configuration
+- `LOG_LEVEL`=INFO
 
 ## Troubleshooting
 ### ESP32 Issues
@@ -438,11 +456,11 @@ The application can be configured through environment variables:
     - Save the configuration and exit
 
 ### MQTT Issues
-1. ESP32 not connecting to MQTT broker
+1. ESP32 not connecting to MQTT broker in docker
 - Verify the MQTT broker IP address is correct
-- Check that the MQTT broker is running and accessible from the ESP32
+- Ensure port 1883 is open (If mosquitto broker service is active in local machine at port 1883, stop the service in the local machine)
+- Check that the MQTT broker in docker is running and accessible from the ESP32
 - Ensure no firewall is blocking port 1883
-- Ensure port 1883 is open
 
 2. No data in MQTT topic
 - Check ESP32 logs for MQTT publish errors
@@ -462,7 +480,7 @@ The application can be configured through environment variables:
 3. Brokers Won't Start
 - Check logs for configuration errors:
     ```bash
-    docker-compose logs kafka1
+    docker-compose logs kafka1 kafka2 kafka3
     ```
 4. Kafka Connection Issues
 - Ensure all containers are on the same Docker network

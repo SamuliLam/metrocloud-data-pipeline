@@ -9,6 +9,7 @@ import sys
 import os
 import socket
 import random
+import traceback
 
 from src.utils.logger import log
 from src.config.config import settings
@@ -117,11 +118,13 @@ def main():
 
         # Run until interrupted
         log.info(f"Adapter running, press CTRL+C to stop")
+        adapter.run()
         while True:
             time.sleep(1)
 
     except Exception as e:
         log.error(f"Error in RuuviTag adapter service: {e}")
+        log.error(traceback.format_exc())
         sys.exit(1)
 
 

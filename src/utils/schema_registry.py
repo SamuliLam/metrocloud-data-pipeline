@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Set
 import avro.schema
 from confluent_kafka.schema_registry import Schema, SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer, AvroDeserializer 
@@ -28,6 +28,9 @@ class SchemaRegistry:
         self.schema_registry_url = schema_registry_url or settings.schema_registry.url
         self.sr_config = {'url': self.schema_registry_url}
         self.schema_registry = SchemaRegistryClient(self.sr_config)
+        
+        # Cache for registered schemas to avoid repeated registration attempts
+        self._registered_schemas: Set[str] = set()
         
         log.info(f"Schema Registry client initialized with URL: {self.schema_registry_url}")
         
@@ -164,12 +167,20 @@ class SchemaRegistry:
             if not settings.schema_registry.auto_register_schemas:
                 log.warning(f"Auto schema registration is disabled. Skipping registration for {subject}")
                 return None
+            
+            # Add caching to avoid repetitive registration attempts
+            if subject in self._registered_schemas:
+                return None
                 
-            # Check if schema already exists
+            # Check if schema already exists in Schema Registry
             try:
                 # Check latest version of schema
                 latest_schema = self.schema_registry.get_latest_version(subject)
                 log.info(f"Schema already exists for subject {subject} with ID: {latest_schema.schema_id}")
+
+                # Add to cache even though we didn't register it
+                self._registered_schemas.add(subject)
+
                 return latest_schema.schema_id
             except Exception as e:
                 log.debug(f"No existing schema found for subject {subject}. Proceeding to register new schema.")
@@ -181,6 +192,9 @@ class SchemaRegistry:
 
             log.info(f"Schema registered with ID: {schema_id}")
             log.debug(f"Schema compatibility level: {settings.schema_registry.compatibility_level}")
+
+            # Add to cache after successful registration
+            self._registered_schemas.add(subject)
 
             return schema_id
 

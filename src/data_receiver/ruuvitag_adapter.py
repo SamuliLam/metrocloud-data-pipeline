@@ -7,6 +7,7 @@ RuuviTag Data Apapter - Receives data from ESP32 and forwards to Kafka.
 import os
 import json
 import time
+import traceback
 import paho.mqtt.client as mqtt
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -59,11 +60,17 @@ class RuuviTagAdapter:
         if settings.mqtt.username and settings.mqtt.password:
             self.mqtt_client.username_pw_set(settings.mqtt.username, settings.mqtt.password)
 
-        # Create Kafka producer for sending data
-        self.kafka_producer = KafkaProducer()
+        # Create Kafka producer for sending data with exception handling
+        try:
+            self.kafka_producer = KafkaProducer()
+            log.info("Kafka producer initialized successfully")
+        except Exception as e:
+            log.error(f"Failed to initialize Kafka producer: str{e}")
+            raise
 
         # Store device data for periodic monitoring and debugging
         self.devices = {}
+        self.message_count = 0
 
         log.info(f"RuuviTag adapter initialized with MQTT broker: {self.mqtt_broker}:{self.mqtt_port}")
 
@@ -96,16 +103,23 @@ class RuuviTagAdapter:
             msg: MQTT messag
         """
         try:
+            # Log raw message for debugging
+            log.debug(f"Raw MQTT message received on {msg.topic}: {msg.payload}")
+
             # Decode and parse JSON
             payload = msg.payload.decode('utf-8')
             data = json.loads(payload)
+
+            self.message_count += 1
+            if self.message_count % 10 == 0:  # Log every 10th message to avoid log flooding
+                log.info(f"Received message #{self.message_count}: {payload[:100]}...")
             
             # Process and adapt data for Kafka
             kafka_message = self.adapt_ruuvitag_data(data)
 
             # Send to Kafka
             if kafka_message:
-                self.kafka_producer.send_message(kafka_message)
+                msg_id = self.kafka_producer.send_message(kafka_message)
 
                 # Store device data for monitoring
                 device_id = kafka_message.get('device_id')
@@ -115,12 +129,17 @@ class RuuviTagAdapter:
                         'data': kafka_message
                     }
                 
-                log.debug(f"Processed RuuviTag data from device: {kafka_message.get('device_id')}")
+                log.debug(f"Processed and sent RuuviTag data from device: {device_id}, temp: {data.get('temperature', 'N/A')}°C")
+            else:
+                log.warning(f"Failed to adapt message: {payload[:100]}...")
 
         except json.JSONDecodeError as e:
             log.error(f"Failed to parse JSON from MQTT message: {e}")
+            log.error(f"Raw message: {msg.payload}")
         except Exception as e:
             log.error(f"Error processing MQTT message: {e}")
+            log.error(traceback.format_exc())
+
 
     def adapt_ruuvitag_data(self, ruuvitag_data: Dict[str, Any]) -> Dict[str, any]:
         """
@@ -132,58 +151,112 @@ class RuuviTagAdapter:
         Returns:
             Adapted data matching kafka schema
         """
-        # Validate required fields
-        required_fields = ['device_id', 'temperature', 'humidity', 'pressure']
-        for field in required_fields:
-            if field not in ruuvitag_data:
-                log.warning(f"Missing required field in RuuviTag data: {field}")
-                return None
-            
-        # Get device ID (MAC address)
-        device_id = ruuvitag_data['device_id']
 
-        # Create ISO-8601 timestamp with timezone
-        if 'timestamp' in ruuvitag_data:
-            try:
-                # If timestamp is a unix timestamp (seconds since epoch)
-                timestamp = datetime.fromtimestamp(int(ruuvitag_data['timestamp']), tz=timezone.utc)
-                iso_timestamp = timestamp.isoformat()
-            except (ValueError, TypeError):
-                # If already formatted or invalid, use current time
+        try:
+            # Log the input for debugging
+            log.debug(f"Adapting data: {ruuvitag_data}")
+
+            # Validate required fields
+            required_fields = ['device_id', 'temperature']
+            for field in required_fields:
+                if field not in ruuvitag_data:
+                    log.warning(f"Missing required field in RuuviTag data: {field}")
+                    log.warning(f"Available fields: {list(ruuvitag_data.keys())}")
+                    return None
+                
+            # Get device ID (MAC address)
+            device_id = ruuvitag_data['device_id']
+
+            # Create ISO-8601 timestamp with timezone - handle various formats
+            if 'timestamp' in ruuvitag_data:
+                try:
+                    # Try parsing as integer (seconds since epoch)
+                    ts_value = ruuvitag_data['timestamp']
+                    if isinstance(ts_value, str) and ts_value.isdigit():
+                        ts_value = int(ts_value)
+                    
+                    if isinstance(ts_value, int) or isinstance(ts_value, float):
+                        # If it's a small number (< 10000000), it might be relative time, not epoch
+                        if ts_value < 10000000:  # Arbitrary threshold
+                            # Use current time instead
+                            iso_timestamp = datetime.now(timezone.utc).isoformat()
+                            log.debug(f"Timestamp {ts_value} seems to be relative, using current time")
+                        else:
+                            timestamp = datetime.fromtimestamp(ts_value, tz=timezone.utc)
+                            iso_timestamp = timestamp.isoformat()
+                    elif isinstance(ts_value, str) and "T" in ts_value:
+                        # Already looks like ISO format
+                        iso_timestamp = ts_value
+                    else:
+                        # Unknown format, use current time
+                        iso_timestamp = datetime.now(timezone.utc).isoformat()
+                        log.debug(f"Unknown timestamp format: {ts_value}, using current time")
+                except Exception as e:
+                    log.warning(f"Failed to parse timestamp '{ruuvitag_data['timestamp']}': {e}")
+                    iso_timestamp = datetime.now(timezone.utc).isoformat()
+            else:
                 iso_timestamp = datetime.now(timezone.utc).isoformat()
-        else:
-            iso_timestamp = datetime.now(timezone.utc).isoformat()
+            
+            # Convert numeric fields to proper types
+            safe_temp = self._safe_float(ruuvitag_data.get('temperature', 0))
+            safe_humidity = self._safe_float(ruuvitag_data.get('humidity', 0))
+            safe_pressure = self._safe_float(ruuvitag_data.get('pressure', 0))
+            safe_battery = self._safe_float(ruuvitag_data.get('battery_voltage', 0))
 
-        # Map RuuviTag data to Kafka schema
-        kafka_data = {
-            "device_id": device_id,
-            "device_type": settings.ruuvitag.device_type,
-            "timestamp": iso_timestamp,
-            "value": float(ruuvitag_data.get('temperature')),
-            "unit": "°C",
-            "location": settings.ruuvitag.default_location,
-            "battery_level": self._calculate_battery_level(float(ruuvitag_data.get('battery_voltage', 0))),
-            "signal_strength": settings.ruuvitag.signal_strength,
-            "is_anomaly": self._detect_anomaly(ruuvitag_data),
-            "firware_version": settings.ruuvitag.firmware_version,
-            "metadata": {
-                "humidity": str(ruuvitag_data.get('humidity', 0)),
-                "pressure": str(ruuvitag_data.get('pressure', 0)),
-                "accel_x": str(ruuvitag_data.get('accel_x', 0)),
-                "accel_y": str(ruuvitag_data.get('accel_y', 0)),
-                "accel_z": str(ruuvitag_data.get('accel_z', 0)),
-                "tx_power": str(ruuvitag_data.get('tx_power', 0)),
-                "movement_counter": str(ruuvitag_data.get('movement_counter', 0)),
-                "measurement_sequence": str(ruuvitag_data.get('measurement_sequence', 0))
-                # Note: ESP32 sends 'seq_number' instead of 'measurement_sequence'
-                # Adding both for compatibility
-                if 'measurement_sequence' in ruuvitag_data
-                else str(ruuvitag_data.get('seq_number', 0))
-            },
-            "status": "ACTIVE",
-            "tags": ["ruuvitag", "ble", "temperature", "humidity", "pressure"],
-            "maintenance_date": None
-        }
+            # Map RuuviTag data to Kafka schema
+            kafka_data = {
+                "device_id": device_id,
+                "device_type": settings.ruuvitag.device_type,
+                "timestamp": iso_timestamp,
+                "value": float(ruuvitag_data.get('temperature')),
+                "unit": "°C",
+                "location": settings.ruuvitag.default_location,
+                "battery_level": self._calculate_battery_level(float(ruuvitag_data.get('battery_voltage', 0))),
+                "signal_strength": settings.ruuvitag.signal_strength,
+                "is_anomaly": self._detect_anomaly(ruuvitag_data),
+                "firware_version": settings.ruuvitag.firmware_version,
+                "metadata": {
+                    "humidity": str(ruuvitag_data.get('humidity', 0)),
+                    "pressure": str(ruuvitag_data.get('pressure', 0)),
+                    "accel_x": str(ruuvitag_data.get('accel_x', 0)),
+                    "accel_y": str(ruuvitag_data.get('accel_y', 0)),
+                    "accel_z": str(ruuvitag_data.get('accel_z', 0)),
+                    "tx_power": str(ruuvitag_data.get('tx_power', 0)),
+                    "movement_counter": str(ruuvitag_data.get('movement_counter', 0)),
+                    "measurement_sequence": str(ruuvitag_data.get('measurement_sequence', 0))
+                    # Note: ESP32 sends 'seq_number' instead of 'measurement_sequence'
+                    # Adding both for compatibility
+                    if 'measurement_sequence' in ruuvitag_data
+                    else str(ruuvitag_data.get('seq_number', 0))
+                },
+                "status": "ACTIVE",
+                "tags": ["ruuvitag", "ble", "temperature", "humidity", "pressure"],
+                "maintenance_date": None
+            }
+
+            # Check for anomalies
+            kafka_data["is_anomaly"] = self._detect_anomaly({
+                "temperature": safe_temp,
+                "humidity": safe_humidity,
+                "pressure": safe_pressure,
+                "battery_voltage": safe_battery
+            })
+            
+            return kafka_data
+            
+        except Exception as e:
+            log.error(f"Error adapting RuuviTag data: {e}")
+            log.error(traceback.format_exc())
+            return None
+
+    def _safe_float(self, value: Any) -> float:
+        """
+        Safely convert a value to float with fallback
+        """
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return 0.0
 
     def _calculate_battery_level(self, voltage: float) -> float:
         """
@@ -252,13 +325,22 @@ class RuuviTagAdapter:
         
     
     def connect(self):
-        """Connect to MQTT broker"""
-        try:
-            self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port, self.keep_alive)
-            log.info(f"Connecting to MQTT broker {self.mqtt_broker}:{self.mqtt_port}")
-        except Exception as e:
-            log.error(f"Failed to connect to MQTT broker: {e}")
-            raise
+        """Connect to MQTT broker with retry."""
+        max_retries = 5
+        retry = 0
+        
+        while retry < max_retries:
+            try:
+                self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port, keepalive=60)
+                log.info(f"Connecting to MQTT broker {self.mqtt_broker}:{self.mqtt_port}")
+                return
+            except Exception as e:
+                retry += 1
+                log.warning(f"Failed to connect to MQTT broker (attempt {retry}/{max_retries}): {e}")
+                if retry >= max_retries:
+                    log.error(f"Failed to connect to MQTT broker after {max_retries} attempts")
+                    raise
+                time.sleep(5)  # Wait before retry
 
     def start(self):
         """Start the adapter"""
@@ -271,17 +353,23 @@ class RuuviTagAdapter:
         log.info("RuuviTag adapter started")
 
     def stop(self):
-        """Stop the adapter"""
+        """Stop the adapter."""
         # Stop MQTT loop
         self.mqtt_client.loop_stop()
-
+        
         # Disconnect from MQTT broker
-        self.mqtt_client.disconnect()
-
+        try:
+            self.mqtt_client.disconnect()
+        except Exception as e:
+            log.warning(f"Error disconnecting from MQTT: {e}")
+        
         # Close Kafka producer
-        self.kafka_producer.close()
-
-        log.info("RuuviTag adapter stopped")
+        try:
+            self.kafka_producer.close()
+        except Exception as e:
+            log.warning(f"Error closing Kafka producer: {e}")
+        
+        log.info("Improved RuuviTag adapter stopped")
 
     def run(self):
         """Run the adapter in foreground"""

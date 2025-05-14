@@ -27,4 +27,5 @@ ENV CONFIG_FILE_PATH=/app/config.yaml
 ENV PYTHONBUFFERED=1
 
 # Run the producer script with wait for Schema Registry
-CMD ["python", "run_ruuvitag_adapter.py"]
+CMD ["/usr/local/bin/wait-for-it.sh", "schema-registry:8081", "-t", "180", "--", "python", "run_ruuvitag_adapter.py"]
+

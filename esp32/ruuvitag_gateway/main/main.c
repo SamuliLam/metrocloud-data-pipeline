@@ -36,7 +36,7 @@
 #define MQTT_BROKER_URL         "mqtt://192.168.50.240:1883" // Change to your MQTT broker IP
 #define MQTT_TOPIC              "ruuvitag/data"
 #define MQTT_QOS                1
-#define MAX_RUUVITAGS           1
+#define MAX_RUUVITAGS           10
 
 static const char *TAG = "RUUVITAG";
 
