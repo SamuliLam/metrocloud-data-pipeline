@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "ruuvitag_gateway",
-    "project_version":    "b15ee34-dirty",
+    "project_version":    "8484c51-dirty",
     "project_path":       "/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway",
     "idf_path":           "/Users/rabindramanandhar/esp/esp-idf",
     "build_dir":          "/Users/rabindramanandhar/Documents/Rabindra/Thesis/IoT-Data-Pipeline/esp32/ruuvitag_gateway/build",

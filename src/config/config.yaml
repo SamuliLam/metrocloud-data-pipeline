@@ -62,7 +62,7 @@ kafka:
 
 # MQTT configuration
 mqtt:
-  broker_host: 192.168.50.240
+  broker_host: 192.168.50.108
   broker_port: 1883
   topic: ruuvitag/data
   client_id: ruuvitag_adapter

@@ -120,10 +120,10 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGI(TAG, "Connection failed! Retrying...");
+        ESP_LOGI(TAG, "WiFi Disconnected. Reason: %d", ((wifi_event_sta_disconnected_t*)event_data)->reason);
+        // Delay before retry to prevent flooding
+        vTaskDelay(pdMS_TO_TICKS(3000));
         esp_wifi_connect();
-        xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
-        xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "Connected with IP Address:" IPSTR, IP2STR(&event->ip_info.ip));
@@ -142,6 +142,17 @@ static void init_mqtt(void) {
             .address = {
                 .uri = MQTT_BROKER_URL,
             }
+        },
+        .credentials = {
+            .client_id = "ruuvi_gateway_01", // Unique client ID
+        },
+        .network = {
+            .reconnect_timeout_ms = 5000,    // Auto-reconnect after 5s
+            .disable_auto_reconnect = false, // Enable auto-reconnect
+        },
+        .session = {
+            .keepalive = 60,                 // Send ping every 60s
+            .disable_clean_session = true,   // Maintain session state
         }
     };
 
@@ -156,16 +167,22 @@ static void init_mqtt(void) {
 }
 
 // MQTT event handler
-static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {    
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) { 
+    
+    esp_mqtt_event_handle_t event = event_data;
+
     switch ((esp_mqtt_event_id_t)event_id) {
         case MQTT_EVENT_CONNECTED:
-            ESP_LOGI(TAG, "MQTT Connected to broker");
+        ESP_LOGI(TAG, "MQTT Connected to broker");
             break;
         case MQTT_EVENT_DISCONNECTED:
-            ESP_LOGI(TAG, "MQTT Disconnected from broker");
+            ESP_LOGI(TAG, "MQTT Disconnected from broker.");
+            //Explicitly restart client if auto-reconnect fails
             break;
         case MQTT_EVENT_ERROR:
-            ESP_LOGI(TAG, "MQTT Error");
+            if (event->error_handle) {
+                ESP_LOGE(TAG, "MQTT Error: %s", esp_err_to_name(event->error_handle->esp_tls_last_esp_err));
+            }
             break;
         default:
             break;
@@ -439,8 +456,18 @@ static void send_mqtt_message(ruuvi_data_t *data)
                       "\"measurement_sequence\":%d}", data->seq_number);
     
     /* Publish message to MQTT */
-    int msg_id = esp_mqtt_client_publish(mqtt_client, MQTT_TOPIC, buffer, 0, 1, 0);
-    
+    int msg_id = -1;  // Declare here
+    int retry_count = 0;
+
+    do {
+        msg_id = esp_mqtt_client_publish(mqtt_client, MQTT_TOPIC, buffer, 0, 1, 0);
+        if (msg_id == -1) {
+            ESP_LOGW(TAG, "Publish failed, retrying (%d/3)", retry_count+1);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            retry_count++;
+        }
+    } while (msg_id == -1 && retry_count < 3);
+
     if (msg_id != -1) {
         ESP_LOGI(TAG, "Published data to MQTT, msg_id=%d", msg_id);
     } else {
