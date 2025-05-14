@@ -229,10 +229,10 @@ If you haven't installed ESP-IDF yet, follow these steps:
 6. Interact with Kafka using command-line tools
     ```bash
     # List Kafka topics
-    docker exec -it kafka-broker-1 kafka-topics --bootstrap-server kafka:9092 --list
+    docker exec -it kafka-broker-1 kafka-topics --bootstrap-server kafka-broker-1:9092 --list
 
     # View messages on the topic
-    docker exec -it kafka-broker-1 kafka-consumer --bootstrap-server kafka:9092 --topic iot-sensor-data --from-beginning
+    docker exec -it kafka-broker-1 kafka-console-consumer --bootstrap-server kafka-broker-1:9092 --topic iot-sensor-data --from-beginning
     ```
 
 7. Access the Kafka UI
