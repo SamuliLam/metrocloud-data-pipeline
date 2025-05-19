@@ -100,9 +100,12 @@ def log_configuration():
     # Log RuuviTag configuration if available
     if hasattr(settings, 'ruuvitag'):
         log.info("RuuviTag configuration:")
-        log.info(f"Temperature thresholds: {settings.ruuvitag.anomaly_thresholds.get('temperature_min', -40)}°C to {settings.ruuvitag.anomaly_thresholds.get('temperature_max', 85)}°C")
-        log.info(f"Humidity thresholds: {settings.ruuvitag.anomaly_thresholds.get('humidity_min', 0)}% to {settings.ruuvitag.anomaly_thresholds.get('humidity_max', 100)}%")
-        log.info(f"Pressure thresholds: {settings.ruuvitag.anomaly_thresholds.get('pressure_min', 85000)} to {settings.ruuvitag.anomaly_thresholds.get('pressure_max', 115000)} Pa")
+        log.info(f"Device type: {settings.ruuvitag.device_type}")
+        log.info(f"Temperature thresholds: {settings.ruuvitag.anomaly_thresholds.get('temperature_min', -50)}°C to {settings.ruuvitag.anomaly_thresholds.get('temperature_max', 50)}°C")
+        log.info(f"Humidity thresholds: {settings.ruuvitag.anomaly_thresholds.get('humidity_min', 15)}% to {settings.ruuvitag.anomaly_thresholds.get('humidity_max', 100)}%")
+        log.info(f"Pressure thresholds: {settings.ruuvitag.anomaly_thresholds.get('pressure_min', 87000)} to {settings.ruuvitag.anomaly_thresholds.get('pressure_max', 108500)} Pa")
+        log.info(f"Battery threshold: {settings.ruuvitag.anomaly_thresholds.get('battery_low', 2.0)}V")
+
 
 def main():
     """
@@ -121,6 +124,9 @@ def main():
     try:
         # Create and start the consumer with multi-broker awareness and Avro deserialization
         consumer = IoTAlertConsumer()
+
+        log.info("Consumer will now handle RuuviTag data as separate sensor readings")
+        log.info("Each RuuviTag physical device now sends multiple messages (one per sensor)")
 
         # Setup signal handlers
         def signal_handler(sig, frame):
