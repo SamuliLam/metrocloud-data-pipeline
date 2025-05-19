@@ -31,12 +31,12 @@
 
 
 // Constants
-#define WIFI_SSID               "rabindra"
-#define WIFI_PASSWORD           "888Eight888."
-#define MQTT_BROKER_URL         "mqtt://192.168.50.240:1883" // Change to your MQTT broker IP
+#define WIFI_SSID               "AIoT-5GmmWave"
+#define WIFI_PASSWORD           "AIoT-2024"
+#define MQTT_BROKER_URL         "mqtt://192.168.50.108:1883" // Change to your MQTT broker IP
 #define MQTT_TOPIC              "ruuvitag/data"
 #define MQTT_QOS                1
-#define MAX_RUUVITAGS           10
+#define MAX_RUUVITAGS           2
 
 static const char *TAG = "RUUVITAG";
 
