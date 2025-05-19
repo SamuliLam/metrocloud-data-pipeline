@@ -115,21 +115,27 @@ class RuuviTagAdapter:
                 log.info(f"Received message #{self.message_count}: {payload[:100]}...")
             
             # Process and adapt data for Kafka
-            kafka_message = self.adapt_ruuvitag_data(data)
+            kafka_messages = self.adapt_ruuvitag_data(data)
 
-            # Send to Kafka
-            if kafka_message:
-                msg_id = self.kafka_producer.send_message(kafka_message)
+            # Sending each message to Kafka
+            if kafka_messages:
+                log.info(f"Sending {len(kafka_messages)} separate sensor readings to Kafka")
+                for kafka_message in kafka_messages:
+                    self.kafka_producer.send_message(kafka_message)
 
-                # Store device data for monitoring
+                # Store device data for monitoring (using the parent device ID)
+                parent_device_id = kafka_message.get('metadata', {}).get('parent_device') 
                 device_id = kafka_message.get('device_id')
+                sensor_type = kafka_message.get('metadata', {}).get('sensor_type', 'unknown')
+
+                log.debug(f"Processed and sent {sensor_type} reading from device: {parent_device_id}, value: {kafka_message.get('value')}{kafka_message.get('unit')}")
+
+                # Store in devices dictionary using the actual device_id
                 if device_id:
                     self.devices[device_id] = {
                         'last_seen': datetime.now(),
                         'data': kafka_message
-                    }
-                
-                log.debug(f"Processed and sent RuuviTag data from device: {device_id}, temp: {data.get('temperature', 'N/A')}°C")
+                    }                
             else:
                 log.warning(f"Failed to adapt message: {payload[:100]}...")
 
@@ -141,7 +147,7 @@ class RuuviTagAdapter:
             log.error(traceback.format_exc())
 
 
-    def adapt_ruuvitag_data(self, ruuvitag_data: Dict[str, Any]) -> Dict[str, any]:
+    def adapt_ruuvitag_data(self, ruuvitag_data: Dict[str, Any]) -> List[Dict[str, any]]:
         """
         Adapt RuuviTag data to match the Kafka schema
 
@@ -149,7 +155,7 @@ class RuuviTagAdapter:
             ruuvitag_data: Raw data from RuuviTag via ESP32
 
         Returns:
-            Adapted data matching kafka schema
+            List of adapted data matching kafka schema, one entry per sensor type
         """
 
         try:
@@ -157,7 +163,7 @@ class RuuviTagAdapter:
             log.debug(f"Adapting data: {ruuvitag_data}")
 
             # Validate required fields
-            required_fields = ['device_id', 'temperature']
+            required_fields = ['device_id']
             for field in required_fields:
                 if field not in ruuvitag_data:
                     log.warning(f"Missing required field in RuuviTag data: {field}")
@@ -167,87 +173,166 @@ class RuuviTagAdapter:
             # Get device ID (MAC address)
             device_id = ruuvitag_data['device_id']
 
-            # Create ISO-8601 timestamp with timezone - handle various formats
-            if 'timestamp' in ruuvitag_data:
-                try:
-                    # Try parsing as integer (seconds since epoch)
-                    ts_value = ruuvitag_data['timestamp']
-                    if isinstance(ts_value, str) and ts_value.isdigit():
-                        ts_value = int(ts_value)
-                    
-                    if isinstance(ts_value, int) or isinstance(ts_value, float):
-                        # If it's a small number (< 10000000), it might be relative time, not epoch
-                        if ts_value < 10000000:  # Arbitrary threshold
-                            # Use current time instead
-                            iso_timestamp = datetime.now(timezone.utc).isoformat()
-                            log.debug(f"Timestamp {ts_value} seems to be relative, using current time")
-                        else:
-                            timestamp = datetime.fromtimestamp(ts_value, tz=timezone.utc)
-                            iso_timestamp = timestamp.isoformat()
-                    elif isinstance(ts_value, str) and "T" in ts_value:
-                        # Already looks like ISO format
-                        iso_timestamp = ts_value
-                    else:
-                        # Unknown format, use current time
-                        iso_timestamp = datetime.now(timezone.utc).isoformat()
-                        log.debug(f"Unknown timestamp format: {ts_value}, using current time")
-                except Exception as e:
-                    log.warning(f"Failed to parse timestamp '{ruuvitag_data['timestamp']}': {e}")
-                    iso_timestamp = datetime.now(timezone.utc).isoformat()
-            else:
-                iso_timestamp = datetime.now(timezone.utc).isoformat()
-            
-            # Convert numeric fields to proper types
-            safe_temp = self._safe_float(ruuvitag_data.get('temperature', 0))
-            safe_humidity = self._safe_float(ruuvitag_data.get('humidity', 0))
-            safe_pressure = self._safe_float(ruuvitag_data.get('pressure', 0))
-            safe_battery = self._safe_float(ruuvitag_data.get('battery_voltage', 0))
+            # Handle timestamp
+            iso_timestamp = self._get_timestamp(ruuvitag_data)
 
-            # Map RuuviTag data to Kafka schema
-            kafka_data = {
-                "device_id": device_id,
-                "device_type": settings.ruuvitag.device_type,
-                "timestamp": iso_timestamp,
-                "value": float(ruuvitag_data.get('temperature')),
-                "unit": "°C",
+            # List to hold all messages
+            kafka_messages = []
+
+            # Common properties
+            common_properties = {
                 "location": settings.ruuvitag.default_location,
-                "battery_level": self._calculate_battery_level(float(ruuvitag_data.get('battery_voltage', 0))),
+                "battery_level": self._calculate_battery_level(self._safe_float(ruuvitag_data.get('battery_voltage', 0))),
                 "signal_strength": settings.ruuvitag.signal_strength,
-                "is_anomaly": self._detect_anomaly(ruuvitag_data),
-                "firware_version": settings.ruuvitag.firmware_version,
-                "metadata": {
-                    "humidity": str(ruuvitag_data.get('humidity', 0)),
-                    "pressure": str(ruuvitag_data.get('pressure', 0)),
-                    "accel_x": str(ruuvitag_data.get('accel_x', 0)),
-                    "accel_y": str(ruuvitag_data.get('accel_y', 0)),
-                    "accel_z": str(ruuvitag_data.get('accel_z', 0)),
-                    "tx_power": str(ruuvitag_data.get('tx_power', 0)),
-                    "movement_counter": str(ruuvitag_data.get('movement_counter', 0)),
-                    "measurement_sequence": str(ruuvitag_data.get('measurement_sequence', 0))
-                    # Note: ESP32 sends 'seq_number' instead of 'measurement_sequence'
-                    # Adding both for compatibility
-                    if 'measurement_sequence' in ruuvitag_data
-                    else str(ruuvitag_data.get('seq_number', 0))
-                },
+                "firmware_version": settings.ruuvitag.firmware_version,
+                "timestamp": iso_timestamp,
                 "status": "ACTIVE",
-                "tags": ["ruuvitag", "ble", "temperature", "humidity", "pressure"],
                 "maintenance_date": None
             }
 
-            # Check for anomalies
-            kafka_data["is_anomaly"] = self._detect_anomaly({
-                "temperature": safe_temp,
-                "humidity": safe_humidity,
-                "pressure": safe_pressure,
-                "battery_voltage": safe_battery
-            })
-            
-            return kafka_data
-            
+            # Define sensor mapping - each mapping defines how to extract a sensor reading
+            # This makes it easy to add new sensors in the future
+            sensor_mapping = [
+                {
+                    "field": "temperature",
+                    "device_type": "temperature_sensor",
+                    "unit": "°C",
+                    "tags": ["ruuvitag", "ble", "temperature"],
+                },
+                {
+                    "field": "humidity",
+                    "device_type": "humidity_sensor",
+                    "unit": "%",
+                    "tags": ["ruuvitag", "ble", "humidity"],
+                },
+                {
+                    "field": "pressure",
+                    "device_type": "pressure_sensor",
+                    "unit": "Pa",
+                    "tags": ["ruuvitag", "ble", "pressure"],
+                },
+                {
+                    "field": "accel_x",
+                    "device_type": "acceleration_sensor",
+                    "unit": "g",
+                    "tags": ["ruuvitag", "ble", "acceleration", "x-axis"],
+                    "metadata_extra": {"axis": "x", "sensor_type": "acceleration"}
+                },
+                {
+                    "field": "accel_y",
+                    "device_type": "acceleration_sensor",
+                    "unit": "g",
+                    "tags": ["ruuvitag", "ble", "acceleration", "y-axis"],
+                    "metadata_extra": {"axis": "y", "sensor_type": "acceleration"}
+                },
+                {
+                    "field": "accel_z",
+                    "device_type": "acceleration_sensor",
+                    "unit": "g",
+                    "tags": ["ruuvitag", "ble", "acceleration", "z-axis"],
+                    "metadata_extra": {"axis": "z", "sensor_type": "acceleration"}
+                },
+                {
+                    "field": "battery_voltage",
+                    "device_type": "battery_sensor",
+                    "unit": "V",
+                    "tags": ["ruuvitag", "ble", "battery"],
+                },
+                {
+                    "field": "tx_power",
+                    "device_type": "transmit_power_sensor",
+                    "unit": "dBm",
+                    "tags": ["ruuvitag", "ble", "tx_power"],
+                },
+                {
+                    "field": "movement_counter",
+                    "device_type": "movement_sensor",
+                    "unit": "count",
+                    "tags": ["ruuvitag", "ble", "movement"],
+                }
+                # new sensors can be added here in the future
+            ]
+
+            # Process each sensor mapping
+            for mapping in sensor_mapping:
+                field = mapping["field"]
+                if field in ruuvitag_data:
+                    value = self._safe_float(ruuvitag_data[field])
+
+                    # Create device ID for this specific sensor
+                    sensor_device_id = f"{device_id}_{field}"
+
+                    # Build metadata
+                    metadata = {
+                        "parent_device": device_id,
+                        "sensor_type": field
+                    }
+
+                    # Add any extra metadata specified in the mapping
+                    if "metadata_exra" in mapping:
+                        metadata.update(mapping["metadata_extra"])
+
+                    # Create message for this sensor
+                    sensor_message = {
+                        "device_id": sensor_device_id,
+                        "device_type": mapping["device_type"],
+                        "value": value,
+                        "unit": mapping["unit"],
+                        "is_anomaly": self._detect_anomaly({field: value}),
+                        "metadata": metadata,
+                        "tags": mapping["tags"],
+                    }
+
+                    # Add common properties
+                    sensor_message.update(common_properties)
+
+                    # Add to list of messages
+                    kafka_messages.append(sensor_message)
+
+            return kafka_messages
+        
         except Exception as e:
             log.error(f"Error adapting RuuviTag data: {e}")
             log.error(traceback.format_exc())
-            return None
+            return []
+
+    def _get_timestamp(self, ruuvitag_data: Dict[str, Any]) -> str:
+        """
+        Extract or generate ISO-8601 timestamp from RuuviTag data
+
+        Args:
+            ruuvitag_data: Raw data from RuuviTag
+        
+        Returns:
+            ISO-8601 formatted timestamp strings
+        """
+        if 'timestamp' in ruuvitag_data:
+            try:
+                # Try parsing as integer (seconds since epoch)
+                ts_value = ruuvitag_data['timestamp']
+                if isinstance(ts_value, str) and ts_value.isdigit():
+                    ts_value = int(ts_value)
+                
+                if isinstance(ts_value, int) or isinstance(ts_value, float):
+                    # If it's a small number (< 10000000), it might be relative time, not epoch
+                    if ts_value < 10000000: # Arbitrary threshold
+                        # Use current time instead
+                        return datetime.now(timezone.utc).isoformat()
+                    else:
+                        timestamp = datetime.fromtimestamp(ts_value, tz=timezone.utc)
+                        return timestamp.isoformat()
+                elif isinstance(ts_value, str) and "T" in ts_value:
+                    # Already looks like ISO format
+                    return ts_value
+                else:
+                    # Unknown format, use current time
+                    return datetime.now(timezone.utc).isoformat()
+            except Exception as e:
+                log.warning(f"Failed to parse timestamp '{ruuvitag_data['timestamp']}': {e}")
+                return datetime.now(timezone.utc).isoformat()
+        else:
+            return datetime.now(timezone.utc).isoformat()
+
 
     def _safe_float(self, value: Any) -> float:
         """
@@ -289,7 +374,7 @@ class RuuviTagAdapter:
         Detect anomalies in RuuviTag data.
 
         Args:
-            data: RuuviTag data
+            data: RuuviTag data for a single sensor or multiple sensors
 
         Returns:
             True if anomaly detected, False otherwise
@@ -299,30 +384,37 @@ class RuuviTagAdapter:
         thresholds = settings.ruuvitag.anomaly_thresholds
 
         try:
-            temp = float(data.get('temperature', 0))
-            humidity = float(data.get('humidity', 0))
-            pressure = float(data.get('pressure', 0))
-            battery = float(data.get('battery_voltage', 0))
+            if 'temperature' in data:
+                temp = self._safe_float(data['temperature'])
+                if temp > thresholds["temperature_max"] or temp < thresholds["temperature_min"]:
+                    log.warning(f"Anomaly detected: extreme temperature: {temp}°C")
+                    return True
 
-            # Check for anomalies
-            if temp > thresholds["temperature_max"] or temp < thresholds["temperature_min"]:
-                log.warning(f"Anomaly detected: extreme temperature: {temp}°C")
-                return True
-            if humidity > thresholds["humidity_max"] or humidity < thresholds["humidity_min"]:
-                log.warning(f"Anomaly detected: invalid humidity: {humidity}%")
-                return True
-            if pressure > thresholds["pressure_max"] or pressure < thresholds["pressure_min"]:
-                log.warning(f"Anomaly detected: extreme pressure: {pressure} Pa")
-                return True
-            if battery < thresholds["battery_low"] and battery > 0:
-                log.warning(f"Anomaly detected: low battery: {battery}V")
-                return True
+            # Check for humidity anomaly
+            if 'humidity' in data:
+                humidity = self._safe_float(data['humidity'])
+                if humidity > thresholds["humidity_max"] or humidity < thresholds["humidity_min"]:
+                    log.warning(f"Anomaly detected: invalid humidity: {humidity}%")
+                    return True
+
+            # Check for pressure anomaly
+            if 'pressure' in data:
+                pressure = self._safe_float(data['pressure'])
+                if pressure > thresholds["pressure_max"] or pressure < thresholds["pressure_min"]:
+                    log.warning(f"Anomaly detected: extreme pressure: {pressure} Pa")
+                    return True
+            
+             # Check for battery anomaly
+            if 'battery_voltage' in data:
+                battery = self._safe_float(data['battery_voltage'])
+                if battery < thresholds["battery_low"] and battery > 0:
+                    log.warning(f"Anomaly detected: low battery: {battery}V")
+                    return True
             
             return False
         except (ValueError, TypeError) as e:
             log.error(f"Error detecting anomalies: {e}")
             return False
-        
     
     def connect(self):
         """Connect to MQTT broker with retry."""
