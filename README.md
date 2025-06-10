@@ -1,37 +1,41 @@
 # IoT Data Ingestion Pipeline with Multi-Broker Kafka and Schema Registry
-A scalable and fault-tolerant data pipeline for ingesting, processing, and analyzing real-time IoT data collected from RuuviTag sensors using ESP32 as gateway and MQTT as network protocol to connect ESP32 and Confluent Kafka (with multiple brokers in KRaft mode).
+A scalable and fault-tolerant data pipeline for ingesting, processing, and analyzing real-time IoT data collected from RuuviTag sensors using ESP32 as gateway and MQTT as network protocol to connect ESP32, Confluent Kafka (with multiple brokers in KRaft mode), and PostgreSQL for data persistence.
 
 ## Project Overview
 This project implements a complete near real-time IoT data pipeline with the following components:
 
-- Real-Time Data Collection: Collects real-time data with real IoT devices - specifically RuuviTags as BLE sensors and an ESP32 as a gateway and MQTT for network protocol
+- **Real-Time Data Collection**: Collects real-time data with real IoT devices - specifically RuuviTags as BLE sensors and an ESP32 as a gateway and MQTT for network protocol
 - Data Simulation: Simulates multiple IoT sensors (temperature, humidity, pressure, motion, light, etc.,) to generate data
 - Data Ingestion: Uses Confluet-Kafka-Python for reliable, scalable data ingestion
 - Data Processing: Processes and filters the data, generating alerts for anomalies
-- Data Storage: Uses Apache-Iceberg for data storages
+- Data Storage: Uses PostgreSQL for persistent data storage with automatic archiving
 - Monitoring: Kafka UI for observability and operational insights
 
 ## Key Features
 - High availability: Replication across multiple Kafka brokers
-- Data Validation: Schema enforcement at produce time
+- Data Validation: Schema enforcement at produce time with Avro
 - Fault Tolerance: Automatic failover and recovery
 - Efficient Serialization: Compact binary format with Avro
 - Anomaly Detection: Real-time monitoring for unusual sensor readings
 - Horizontal Scaling: Add more brokers to handle increased load
 - Schema Management: Centralized control of data formats
+- Data Persistence: Reliable storage in PostgreSQL with data archiving
+- Data Analytics: Query historical data and generate insights
 
 ## Architecture
-![architecture.png](images/architecture2.png)
+![architecture.png](images/architecture3.png)
 
 ## Project Structure
 ```
 metrocloud-data-pipeline/
-├── README.md                               # Project Documentation
+├── database
+│   └── init.sql                            # PostgreSQL database initialization script
 ├── docker
+│   ├── docker-compose.yml                  # Docker Compose configuration for all services
 │   ├── Dockerfile.consumer                 # Docker file for consumer service
+│   ├── Dockerfile.postgresql_sink
 │   ├── Dockerfile.producer                 # Docker file for producer service
-│   ├── Dockerfile.ruuvitag_adapter         # Docker file for ruuvitag adapter service
-│   └── docker-compose.yml                  # Docker Compose configuration for all services
+│   └──Dockerfile.ruuvitag_adapter          # Docker file for ruuvitag adapter service
 ├── esp32
 │   └── ruuvitag_gateway
 │       ├── CMakeLists.txt                  # Defines project name and target
@@ -45,13 +49,16 @@ metrocloud-data-pipeline/
 │   ├── architecture.png
 │   └── architecture1.png
 │   └── architecture2.png
+├── manage_database.py                      # Database management script
 ├── mqtt                                    # MQTT protocol configuration
 │   └── config
 │       └── mosquitto.conf
+├── README.md                               # Project Documentation
 ├── requirements.txt                        # Python dependencies
 ├── run_consumer.py                         # Standalone script for consumer in Docker
+├── run_postgresql_sink.py                  # Standalone script for PostgreSQL sink
 ├── run_producer.py                         # Standalone script for producer in Docker
-├── run_ruuvitag_adapter.py
+├── run_ruuvitag_adapter.py                 # Standalone script for RuuviTag adapter
 └── src
     ├── __init__.py
     ├── __pycache__
@@ -72,11 +79,17 @@ metrocloud-data-pipeline/
     ├── data_receiver
     │   ├── __init__.py
     │   └── ruuvitag_adapter.py
+    ├── data_storage
+    │   ├── __init__.py
+    │   ├── database.py                     # PostgreSQL database connection and operations
+    │   ├── models.py                       # Data models for sensor readings
+    │   └── postgresql_sink.py              # Kafka to PostgreSQL data sink
     ├── schemas
     │   └── iot_sensor_reading.avsc         # Avro schema for IoT sensor data
     └── utils
         ├── __init__.py
         ├── __pycache__
+        ├── database_utils.py               # Database utility functions
         ├── logger.py                       # Enhanced logger configuration
         └── schema_registry.py              # Schema Registry client implementation
 ```
@@ -86,6 +99,8 @@ metrocloud-data-pipeline/
 - Confluent Kafka: Message broker for data ingestion
 - KRaft Mode: Kafka's Raft implementation (no ZooKeeper dependency)
 - Confluent Python Client: For producing and consuming Kafka messags
+- PostgreSQL: Relational database for data persistence
+- SQLAlchemy: SQL toolkit and ORM for database operations
 - Pydantic: For configuration management and data validation
 - Docker & Docker Compose: For containerization and orchestration
 - Kafka UI: Web interface for monitoring Kafka
@@ -222,6 +237,8 @@ If you haven't installed ESP-IDF yet, follow these steps:
     docker-compose logs -f ruuvitag-adapter # check RuuviTag adapter logs
     docker-compose logs -f kafka-broker-1 kafka-broker-2 kafka-broker-3 # check kafka broker logs
     docker-compose logs -f schema-registry # check schema registry logs
+    docker-compose logs -f postgresql # check PostgreSQL logs
+    docker-compose logs -f postgresql-sink # check PostgreSQL sink logs
     docker-compose logs -f kafka-producer # check Kafka producer logs (for simulated IoT sensor data only, it is replaced by ruuvitag-adapter for real IoT data using RuuviTag sensors)
     docker-compose logs -f kafka-consumer # check Kafka consumer logs
     ```
@@ -235,7 +252,19 @@ If you haven't installed ESP-IDF yet, follow these steps:
     docker exec -it kafka-broker-1 kafka-console-consumer --bootstrap-server kafka-broker-1:9092 --topic iot-sensor-data --from-beginning
     ```
 
-7. Access the Kafka UI
+7. Access PostgreSQL Database
+    ```bash
+    # Connect to PostgreSQL
+    docker exec -it postgresql psql -u iot_user -d iot_data
+
+    # View recent sensor readings
+    SELECT * FROM sensor_readings ORDER BY timestamp DESC LIMIT 10;
+
+    # Check device summary
+    SELECT * FROM devicy_summary;
+    ```
+
+8. Access the Kafka UI
     - Open your browser and navigate to http://localhost:8080
     - This allows you to monitor:
         - Kafka broker health
@@ -266,25 +295,35 @@ If you haven't installed ESP-IDF yet, follow these steps:
 ## Data Flow
 The data flows through the system as follows:
 
-1. RuuviTag -> ESP32
+1. **RuuviTag -> ESP32**
 - RuuviTags broadcast BLE advertisements with sensor data
 - ESP32 scans for advertisements and extracts sensor values
 - ESP32 formats data into JSON
 
-2. ESP32 -> MQTT -> RuuviTag Adapter
+2. **ESP32 -> MQTT -> RuuviTag Adapter**
 - ESP32 publishes JSON data to MQTT broker
 - RuuviTag adapter subscribes to MQTT topic
 - Adapter receives and validates data
 
-3. RuuviTag Adapter -> Kafka
+3. **RuuviTag Adapter -> Kafka**
 - Adapter transforms data to match Avro schema
 - Adapter publishes to Kafka topic with proper serialization
 - Schema Registry validates the data format
 
-4. Kafka -> Consumer
+4. **Kafka -> Consumer (Alerts)**
 - Consumer processes messages from Kafka
 - Alerts generated for anomalous readings
 - Data available for monitoring in Kafka UI
+
+5. **Kafka -> PostgreSQL Sink**
+- PostgreSQL sink consumes messages from Kafka
+- Data is validated and transformed
+- Batch insertion into PostgreSQL for persistence
+
+6. **PostgreSQL -> Analytics**
+- Historical data storage for long-term analysis
+- Data archiving for older records
+- Query interface for reporting and analytics
 
 ## Component Details
 ### RuuviTag Sensors:
@@ -312,6 +351,20 @@ The ESP32 gateway:
 - Publishes to Kafka with proper Avro serialization
 - Integrates smoothly with existing Kafka infrastructure
 
+### PostgreSQL Data Sink
+- Consumes IoT data from Kafka with Avro deserialization
+- Validates and transforms data for database storage
+- Performs batch insertions for optimal performance
+- Handles data archiving and cleanup automatically
+- Provides error handling and retry mechanisms
+
+### PostgreSQL Database
+- Stores sensor readings with full metadata
+- Supports geospatial data for device locations
+- Implements data archiving and retention policies
+- Provides views for common queries
+- Includes integrity constraints and indexes
+
 ### Kafka Pipeline
 The Kafka pipeline remains unchanged:
 - Multi-broker setup for fault tolerance
@@ -330,10 +383,10 @@ This project uses 3 Kafka brokers in a KRaft quorum:
 | Kafka3 |      9092     |     29094     | broker + controller |
 
 Benefits:
-- High Availabliity: No single point of failure with data replicated across multiple brokers
-- Scalability: Horizontal scaling by adding more brokers to handle increased load
-- Fault Tolerance: System continues to operate even if one or more brokers fail
-- Performance: Multiple brokers can handle more concurrent produceres and consumers
+- **High Availabliity**: No single point of failure with data replicated across multiple brokers
+- **Scalability**: Horizontal scaling by adding more brokers to handle increased load
+- **Fault Tolerance**: System continues to operate even if one or more brokers fail
+- *Performance**: Multiple brokers can handle more concurrent produceres and consumers
 
 #### KRaft Mode (Kafka Raft)
 This setup uses KRaft mode which eliminates the ZooKeeper dependency:
@@ -400,6 +453,11 @@ The application can be configured through environment variables:
 #### Kafka Cluster Configuration
 `Note:` `docker-compose.yml`
 
+#### PostgreSQL Configuration
+- `POSTGRES_DB`=iot_data
+- `POSTGRES_USER`=iot_user
+- `POSTGRES_PASSWORD`=iot_password
+
 #### IoT Simulator Configuration
 - `IOT_NUM_DEVICES`=8
 - `IOT_DATA_INTERVAL_SEC`=1.0
@@ -421,26 +479,47 @@ The application can be configured through environment variables:
 #### Kafka Consumer
 `Note:` `docker-compose.yml`
 
+#### PostgreSQL Sink Configuration
+- `DATA_SINK_BATCH_SIZE`=50
+- `DATA_SINK_COMMIT_INTERVAL`=5.0
+- `POSTGRES_BATCH_SIZE`=100
+- `POSTGRES_ARCHIVE_AFTER_DAYS`=30
+- `POSTGRES_RETENTION_DAYS`=90
+
 ### Logging Configuration
 - `LOG_LEVEL`=INFO
 
+## Database Management
+### Database Schema
+The PostgreSQL database includes:
+- **sensor_readings**: Main table for current sensor data
+- **sensor_readings_archive**: Archive table for old data
+- **device_summary**: View showing device statistics
+- **recent_sensor_readings**: View for last 24 hours
+- **anomalous_sensor_readings**: View for anomalous readings
+
+### Data Retention
+- **Active Data**: Kept in main table for 30 days (configurable)
+- **Archived Data**: Moved to archive table, kept for 90 days (configurable)
+- **Cleanup**: Automatic cleanup runs periodically via the PostgreSQL sink
+
 ## Troubleshooting
 ### ESP32 Issues
-1. Bluetooth Not Working
+1. **Bluetooth Not Working**
 - Ensure Bluetooth is enabled in the ESP-IDF configuration
 - Verify that the ESP32 module has Bluetooth capability and is properly initialized
 
-2. ESP32 not connecting to WiFi
+2. **ESP32 not connecting to WiFi**
 - Double-check the `SSID` and `password`
 - Ensure the WiFi network is 2.4 GHz (ESP32 doesn't support 5 GHz)
 - Check ESP32 serial monitor for connection errors
 
-3. No RuuviTag Data
+3. **No RuuviTag Data**
 - Confirm RuuviTags are powered and broadcasting
 - Place RuuviTags closer to the ESP32 during testing
 - Check if the RuuviTags are using a supported data format (usually format 5)
 
-4. Flash partition Issue
+4. **Flash partition Issue
 
     When the compiled binary size exceeds the available space in the flash partition, it gives overflow error. To fix this issue,
     - Reduce the size of the binary
@@ -456,36 +535,60 @@ The application can be configured through environment variables:
     - Save the configuration and exit
 
 ### MQTT Issues
-1. ESP32 not connecting to MQTT broker in docker
+1. **ESP32 not connecting to MQTT broker in docker**
 - Verify the MQTT broker IP address is correct
 - Ensure port 1883 is open (If mosquitto broker service is active in local machine at port 1883, stop the service in the local machine)
 - Check that the MQTT broker in docker is running and accessible from the ESP32
 - Ensure no firewall is blocking port 1883
 
-2. No data in MQTT topic
+2. **No data in MQTT topic**
 - Check ESP32 logs for MQTT publish errors
 - Verify topic name matches between ESP32 and adapter
 
 ### Kafka Issues
-1. RuuviTag adapter not connecting to Kafka
+1. **RuuviTag adapter not connecting to Kafka**
 - Check Kafka broker status
 - Verify configuration parameters
 - Look for connection errors in logs
 
-2. Schema validation errors
+2. **Schema validation errors**
 - Verify the data format matches the schema
 - Check Schema Registry status
 - Review adapter transformation logic
 
-3. Brokers Won't Start
+3. **Brokers Won't Start**
 - Check logs for configuration errors:
     ```bash
     docker-compose logs kafka1 kafka2 kafka3
     ```
-4. Kafka Connection Issues
+4. **Kafka Connection Issues**
 - Ensure all containers are on the same Docker network
 - Check that Kafka brokers have had enough time to initialize before producers/consumers connect
 - Verify the advertised listeners are configured correctly for both internal and external access
+
+### PostgreSQL Issues
+1. **Database Connection Failures**
+- Check PostgreSQL service status:
+    ```bash
+    docker-compose logs postgresql
+    ```
+- Verify database credentials
+- Ensure database initialization completed
+
+2. **PostgreSQL Sink Not Working**
+- Check sink service logs:
+    ```bash
+    docker-compose logs postgresql-sink
+    ```
+- Verify Kafka connectivity
+- Check database permissions
+
+5. **SQLAlchemy 'metadata' Attribute Error**
+- This has been fixed by renaming the column to `device_metadata`
+- If you have existing data, run the migration:
+    ```bash
+    docker exec -it postgresql psql -U iot_user -d iot_data -f /docker-entrypoint-initdb.d/02-migrate.sql
+    ```
 
 ### Producer/Consumer Issues
 - Check the logs for connection errors or exceptions
@@ -509,6 +612,12 @@ The application can be configured through environment variables:
 - Monitor WiFi connectivity
 - Update firmware as needed
 
+### Database Maintenance
+- Monitor disk space usage
+- Run periodic cleanup operations
+- Check data integrity regularly
+- Monitor query performance
+
 ### System Monitoring
 - Use Kafka UI to monitor message flow
 - Check logs for errors and anomalies
@@ -528,6 +637,13 @@ The consumer is configured with:
 - Cooperative rebalancing for smooth partition transitions
 - Auto-commit of offsets for recovery
 - Error handling and retry logic
+
+### Database Resilience
+The PostgreSQL sink provides:
+- Batch processing for optimal performance
+- Automatic retry on database connection failures
+- Data validation before insertion
+- Graceful error handling and logging
 
 ## Monitoring
 The Kafka UI provides insights into the health and performance of Kafka cluster:
@@ -551,11 +667,15 @@ The system is designed to automatically recover from most failure scenarios. In 
 1. Ensure all configuration files are intact
 2. Start the cluster with `docker-compose up -d`
 3. The brokers will recover data from the persistent volumes
+4. PostgreSQL data is preserved in persistent volumes
 
 ## Next Steps and Enhancements
 Further enhancements for this project:
-1. Add data storage with ... 
-2. Implement data processing with ...
-3. Create visualization dashboards with ...
-4. Implement machine learning for anomaly detection
-5. Add authentication and TLS encryption for Kafka
+1. **Analytics Dashboard**: Create real-time dashboards with Grafana or similar tools
+2. **Data Processing**: Implement stream processing with Kafka Streams or Apache Flink
+3. **Machine Learning**: Add anomaly detection and predictive analytics
+4. **API Layer**: Create REST API for data access and device management
+5. **Security**: Add authentication and TLS encryption for Kafka and PostgreSQL
+6. **Monitoring**: Implement comprehensive monitoring with Prometheus and Grafana
+7. **Data Warehouse**: Add data warehouse integration for long-term analytics
+8. **Mobile App**: Create mobile application for real-time monitoring

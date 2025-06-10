@@ -247,7 +247,8 @@ class SensorReadingDTO:
                 timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
             except ValueError:
                 # Fallback to current time
-                timestamp = datetime.utcnow()
+                # timestamp = datetime.utcnow() -- deprecated
+                timestamp = datetime.now(datetime.timezone.utc)
         elif isinstance(timestamp_str, datetime):
             timestamp = timestamp_str
         else:
