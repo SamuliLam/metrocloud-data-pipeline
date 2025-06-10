@@ -230,14 +230,14 @@ class IoTDevice:
         if random.random() < 0.01:  # 1% chance to change status
             self.status = random.choice(["ACTIVE", "IDLE", "MAINTENANCE", "ERROR", "UNKNOWN"])
 
-        # Create metadata field for additional device info
-        metadata = {
+        # Create device metadata field for additional device info
+        device_metadata = {
             "manufacturer": random.choice(["SensorTech", "IoTDevices", "SmartSense", "TechnoIoT"]),
             "model": f"Model-{random.choice(['A', 'B', 'C', 'X'])}{random.randint(100, 999)}",
             "installation_date": f"2023-{random.randint(1,12):02d}-{random.randint(1,28):02d}"
         }
         
-        # Create the reading object with all metadata according to Avro schema
+        # Create the reading object with all device metadata according to Avro schema
         reading = {
             "device_id": self.device_id,
             "device_type": self.device_type,
@@ -249,7 +249,7 @@ class IoTDevice:
             "signal_strength": signal_strength,
             "is_anomaly": is_anomaly,
             "firmware_version": self.firmware_version,
-            "metadata": metadata,
+            "device_metadata": device_metadata,
             "status": self.status,
             "tags": self.tags,
             "maintenance_date": self.maintenance_date

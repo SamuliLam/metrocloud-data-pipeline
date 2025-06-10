@@ -89,7 +89,7 @@ class KafkaProducer:
                 # Convert topic config dict to the format expected by NewTopic
                 config = {}
                 for k, v in topic_config.items():
-                    # Convert min_insync_replicas to min.insync.replicas format
+                    # Convert min_insync_replicas, retention_ms and cleanup_policy to format min.insync.replicas, retention.ms and cleanup.policy respectively 
                     key = k.replace('_', '.')
                     config[key] = str(v)
 

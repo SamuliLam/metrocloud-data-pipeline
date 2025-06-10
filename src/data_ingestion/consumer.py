@@ -318,12 +318,12 @@ class IoTAlertConsumer(KafkaConsumer):
         status = message.get('status', 'UNKNOWN')  # Get status from updated schema
         tags = message.get('tags', [])  # Get tags from updated schema
 
-        # Get metadata
-        metadata = message.get('metadata', {})
+        # Get device metadata
+        device_metadata = message.get('device_metadata', {})
 
-        # Check if this is a RuuviTag sensor (they have parent_device in metadata)
-        parent_device_id = metadata.get('parent_device')
-        sensor_type = metadata.get('sensor_type', '')
+        # Check if this is a RuuviTag sensor (they have parent_device in device metadata)
+        parent_device_id = device_metadata.get('parent_device')
+        sensor_type = device_metadata.get('sensor_type', '')
 
         # Format numeric values nicely
         if isinstance(value, (int, float)):
@@ -410,7 +410,7 @@ class IoTAlertConsumer(KafkaConsumer):
 
             # Acceleration sensor handling
             elif device_type.lower() == "acceleration_sensor":
-                axis = metadata.get('axis', 'unknown')
+                axis = device_metadata.get('axis', 'unknown')
                 log.info(f"Device: {device_id} ({device_type}) | Acceleration ({axis}): {formatted_value}{unit} | Time: {timestamp}")
             
             # Movement counter handling

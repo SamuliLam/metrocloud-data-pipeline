@@ -60,6 +60,33 @@ kafka:
       port: 9092
       external_port: 29094
 
+# PostgreSQL configuration
+postgresql:
+  host: postgresql
+  port: 5432
+  database: iot_data
+  username: iot_user
+  password: iot_password
+  
+  # Connection pool settings
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+  
+  # Performance settings
+  batch_size: 100
+  commit_interval: 5.0  # seconds
+  
+  # Table configuration
+  main_table: sensor_readings
+  archive_table: sensor_readings_archive
+  
+  # Data retention
+  retention_days: 90
+  archive_after_days: 30
+
+
 # MQTT configuration
 mqtt:
   broker_host: mosquitto
@@ -180,6 +207,14 @@ consumer:
   
   # Load balancing
   partition_assignment_strategy: cooperative-sticky
+
+# Data Sink configuration
+data_sink:
+  consumer_group_id: iot-data-sink
+  batch_size: 50
+  commit_interval: 5.0
+  max_retries: 3
+  retry_backoff: 2.0
 
 # UI configuration
 kafka_ui:

@@ -25,6 +25,151 @@ def load_yaml_config():
 # Load configuration from YAML file
 yaml_config = load_yaml_config()
 
+class PostgreSQLSettings(BaseSettings):
+    """
+    PostgreSQL database configuration settings.
+    
+    Attributes:
+        host: Database host
+        port: Database port
+        database: Database name
+        username: Database username
+        password: Database password
+        pool_size: Connection pool size
+        max_overflow: Maximum overflow connections
+        pool_timeout: Pool timeout in seconds
+        pool_recycle: Pool recycle time in seconds
+        batch_size: Batch size for bulk operations
+        commit_interval: Commit interval in seconds
+        main_table: Main table name for sensor readings
+        archive_table: Archive table name
+        retention_days: Data retention period in days
+        archive_after_days: Archive data after days
+    """
+    host: str = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('host') or
+                        os.getenv("POSTGRES_HOST", "postgresql")
+    )
+    
+    port: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('port') or 
+                        int(os.getenv("POSTGRES_PORT", "5432"))
+    )
+    
+    database: str = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('database') or 
+                        os.getenv("POSTGRES_DB", "iot_data")
+    )
+    
+    username: str = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('username') or 
+                        os.getenv("POSTGRES_USER", "iot_user")
+    )
+    
+    password: str = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('password') or 
+                        os.getenv("POSTGRES_PASSWORD", "iot_password")
+    )
+    
+    # Connection pool settings
+    pool_size: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('pool_size') or 
+                        int(os.getenv("POSTGRES_POOL_SIZE", "5"))
+    )
+    
+    max_overflow: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('max_overflow') or 
+                        int(os.getenv("POSTGRES_MAX_OVERFLOW", "10"))
+    )
+    
+    pool_timeout: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('pool_timeout') or 
+                        int(os.getenv("POSTGRES_POOL_TIMEOUT", "30"))
+    )
+    
+    pool_recycle: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('pool_recycle') or 
+                        int(os.getenv("POSTGRES_POOL_RECYCLE", "3600"))
+    )
+    
+    # Performance settings
+    batch_size: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('batch_size') or 
+                        int(os.getenv("POSTGRES_BATCH_SIZE", "100"))
+    )
+    
+    commit_interval: float = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('commit_interval') or 
+                        float(os.getenv("POSTGRES_COMMIT_INTERVAL", "5.0"))
+    )
+    
+    # Table configuration
+    main_table: str = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('main_table') or 
+                        os.getenv("POSTGRES_MAIN_TABLE", "sensor_readings")
+    )
+    
+    archive_table: str = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('archive_table') or 
+                        os.getenv("POSTGRES_ARCHIVE_TABLE", "sensor_readings_archive")
+    )
+    
+    # Data retention
+    retention_days: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('retention_days') or 
+                        int(os.getenv("POSTGRES_RETENTION_DAYS", "90"))
+    )
+    
+    archive_after_days: int = Field(
+        default_factory=lambda: yaml_config.get('postgresql', {}).get('archive_after_days') or 
+                        int(os.getenv("POSTGRES_ARCHIVE_AFTER_DAYS", "30"))
+    )
+    
+    @property
+    def database_url(self) -> str:
+        """
+        Get the database URL for SQLAlchemy.
+        
+        Returns:
+            Database URL string
+        """
+        return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+
+class DataSinkSettings(BaseSettings):
+    """
+    Data Sink configuration settings.
+    
+    Attributes:
+        consumer_group_id: Consumer group ID for the data sink
+        batch_size: Batch size for database operations
+        commit_interval: Interval between commits in seconds
+        max_retries: Maximum number of retries for failed operations
+        retry_backoff: Backoff time between retries in seconds
+    """
+    consumer_group_id: str = Field(
+        default_factory=lambda: yaml_config.get('data_sink', {}).get('consumer_group_id') or
+                        os.getenv("DATA_SINK_CONSUMER_GROUP_ID", "iot-data-sink")
+    )
+    
+    batch_size: int = Field(
+        default_factory=lambda: yaml_config.get('data_sink', {}).get('batch_size') or 
+                        int(os.getenv("DATA_SINK_BATCH_SIZE", "50"))
+    )
+    
+    commit_interval: float = Field(
+        default_factory=lambda: yaml_config.get('data_sink', {}).get('commit_interval') or 
+                        float(os.getenv("DATA_SINK_COMMIT_INTERVAL", "5.0"))
+    )
+    
+    max_retries: int = Field(
+        default_factory=lambda: yaml_config.get('data_sink', {}).get('max_retries') or 
+                        int(os.getenv("DATA_SINK_MAX_RETRIES", "3"))
+    )
+    
+    retry_backoff: float = Field(
+        default_factory=lambda: yaml_config.get('data_sink', {}).get('retry_backoff') or 
+                        float(os.getenv("DATA_SINK_RETRY_BACKOFF", "2.0"))
+    )
 
 class MQTTSettings(BaseSettings):
     """
@@ -537,11 +682,13 @@ class Settings(BaseSettings):
         app_name: Name of the application
         environment: Deployment environment (development, staging, production)
         kafka: Kafka configuration settings
+        postgresql: PostgreSQL configuration settings
         schema_registry: Schema Registry configuration settings
         iot_simulator: IoT simulator configuration settings
         logging: Logging configuration settings
         producer: Producer configuration settings
         Consumer: Consumer configuration settings
+        data_sink: Data sink configuration settings
     """
     app_name: str = Field(
         default_factory=lambda: yaml_config.get('app', {}).get('name') or 
@@ -554,6 +701,7 @@ class Settings(BaseSettings):
     )
 
     kafka: KafkaSettings = KafkaSettings()
+    postgresql: PostgreSQLSettings = PostgreSQLSettings()
     mqtt: MQTTSettings = MQTTSettings()
     ruuvitag: RuuviTagSettings = RuuviTagSettings()
     schema_registry: SchemaRegistrySettings = SchemaRegistrySettings()
@@ -561,6 +709,7 @@ class Settings(BaseSettings):
     logging: LoggingSettings = LoggingSettings()
     producer: ProducerSettings = ProducerSettings()
     consumer: ConsumerSettings = ConsumerSettings()
+    data_sink: DataSinkSettings = DataSinkSettings()
     
     class Config:
         """Configuration for the Settings class."""

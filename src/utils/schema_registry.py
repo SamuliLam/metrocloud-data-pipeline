@@ -104,8 +104,8 @@ class SchemaRegistry:
         avro_reading = dict(sensor_reading)
         
         # Ensure all fields are present with appropriate types
-        if 'metadata' not in avro_reading or avro_reading['metadata'] is None:
-            avro_reading['metadata'] = {}
+        if 'device_metadata' not in avro_reading or avro_reading['device_metadata'] is None:
+            avro_reading['device_metadata'] = {}
             
         # Convert any None values to appropriate defaults for required fields
         if avro_reading.get('signal_strength') is None:
@@ -215,12 +215,12 @@ class SchemaRegistry:
         """
         try:
             if version == "latest":
-                metadata = self.schema_registry.get_latest_version(subject)
+                device_metadata = self.schema_registry.get_latest_version(subject)
                 return {
                     "subject": subject, 
-                    "version": metadata.version, 
-                    "id": metadata.schema_id,
-                    "schema": metadata.schema.schema_str
+                    "version": device_metadata.version, 
+                    "id": device_metadata.schema_id,
+                    "schema": device_metadata.schema.schema_str
                 }
             else:
                 return self.schema_registry.get_version(subject, version)

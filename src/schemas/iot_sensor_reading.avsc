@@ -120,7 +120,7 @@
       "doc": "Device firmware version"
     },
     {
-      "name": "metadata",
+      "name": "device_metadata",
       "type": [
         {
           "type": "map",
@@ -129,7 +129,7 @@
         "null"
       ],
       "default": null,
-      "doc": "Additional metadata for extensibility"
+      "doc": "Additional device metadata for extensibility"
     },
     {
       "name": "status",

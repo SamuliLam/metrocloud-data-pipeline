@@ -208,6 +208,31 @@ services:
     networks:
       - kafka-net # Access Kafka over Docker network
 
+  # PostgreSQL Database
+  postgresql:
+    image: postgres:15-alpine
+    container_name: postgresql
+    hostname: postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-iot_data}
+      POSTGRES_USER: ${POSTGRES_USER:-iot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-iot_user} -d ${POSTGRES_DB:-iot_data}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      
   # MQTT Broker for ESP32 Gateway
   mosquitto:
     image: eclipse-mosquitto:2.0
@@ -277,6 +302,62 @@ services:
       - ruuvitag-adapter # Wait until ruuvitag-adapter is available
     networks:
       - kafka-net
+  
+  # PostgreSQL Data Sink Service
+  postgresql-sink:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.postgresql_sink
+    container_name: postgresql-sink
+    hostname: postgresql-sink
+    environment:
+      # Database configuration
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-iot_data}
+      POSTGRES_USER: ${POSTGRES_USER:-iot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
+      
+      # Kafka configuration
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
+      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data}
+      DATA_SINK_CONSUMER_GROUP_ID: ${DATA_SINK_CONSUMER_GROUP_ID:-iot-data-sink}
+      
+      # Schema Registry configuration
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      
+      # Data sink specific configuration
+      DATA_SINK_BATCH_SIZE: ${DATA_SINK_BATCH_SIZE:-50}
+      DATA_SINK_COMMIT_INTERVAL: ${DATA_SINK_COMMIT_INTERVAL:-5.0}
+      DATA_SINK_MAX_RETRIES: ${DATA_SINK_MAX_RETRIES:-3}
+      DATA_SINK_RETRY_BACKOFF: ${DATA_SINK_RETRY_BACKOFF:-2.0}
+      
+      # PostgreSQL specific settings
+      POSTGRES_BATCH_SIZE: ${POSTGRES_BATCH_SIZE:-100}
+      POSTGRES_COMMIT_INTERVAL: ${POSTGRES_COMMIT_INTERVAL:-5.0}
+      POSTGRES_ARCHIVE_AFTER_DAYS: ${POSTGRES_ARCHIVE_AFTER_DAYS:-30}
+      POSTGRES_RETENTION_DAYS: ${POSTGRES_RETENTION_DAYS:-90}
+      
+      CONFIG_FILE_PATH: /app/config.yaml
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ../src/config/config.yaml:/app/config.yaml
+    depends_on:
+      - postgresql
+      - kafka1
+      - kafka2
+      - kafka3
+      - schema-registry
+      - ruuvitag-adapter
+    networks:
+      - kafka-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import psycopg2; psycopg2.connect(host=\"postgresql\", database=\"iot_data\", user=\"iot_user\", password=\"iot_password\")'"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
 # Docker Volume for Kafka Storage
 volumes:
@@ -290,6 +371,8 @@ volumes:
     driver: local
   kafka-ui:
     driver: local
+  postgresql_data:
+    driver: local
   mosquitto_data:
     driver: local
   mosquitto_log:
@@ -297,6 +380,8 @@ volumes:
   ruuvitag-adapter:
     driver: local
   kafka-consumer:
+    driver: local
+  postgresql-sink:
     driver: local
 
 # Docker Network for All Services

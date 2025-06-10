@@ -124,9 +124,9 @@ class RuuviTagAdapter:
                     self.kafka_producer.send_message(kafka_message)
 
                 # Store device data for monitoring (using the parent device ID)
-                parent_device_id = kafka_message.get('metadata', {}).get('parent_device') 
+                parent_device_id = kafka_message.get('device_metadata', {}).get('parent_device') 
                 device_id = kafka_message.get('device_id')
-                sensor_type = kafka_message.get('metadata', {}).get('sensor_type', 'unknown')
+                sensor_type = kafka_message.get('device_metadata', {}).get('sensor_type', 'unknown')
 
                 log.debug(f"Processed and sent {sensor_type} reading from device: {parent_device_id}, value: {kafka_message.get('value')}{kafka_message.get('unit')}")
 
@@ -262,15 +262,15 @@ class RuuviTagAdapter:
                     # Create device ID for this specific sensor
                     sensor_device_id = f"{device_id}_{field}"
 
-                    # Build metadata
-                    metadata = {
+                    # Build device metadata
+                    device_metadata = {
                         "parent_device": device_id,
                         "sensor_type": field
                     }
 
                     # Add any extra metadata specified in the mapping
                     if "metadata_exra" in mapping:
-                        metadata.update(mapping["metadata_extra"])
+                        device_metadata.update(mapping["metadata_extra"])
 
                     # Create message for this sensor
                     sensor_message = {
@@ -279,7 +279,7 @@ class RuuviTagAdapter:
                         "value": value,
                         "unit": mapping["unit"],
                         "is_anomaly": self._detect_anomaly({field: value}),
-                        "metadata": metadata,
+                        "device_metadata": device_metadata,
                         "tags": mapping["tags"],
                     }
 

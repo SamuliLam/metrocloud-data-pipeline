@@ -42,9 +42,9 @@ def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
             consumer = Consumer(consumer_conf)
             
             # List topics as a connectivity test
-            metadata = consumer.list_topics(timeout=10)
-            if metadata:
-                log.info(f"Successfully listed {len(metadata.topics)} topics from Kafka")
+            device_metadata = consumer.list_topics(timeout=10)
+            if device_metadata:
+                log.info(f"Successfully listed {len(device_metadata.topics)} topics from Kafka")
             
             # Close the consumer properly
             consumer.close()

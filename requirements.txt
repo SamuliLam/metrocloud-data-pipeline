@@ -10,3 +10,7 @@ fastavro==1.10.0 # Fast Avro implementation
 requests==2.32.3 # For Schema Registry HTTP requests
 pyyaml==6.0.2 # For YAML configuration parsing
 paho-mqtt==1.6.1 # For mqtt connection
+
+psycopg2-binary==2.9.9 # PostgreSQL adapter for Python
+sqlalchemy==2.0.23 # SQL toolkit and ORM
+alembic==1.13.1 # Database migration tool
