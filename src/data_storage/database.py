@@ -223,9 +223,9 @@ class TimescaleDBManager:
             True if successful, False otherwise
         """
         try:
-            # Prepare the INSERT query
-            query = """
-                INSERT INTO sensor_readings (
+            # Prepare the INSERT query for TimescaleDB
+            query = f"""
+                INSERT INTO {settings.timescaledb.main_table} (
                     device_id, device_type, timestamp, value, unit,
                     latitude, longitude, building, floor, zone, room,
                     battery_level, signal_strength, firmware_version,
@@ -290,8 +290,8 @@ class TimescaleDBManager:
             with psycopg2.connect(settings.timescaledb.database_url) as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     # Prepare the INSERT query with ON CONFLICT handling
-                    query = """
-                        INSERT INTO sensor_readings (
+                    query = f"""
+                        INSERT INTO {settings.timescaledb.main_table} (
                             device_id, device_type, timestamp, value, unit,
                             latitude, longitude, building, floor, zone, room,
                             battery_level, signal_strength, firmware_version,
@@ -359,8 +359,8 @@ class TimescaleDBManager:
         """
         try:
             if device_id:
-                query = """
-                    SELECT * FROM sensor_readings 
+                query = f"""
+                    SELECT * FROM {settings.timescaledb.main_table} 
                     WHERE device_id = :device_id 
                     AND timestamp >= NOW() - INTERVAL '%s hours'
                     ORDER BY timestamp DESC 
@@ -368,8 +368,8 @@ class TimescaleDBManager:
                 """ % hours
                 parameters = {'device_id': device_id, 'limit': limit}
             else:
-                query = """
-                    SELECT * FROM sensor_readings 
+                query = f"""
+                    SELECT * FROM {settings.timescaledb.main_table}
                     WHERE timestamp >= NOW() - INTERVAL '%s hours'
                     ORDER BY timestamp DESC 
                     LIMIT :limit
@@ -438,7 +438,7 @@ class TimescaleDBManager:
                     AVG(value) as avg_value,
                     MIN(value) as min_value,
                     MAX(value) as max_value
-                FROM sensor_readings
+                FROM {settings.timescaledb.main_table}
                 WHERE device_id = :device_id
                     AND timestamp >= {start_time}
                     AND timestamp <= {end_time}
