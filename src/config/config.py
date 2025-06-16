@@ -25,9 +25,9 @@ def load_yaml_config():
 # Load configuration from YAML file
 yaml_config = load_yaml_config()
 
-class PostgreSQLSettings(BaseSettings):
+class TimescaleDBSettings(BaseSettings):
     """
-    PostgreSQL database configuration settings.
+    TimescaleDB database configuration settings.
     
     Attributes:
         host: Database host
@@ -45,75 +45,78 @@ class PostgreSQLSettings(BaseSettings):
         archive_table: Archive table name
         retention_days: Data retention period in days
         archive_after_days: Archive data after days
+        chunk_time_interval: TimescaleDB chunk time interval
+        compression_after: Compress data after this interval
+        retention_policy: Data retention policy
     """
     host: str = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('host') or
-                        os.getenv("POSTGRES_HOST", "postgresql")
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('host') or
+                        os.getenv("TIMESCALEDB_HOST", "timescaledb")
     )
     
     port: int = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('port') or 
-                        int(os.getenv("POSTGRES_PORT", "5432"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('port') or 
+                        int(os.getenv("TIMESCALEDB_PORT", "5432"))
     )
     
     database: str = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('database') or 
-                        os.getenv("POSTGRES_DB", "iot_data")
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('database') or 
+                        os.getenv("TIMESCALEDB_DB", "iot_data")
     )
     
     username: str = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('username') or 
-                        os.getenv("POSTGRES_USER", "iot_user")
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('username') or 
+                        os.getenv("TIMESCALEDB_USER", "iot_user")
     )
     
     password: str = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('password') or 
-                        os.getenv("POSTGRES_PASSWORD", "iot_password")
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('password') or 
+                        os.getenv("TIMESCALEDB_PASSWORD", "iot_password")
     )
     
     # Connection pool settings
     pool_size: int = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('pool_size') or 
-                        int(os.getenv("POSTGRES_POOL_SIZE", "5"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('pool_size') or 
+                        int(os.getenv("TIMESCALEDB_POOL_SIZE", "5"))
     )
     
     max_overflow: int = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('max_overflow') or 
-                        int(os.getenv("POSTGRES_MAX_OVERFLOW", "10"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('max_overflow') or 
+                        int(os.getenv("TIMESCALEDB_MAX_OVERFLOW", "10"))
     )
     
     pool_timeout: int = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('pool_timeout') or 
-                        int(os.getenv("POSTGRES_POOL_TIMEOUT", "30"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('pool_timeout') or 
+                        int(os.getenv("TIMESCALEDB_POOL_TIMEOUT", "30"))
     )
     
     pool_recycle: int = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('pool_recycle') or 
-                        int(os.getenv("POSTGRES_POOL_RECYCLE", "3600"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('pool_recycle') or 
+                        int(os.getenv("TIMESCALEDB_POOL_RECYCLE", "3600"))
     )
     
     # Performance settings
     batch_size: int = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('batch_size') or 
-                        int(os.getenv("POSTGRES_BATCH_SIZE", "100"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('batch_size') or 
+                        int(os.getenv("TIMESCALEDB_BATCH_SIZE", "100"))
     )
     
     commit_interval: float = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('commit_interval') or 
-                        float(os.getenv("POSTGRES_COMMIT_INTERVAL", "5.0"))
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('commit_interval') or 
+                        float(os.getenv("TIMESCALEDB_COMMIT_INTERVAL", "5.0"))
     )
     
     # Table configuration
     main_table: str = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('main_table') or 
-                        os.getenv("POSTGRES_MAIN_TABLE", "sensor_readings")
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('main_table') or 
+                        os.getenv("TIMESCALEDB_MAIN_TABLE", "sensor_readings")
     )
     
     archive_table: str = Field(
-        default_factory=lambda: yaml_config.get('postgresql', {}).get('archive_table') or 
-                        os.getenv("POSTGRES_ARCHIVE_TABLE", "sensor_readings_archive")
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('archive_table') or 
+                        os.getenv("TIMESCALEDB_ARCHIVE_TABLE", "sensor_readings_archive")
     )
-    
+
     # Data retention
     retention_days: int = Field(
         default_factory=lambda: yaml_config.get('postgresql', {}).get('retention_days') or 
@@ -123,6 +126,28 @@ class PostgreSQLSettings(BaseSettings):
     archive_after_days: int = Field(
         default_factory=lambda: yaml_config.get('postgresql', {}).get('archive_after_days') or 
                         int(os.getenv("POSTGRES_ARCHIVE_AFTER_DAYS", "30"))
+    )
+    
+    # TimescaleDB specific settings
+    chunk_time_interval: str = Field(
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('chunk_time_interval') or 
+                        os.getenv("TIMESCALEDB_CHUNK_TIME_INTERVAL", "1 day")
+    )
+    
+    compression_after: str = Field(
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('compression_after') or 
+                        os.getenv("TIMESCALEDB_COMPRESSION_AFTER", "7 days")
+    )
+    
+    drop_after: str = Field(
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('drop_after') or 
+                        os.getenv("TIMESCALEDB_DROP_AFTER", "90 days")
+    )
+    
+    # Continuous aggregates settings
+    enable_continuous_aggregates: bool = Field(
+        default_factory=lambda: yaml_config.get('timescaledb', {}).get('enable_continuous_aggregates') or 
+                        os.getenv("TIMESCALEDB_ENABLE_CONTINUOUS_AGGREGATES", "True").lower() in ("true", "1", "yes")
     )
     
     @property
@@ -682,6 +707,7 @@ class Settings(BaseSettings):
         app_name: Name of the application
         environment: Deployment environment (development, staging, production)
         kafka: Kafka configuration settings
+        timescaledb: TimescaleDB configuration settings
         postgresql: PostgreSQL configuration settings
         schema_registry: Schema Registry configuration settings
         iot_simulator: IoT simulator configuration settings
@@ -701,7 +727,7 @@ class Settings(BaseSettings):
     )
 
     kafka: KafkaSettings = KafkaSettings()
-    postgresql: PostgreSQLSettings = PostgreSQLSettings()
+    timescaledb: TimescaleDBSettings = TimescaleDBSettings()
     mqtt: MQTTSettings = MQTTSettings()
     ruuvitag: RuuviTagSettings = RuuviTagSettings()
     schema_registry: SchemaRegistrySettings = SchemaRegistrySettings()
@@ -711,6 +737,7 @@ class Settings(BaseSettings):
     consumer: ConsumerSettings = ConsumerSettings()
     data_sink: DataSinkSettings = DataSinkSettings()
     
+
     class Config:
         """Configuration for the Settings class."""
         env_file = ".env"

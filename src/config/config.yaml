@@ -60,9 +60,9 @@ kafka:
       port: 9092
       external_port: 29094
 
-# PostgreSQL configuration
-postgresql:
-  host: postgresql
+# TimeScaleDB configuration
+timescaledb:
+  host: timescaledb
   port: 5432
   database: iot_data
   username: iot_user
@@ -81,11 +81,18 @@ postgresql:
   # Table configuration
   main_table: sensor_readings
   archive_table: sensor_readings_archive
-  
+
   # Data retention
   retention_days: 90
   archive_after_days: 30
+  
+  # TimescaleDB specific settings
+  chunk_time_interval: "1 day"
+  compress_after: "7 days"
+  drop_after: "90 days"
 
+  # Continuous aggregates
+  enable_continuous_aggregates: true
 
 # MQTT configuration
 mqtt:

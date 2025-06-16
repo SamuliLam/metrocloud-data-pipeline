@@ -137,7 +137,7 @@ class IoTDevice:
             Dictionary containing the simulated reading data
         """
         # timestamp = datetime.utcnow().isoformat() + "Z" -- deprecated
-        timestamp = datetime.now(datetime.timezone.utc).isofor() + "Z"
+        timestamp = datetime.now(datetime.timezone.utc).isoformat() + "Z"
         
         # Generate sensor reading based on device type
         if self.device_type == "temperature":

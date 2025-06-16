@@ -3,7 +3,7 @@ Data models for sensor readings and related entities.
 """
 
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Text, JSON, Enum as SQLEnum
@@ -247,12 +247,11 @@ class SensorReadingDTO:
                 timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
             except ValueError:
                 # Fallback to current time
-                # timestamp = datetime.utcnow() -- deprecated
-                timestamp = datetime.now(datetime.timezone.utc)
+                timestamp = datetime.now(timezone.utc).isoformat()
         elif isinstance(timestamp_str, datetime):
             timestamp = timestamp_str
         else:
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(timezone.utc).isoformat()
         
         # Parse maintenance date
         maintenance_date_str = message.get('maintenance_date')

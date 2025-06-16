@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code and schema
 COPY src/ ./src/
-COPY run_postgresql_sink.py .
+COPY run_timescaledb_sink.py .
 
 # Create schema directory if it doesn't exist
 RUN mkdir -p /app/src/schemas
@@ -26,5 +26,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && \
 ENV CONFIG_FILE_PATH=/app/config.yaml
 ENV PYTHONUNBUFFERED=1
 
-# Run the PostgreSQL sink script with wait for dependencies
-CMD ["/bin/bash", "-c", "/usr/local/bin/wait-for-it.sh postgresql:5432 -t 180 && /usr/local/bin/wait-for-it.sh schema-registry:8081 -t 180 && python run_postgresql_sink.py"]
+# Run the TimescaleDB sink script with wait for dependencies
+CMD ["/bin/bash", "-c", "/usr/local/bin/wait-for-it.sh timescaledb:5432 -t 180 && /usr/local/bin/wait-for-it.sh schema-registry:8081 -t 180 && python run_timescaledb_sink.py"]

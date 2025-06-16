@@ -64,7 +64,7 @@ class DatabaseUtils:
             result = {}
             
             # Check main table
-            main_table = settings.postgresql.main_table
+            main_table = settings.timescaledb.main_table
             query = """
                 SELECT 
                     column_name, 
@@ -85,7 +85,7 @@ class DatabaseUtils:
             }
             
             # Check archive table
-            archive_table = settings.postgresql.archive_table
+            archive_table = settings.timescaledb.archive_table
             archive_columns = db_manager.execute_query(query, {'table_name': archive_table})
             result[archive_table] = {
                 'exists': len(archive_columns) > 0,
@@ -129,7 +129,7 @@ class DatabaseUtils:
             result = {}
             
             # Main table stats
-            main_table = settings.postgresql.main_table
+            main_table = settings.timescaledb.main_table
             main_stats_query = f"""
                 SELECT 
                     COUNT(*) as total_rows,
@@ -147,7 +147,7 @@ class DatabaseUtils:
             result[main_table] = main_stats[0] if main_stats else {}
             
             # Archive table stats
-            archive_table = settings.postgresql.archive_table
+            archive_table = settings.timescaledb.archive_table
             try:
                 archive_stats_query = f"""
                     SELECT 
@@ -199,8 +199,8 @@ class DatabaseUtils:
             Dictionary with cleanup results
         """
         try:
-            archive_days = archive_days or settings.postgresql.archive_after_days
-            delete_days = delete_days or settings.postgresql.retention_days
+            archive_days = archive_days or settings.timescaledb.archive_after_days
+            delete_days = delete_days or settings.timescaledb.retention_days
             
             log.info(f"Starting data cleanup: archive after {archive_days} days, delete after {delete_days} days")
             
@@ -224,8 +224,8 @@ class DatabaseUtils:
         Vacuum database tables to reclaim space and update statistics.
         """
         try:
-            main_table = settings.postgresql.main_table
-            archive_table = settings.postgresql.archive_table
+            main_table = settings.timescaledb.main_table
+            archive_table = settings.timescaledb.archive_table
             
             log.info("Starting database vacuum operation...")
             
@@ -267,7 +267,7 @@ class DatabaseUtils:
             List of sensor readings
         """
         try:
-            main_table = settings.postgresql.main_table
+            main_table = settings.timescaledb.main_table
             
             # Build query with filters
             where_conditions = []
@@ -334,7 +334,7 @@ class DatabaseUtils:
             Dictionary with integrity check results
         """
         try:
-            main_table = settings.postgresql.main_table
+            main_table = settings.timescaledb.main_table
             issues = []
             
             # Check for null device IDs
@@ -440,7 +440,7 @@ def run_maintenance():
     # Log table statistics
     stats = utils.get_table_stats()
     if stats:
-        main_table = settings.postgresql.main_table
+        main_table = settings.timescaledb.main_table
         if main_table in stats:
             main_stats = stats[main_table]
             log.info(f"Table statistics - Rows: {main_stats.get('total_rows', 'N/A')}, "

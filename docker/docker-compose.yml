@@ -208,21 +208,23 @@ services:
     networks:
       - kafka-net # Access Kafka over Docker network
 
-  # PostgreSQL Database
-  postgresql:
-    image: postgres:15-alpine
-    container_name: postgresql
-    hostname: postgresql
+  # TimeScaleDB Database
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: timescaledb
+    hostname: timescaledb
     ports:
-      - "5432:5432"
+    - "5432:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-iot_data}
       POSTGRES_USER: ${POSTGRES_USER:-iot_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      # TimescaleDB specific configurations
+      TIMESCALEDB_TELEMETRY: "off"
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
-      - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
+        - timescaledb_data:/var/lib/postgresql/data
+        - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - kafka-net
     restart: unless-stopped
@@ -231,7 +233,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
       
   # MQTT Broker for ESP32 Gateway
   mosquitto:
@@ -303,21 +305,21 @@ services:
     networks:
       - kafka-net
   
-  # PostgreSQL Data Sink Service
-  postgresql-sink:
+  # TImeScaleDB Data Sink Service
+  timescaledb-sink:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.postgresql_sink
-    container_name: postgresql-sink
-    hostname: postgresql-sink
+      dockerfile: docker/Dockerfile.timescaledb_sink
+    container_name: timescaledb-sink
+    hostname: timescaledb-sink
     environment:
       # Database configuration
-      POSTGRES_HOST: postgresql
+      POSTGRES_HOST: timescaledb
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-iot_data}
       POSTGRES_USER: ${POSTGRES_USER:-iot_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
-      
+
       # Kafka configuration
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
       KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data}
@@ -332,18 +334,19 @@ services:
       DATA_SINK_MAX_RETRIES: ${DATA_SINK_MAX_RETRIES:-3}
       DATA_SINK_RETRY_BACKOFF: ${DATA_SINK_RETRY_BACKOFF:-2.0}
       
-      # PostgreSQL specific settings
-      POSTGRES_BATCH_SIZE: ${POSTGRES_BATCH_SIZE:-100}
-      POSTGRES_COMMIT_INTERVAL: ${POSTGRES_COMMIT_INTERVAL:-5.0}
-      POSTGRES_ARCHIVE_AFTER_DAYS: ${POSTGRES_ARCHIVE_AFTER_DAYS:-30}
-      POSTGRES_RETENTION_DAYS: ${POSTGRES_RETENTION_DAYS:-90}
+      # TimescaleDB specific settings
+      TIMESCALE_BATCH_SIZE: ${TIMESCALE_BATCH_SIZE:-100}
+      TIMESCALE_COMMIT_INTERVAL: ${TIMESCALE_COMMIT_INTERVAL:-5.0}
+      TIMESCALE_CHUNK_TIME_INTERVAL: ${TIMESCALE_CHUNK_TIME_INTERVAL:-1 day}
+      TIMESCALE_COMPRESS_AFTER: ${TIMESCALE_COMPRESS_AFTER:-7 days}
+      TIMESCALE_DROP_AFTER: ${TIMESCALE_DROP_AFTER:-90 days}
       
       CONFIG_FILE_PATH: /app/config.yaml
       PYTHONUNBUFFERED: 1
     volumes:
       - ../src/config/config.yaml:/app/config.yaml
     depends_on:
-      - postgresql
+      - timescaledb
       - kafka1
       - kafka2
       - kafka3
@@ -353,7 +356,7 @@ services:
       - kafka-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import psycopg2; psycopg2.connect(host=\"postgresql\", database=\"iot_data\", user=\"iot_user\", password=\"iot_password\")'"]
+      test: ["CMD-SHELL", "python -c 'import psycopg2; psycopg2.connect(host=\"timescaledb\", database=\"iot_data\", user=\"iot_user\", password=\"iot_password\")'"]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -371,7 +374,7 @@ volumes:
     driver: local
   kafka-ui:
     driver: local
-  postgresql_data:
+  timescaledb_data:
     driver: local
   mosquitto_data:
     driver: local
@@ -381,7 +384,7 @@ volumes:
     driver: local
   kafka-consumer:
     driver: local
-  postgresql-sink:
+  timescaledb-sink:
     driver: local
 
 # Docker Network for All Services
