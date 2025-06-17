@@ -260,7 +260,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.ruuvitag_adapter
-    container_name: ruuvitag_adapter
+    container_name: ruuvitag-adapter
     hostname: ruuvitag-adapter
     volumes:
       - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
