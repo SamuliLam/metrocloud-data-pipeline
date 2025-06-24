@@ -14,3 +14,8 @@ paho-mqtt==1.6.1 # For mqtt connection
 psycopg2-binary==2.9.9 # PostgreSQL adapter for Python (compatible with TimescaleDB)
 sqlalchemy==2.0.23 # SQL toolkit and ORM
 alembic==1.13.1 # Database migration tool
+
+# Monitoring and metrics dependencies
+prometheus-client==0.20.0 # Prometheus metrics client for Python
+psutil==5.9.8 # System and process utilities for monitoring
+flask==3.0.0 # Web framework for metrics endpoints and health check

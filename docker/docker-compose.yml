@@ -8,6 +8,7 @@ services:
     ports:
       - "9092:9092" # Internal Kafka port for broker-to-client communication
       - "29092:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
+      - "7071:7071"  # JMX metrics port
     environment:
       # KRaft settings - Unique ID and roles
       KAFKA_NODE_ID: ${KAFKA_NODE_ID_1:-1}
@@ -35,7 +36,11 @@ services:
       
       # KRaft Cluster Initialization
       CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
-
+      
+      # JMX Configuration for monitoring
+      KAFKA_JMX_PORT: 7071
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka1"
+    
     volumes:
       - kafka1_data:/var/lib/kafka/data # Persist Kafka logs and data
       - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
@@ -54,6 +59,7 @@ services:
     ports:
       - "9093:9092" # Internal Kafka port for broker-to-client communication
       - "29093:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
+      - "7072:7071"  # JMX metrics port
     environment:
       # KRaft settings - Unique ID and roles
       KAFKA_NODE_ID: ${KAFKA_NODE_ID_2:-2}
@@ -82,6 +88,10 @@ services:
       # KRaft Cluster Initialization
       CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
+      # JMX Configuration for monitoring
+      KAFKA_JMX_PORT: 7071
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka2"
+    
     volumes:
       - kafka2_data:/var/lib/kafka/data # Persist Kafka logs and data
       - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
@@ -102,6 +112,7 @@ services:
     ports:
       - "9094:9092" # Internal Kafka port for broker-to-client communication
       - "29094:29092" # Host-accessible external kafka port for host machine tools like Kafka UI
+      - "7073:7071"  # JMX metrics port
     environment:
       # KRaft settings - Unique ID and roles
       KAFKA_NODE_ID: ${KAFKA_NODE_ID_3:-3}
@@ -130,6 +141,10 @@ services:
       # KRaft Cluster Initialization
       CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
+      # JMX Configuration for monitoring
+      KAFKA_JMX_PORT: 7071
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka3"
+    
     volumes:
       - kafka3_data:/var/lib/kafka/data # Persist Kafka logs and data
       - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
@@ -161,6 +176,10 @@ services:
 
       # Replication factor for schemas topic
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: ${SCHEMA_REGISTRY_REPLICATION_FACTOR:-3}
+
+      # JMX for monitoring
+      SCHEMA_REGISTRY_JMX_PORT: 7075
+      SCHEMA_REGISTRY_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 
     volumes:
       - ../src/config/config.yaml:/etc/schema-registry/config.yaml # Mount configuration file
@@ -255,13 +274,15 @@ services:
       timeout: 10s
       retries: 3
 
-  # RuuviTag Adapter Service (Replaces the original producer)
+  # RuuviTag Adapter (Real-time IoT Producer with metrics)
   ruuvitag-adapter:
     build:
       context: ..
       dockerfile: docker/Dockerfile.ruuvitag_adapter
     container_name: ruuvitag-adapter
     hostname: ruuvitag-adapter
+    ports:
+      - "8002:8002"  # Metrics endpoint
     volumes:
       - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
     environment:
@@ -269,6 +290,7 @@ services:
       # Add debugging environment variables
       PYTHONTRACEMALLOC: 1
       PYTHONFAULTHANDLER: 1
+      METRICS_PORT: 8002
     depends_on:
       - kafka1
       - kafka2
@@ -285,6 +307,8 @@ services:
       context: .. # Project root directory
       dockerfile: docker/Dockerfile.consumer
     container_name: kafka-consumer
+    ports:
+      - "8001:8001"  # Metrics endpoint
     environment:
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092} # Kafka broker inside Docker network
       KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data} # Topic to subscribe and consume from
@@ -294,6 +318,7 @@ services:
       SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
       PYTHONUNBUFFERED: 1
       CONFIG_FILE_PATH: /app/config.yaml # Path to the config file inside the container
+      METRICS_PORT: 8001
     volumes:
       - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
     depends_on:
@@ -312,6 +337,8 @@ services:
       dockerfile: docker/Dockerfile.timescaledb_sink
     container_name: timescaledb-sink
     hostname: timescaledb-sink
+    ports:
+      - "8003:8003"  # Metrics endpoint
     environment:
       # Database configuration
       POSTGRES_HOST: timescaledb
@@ -343,6 +370,7 @@ services:
       
       CONFIG_FILE_PATH: /app/config.yaml
       PYTHONUNBUFFERED: 1
+      METRICS_PORT: 8003
     volumes:
       - ../src/config/config.yaml:/app/config.yaml
     depends_on:
@@ -361,6 +389,170 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # Prometheus for Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/prometheus/rules/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://localhost:9090'
+    networks:
+      - kafka-net
+    restart: unless-stopped
+
+  # Grafana for Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ../monitoring/grafana/provisioning/dashboards/dashboard.yml:/var/lib/grafana/provisioning/dashboards/dashboard.yml
+    depends_on:
+      - prometheus
+    networks:
+      - kafka-net
+    restart: unless-stopped
+  
+  # JMX Exporter for Kafka metrics
+  kafka-jmx-exporter1:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter1
+    ports:
+      - "9101:9101"  # Separate metrics port
+    environment:
+      SERVICE_PORT: 9101
+    volumes:
+      - ../monitoring/jmx/kafka1-jmx-config.yml:/opt/bitnami/jmx-exporter/etc/config.yml
+    command: ["9101", "/opt/bitnami/jmx-exporter/etc/config.yml"]
+    depends_on:
+      - kafka1
+    networks:
+      - kafka-net
+
+  kafka-jmx-exporter2:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter2
+    ports:
+      - "9102:9102"  # Separate metrics port
+    environment:
+      SERVICE_PORT: 9102
+    volumes:
+      - ../monitoring/jmx/kafka2-jmx-config.yml:/opt/bitnami/jmx-exporter/etc/config.yml
+    command: ["9102", "/opt/bitnami/jmx-exporter/etc/config.yml"]
+    depends_on:
+      - kafka2
+    networks:
+      - kafka-net
+
+  kafka-jmx-exporter3:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter3
+    ports:
+      - "9103:9103"  # Separate metrics port
+    environment:
+      SERVICE_PORT: 9103
+    volumes:
+      - ../monitoring/jmx/kafka3-jmx-config.yml:/opt/bitnami/jmx-exporter/etc/config.yml
+    command: ["9103", "/opt/bitnami/jmx-exporter/etc/config.yml"]
+    depends_on:
+      - kafka3
+    networks:
+      - kafka-net
+
+  # PostgreSQL Exporter for TimescaleDB metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-iot_user}:${POSTGRES_PASSWORD:-iot_password}@timescaledb:5432/${POSTGRES_DB:-iot_data}?sslmode=disable"
+    depends_on:
+      - timescaledb
+    networks:
+      - kafka-net
+
+  # MQTT Exporter for Mosquitto metrics
+  mosquitto-exporter:
+    image: jryberg/mosquitto-exporter:v0.7.5
+    container_name: mosquitto-exporter
+    ports:
+      - "9234:9234"
+    environment:
+      BROKER_ENDPOINT: tcp://mosquitto:1883
+      MQTT_IGNORED_TOPICS: "$$SYS/broker/clients/disconnected,$$SYS/broker/clients/maximum"
+    depends_on:
+      - mosquitto
+    networks:
+      - kafka-net
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($|/)'
+    networks:
+      - kafka-net
+
+  # cAdvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8090:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    networks:
+      - kafka-net
+
+  # AlertManager for alerting
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9095:9093"
+    volumes:
+      - ../monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - kafka-net
+    restart: unless-stopped
 
 # Docker Volume for Kafka Storage
 volumes:
@@ -385,6 +577,12 @@ volumes:
   kafka-consumer:
     driver: local
   timescaledb-sink:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  alertmanager_data:
     driver: local
 
 # Docker Network for All Services

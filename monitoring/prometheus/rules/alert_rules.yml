@@ -1,0 +1,145 @@
+groups:
+  - name: kafka_alerts
+    rules:
+      - alert: KafkaBrokerDown
+        expr: up{job=~"kafka-broker-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kafka broker is down"
+          description: "Kafka broker {{ $labels.instance }} has been down for more than 1 minute."
+
+      - alert: KafkaHighLatency
+        expr: kafka_request_handler_avg_idle_percent < 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Kafka broker high latency"
+          description: "Kafka broker {{ $labels.instance }} has high request latency."
+
+      - alert: KafkaUnderReplicatedPartitions
+        expr: kafka_server_replica_manager_under_replicated_partitions > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kafka under-replicated partitions"
+          description: "Kafka broker {{ $labels.instance }} has {{ $value }} under-replicated partitions."
+
+      - alert: KafkaConsumerLag
+        expr: kafka_consumer_lag_max > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: "Consumer {{ $labels.consumer_group }} has lag of {{ $value }} messages."
+
+  - name: timescaledb_alerts
+    rules:
+      - alert: TimescaleDBDown
+        expr: up{job="timescaledb"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "TimescaleDB is down"
+          description: "TimescaleDB has been down for more than 1 minute."
+
+      - alert: TimescaleDBHighConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TimescaleDB high connection usage"
+          description: "TimescaleDB connection usage is {{ $value }}%."
+
+      - alert: TimescaleDBDiskSpaceHigh
+        expr: (pg_database_size_bytes / (1024*1024*1024)) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TimescaleDB high disk usage"
+          description: "TimescaleDB database size is {{ $value }}GB."
+
+  - name: mqtt_alerts
+    rules:
+      - alert: MQTTBrokerDown
+        expr: up{job="mosquitto"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MQTT broker is down"
+          description: "MQTT broker has been down for more than 1 minute."
+
+      - alert: MQTTHighConnections
+        expr: mosquitto_connected_clients > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High MQTT client connections"
+          description: "MQTT broker has {{ $value }} connected clients."
+
+  - name: application_alerts
+    rules:
+      - alert: ApplicationDown
+        expr: up{job=~"iot-.*|ruuvitag-.*|timescaledb-sink"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Application service is down"
+          description: "Service {{ $labels.job }} at {{ $labels.instance }} has been down for more than 2 minutes."
+
+      - alert: HighErrorRate
+        expr: rate(application_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High application error rate"
+          description: "Service {{ $labels.job }} has error rate of {{ $value }} errors/sec."
+
+      - alert: HighMemoryUsage
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Container {{ $labels.name }} memory usage is {{ $value }}%."
+
+  - name: system_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage on {{ $labels.instance }} is {{ $value }}%."
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage on {{ $labels.instance }} is {{ $value }}%."
+
+      - alert: LowDiskSpace
+        expr: node_filesystem_free_bytes < 5*1024*1024*1024
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Less than 5GB free disk space on {{ $labels.instance }}."

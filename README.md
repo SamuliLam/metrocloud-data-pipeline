@@ -174,7 +174,12 @@ If you haven't installed ESP-IDF yet, follow these steps:
 
     - Create an environment variable in docker/.env file
         ```bash
-        CLUSTER_ID=M87IboZAScmgU_NXvNQWcw
+        CLUSTER_ID=bdPLhBd7R2azWv-YLNO3LQ
+        ```
+        
+        OR Generate the CLUSTER_ID using the following command
+        ```bash
+        docker run --rm confluentinc/cp-kafka:7.9.0 kafka-storage random-uuid
         ```
 
 2. Configure ESP32 Gateway

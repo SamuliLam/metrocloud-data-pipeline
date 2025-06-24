@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Script to run the IoT data generator and producer with Avro serialization.
-This is intended to be run in a Docker container with a multi-broker Kafka cluster.
+This is the SIMULATION producer for testing and development purposes.
+For real-time IoT data from actual sensors, use run_ruuvitag_adapter.py instead.
 """
 
 import time
@@ -30,7 +31,7 @@ def signal_handler(sig, frame):
         frame: Current stack frame
     """
     global running
-    log.info(f"Caught signal {sig}. Stopping producer...")
+    log.info(f"Caught signal {sig}. Stopping simulated producer...")
     running = False
 
 def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
@@ -93,16 +94,17 @@ def log_configuration():
     """
     Log the current configuration settings to help with troubleshooting.
     """
-    log.info("Current configuration:")
+    log.info("Simulated IoT Producer Configuration:")
     log.info(f"App name: {settings.app_name}")
     log.info(f"Environment: {settings.environment}")
     log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
     log.info(f"Kafka topic: {settings.kafka.topic_name}")
     log.info(f"Schema Registry URL: {settings.schema_registry.url}")
-    log.info(f"IoT devices: {settings.iot_simulator.num_devices}")
+    log.info(f"Simulated IoT devices: {settings.iot_simulator.num_devices}")
     log.info(f"Device types: {settings.iot_simulator.device_types}")
     log.info(f"Data generation interval: {settings.iot_simulator.data_generation_interval_sec} seconds")
     log.info(f"Anomaly probability: {settings.iot_simulator.anomaly_probability}")
+    log.info("Note: This is a SIMULATION producer. For real sensor data, use run_ruuvitag_adapter.py")
 
 def main():
     """
@@ -115,7 +117,9 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
     
     # Log application start and configuration
-    log.info("Starting IoT Data Producer Service with Avro Serialization")
+    log.info("=" * 80)
+    log.info("Starting IoT Data Producer Service (SIMULATION MODE)")
+    log.info("=" * 80)
     log_configuration()
     
     # Wait for Kafka and Schema Registry to be ready
@@ -131,10 +135,17 @@ def main():
         simulator = IoTSimulator()
         
         # Start continuous data generation
-        log.info("Starting continuous IoT data generation with Avro serialization...")
+        log.info("=" * 80)
+        log.info("🤖 Starting SIMULATED IoT data generation")
+        log.info(f"📊 Simulating {settings.iot_simulator.num_devices} virtual devices")
+        log.info(f"⏱️  Generation interval: {settings.iot_simulator.data_generation_interval_sec}s")
+        log.info(f"🔬 Device types: {', '.join(settings.iot_simulator.device_types)}")
+        log.info("=" * 80)
         
         # Get the data generation interval from settings
         interval = settings.iot_simulator.data_generation_interval_sec
+        message_count = 0
+        start_time = time.time()
         
         while running:
             # Generate batch of readings from simulated devices
@@ -143,19 +154,30 @@ def main():
             # Send the Avro-serialized readings to Kafka
             producer.send_batch(readings)
             
+            message_count += len(readings)
+            
+            # Log periodic statistics
+            if message_count % 100 == 0:  # Every 100 messages
+                elapsed = time.time() - start_time
+                rate = message_count / elapsed if elapsed > 0 else 0
+                log.info(f"📈 Sent {message_count} simulated messages ({rate:.1f} msg/sec)")
+            
             # Wait before generating next batch
             time.sleep(interval)
             
     except KeyboardInterrupt:
-        log.info("Producer interrupted by user")
+        log.info("Simulated producer interrupted by user")
     except Exception as e:
-        log.error(f"Unexpected error in producer: {str(e)}")
+        log.error(f"Unexpected error in simulated producer: {str(e)}")
         raise
     finally:
         # Ensure producer is properly closed
         if 'producer' in locals():
             producer.close()
-        log.info("Producer shutdown complete")
+        
+        log.info("=" * 80)
+        log.info("Simulated IoT Producer shutdown complete")
+        log.info("=" * 80)
 
 if __name__ == "__main__":
     main()
