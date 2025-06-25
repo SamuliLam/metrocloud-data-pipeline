@@ -1,8 +1,7 @@
 global:
-  smtp_smarthost: 'localhost:587'
+  smtp_smarthost: 'mailpit:1025'
   smtp_from: 'alertmanager@iot-pipeline.local'
-  smtp_auth_username: 'alertmanager@iot-pipeline.local'
-  smtp_auth_password: 'password'
+  smtp_require_tls: false
 
 route:
   group_by: ['alertname']
@@ -27,32 +26,45 @@ receivers:
   - name: 'critical-alerts'
     email_configs:
       - to: 'admin@iot-pipeline.local'
-        from: 'alertmanager@iot-pipeline.local'
-        subject: 'CRITICAL: IoT Pipeline Alert'
         html: |
-          <h2>Alert: {{ .GroupLabels.alertname }}</h2>
-          <p><strong>Summary:</strong> {{ .CommonAnnotations.summary }}</p>
-          <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+          <h2>🚨 CRITICAL ALERT: IoT Pipeline</h2>
+          <h3>{{ .GroupLabels.alertname }}</h3>
           
-          <h3>Details:</h3>
+          <table border="1" cellpadding="5" style="border-collapse: collapse;">
+            <tr><td><strong>Summary</strong></td><td>{{ .CommonAnnotations.summary }}</td></tr>
+            <tr><td><strong>Description</strong></td><td>{{ .CommonAnnotations.description }}</td></tr>
+            <tr><td><strong>Severity</strong></td><td style="color: red;">CRITICAL</td></tr>
+          </table>
+          
+          <h4>Affected Instances:</h4>
           <ul>
           {{ range .Alerts }}
-          <li>Instance: {{ .Labels.instance }}</li>
-          <li>Job: {{ .Labels.job }}</li>
-          <li>Severity: {{ .Labels.severity }}</li>
-          <br>
+          <li>
+            <strong>{{ .Labels.instance }}</strong> ({{ .Labels.job }})<br>
+            Status: {{ .Status }} | Started: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          </li>
           {{ end }}
           </ul>
 
   - name: 'warning-alerts'
     email_configs:
       - to: 'ops@iot-pipeline.local'
-        from: 'alertmanager@iot-pipeline.local'
-        subject: 'WARNING: IoT Pipeline Alert'
         html: |
-          <h2>Alert: {{ .GroupLabels.alertname }}</h2>
-          <p><strong>Summary:</strong> {{ .CommonAnnotations.summary }}</p>
-          <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+          <h2>⚠️ WARNING: IoT Pipeline</h2>
+          <h3>{{ .GroupLabels.alertname }}</h3>
+          
+          <table border="1" cellpadding="5" style="border-collapse: collapse;">
+            <tr><td><strong>Summary</strong></td><td>{{ .CommonAnnotations.summary }}</td></tr>
+            <tr><td><strong>Description</strong></td><td>{{ .CommonAnnotations.description }}</td></tr>
+            <tr><td><strong>Severity</strong></td><td style="color: orange;">WARNING</td></tr>
+          </table>
+          
+          <h4>Affected Instances:</h4>
+          <ul>
+          {{ range .Alerts }}
+          <li><strong>{{ .Labels.instance }}</strong> ({{ .Labels.job }})</li>
+          {{ end }}
+          </ul>
 
 inhibit_rules:
   - source_match:

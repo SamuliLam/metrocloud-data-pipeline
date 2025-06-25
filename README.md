@@ -281,193 +281,28 @@ If you haven't installed ESP-IDF yet, follow these steps:
     docker exec -it timescaledb psql -U iot_user -d iot_data
     ```
 
-8. Query TimescaleDB
+    ```sql
+    -- Inside psql, list databases
+    iot_dat=# \l
 
-    - Basic Time-Series Analysis
-        ```sql
-        -- Recent sensor readings (last 24 hours)
-        SELECT 
-            device_id,
-            device_type,
-            value,
-            unit,
-            timestamp,
-            is_anomaly
-        FROM sensor_readings
-        WHERE timestamp >= NOW() - INTERVAL '24 hours'
-        ORDER BY timestamp DESC
-        LIMIT 100;
+    -- Switch database
+    iot_data=# \c <database-name>
 
-        -- Time-series data for specific device
-        SELECT 
-            timestamp,
-            value,
-            unit,
-            battery_level,
-            is_anomaly
-        FROM sensor_readings
-        WHERE device_id = 'c6:8d:c6:26:39:a6_temperature'
-            AND timestamp >= NOW() - INTERVAL '7 days'
-        ORDER BY timestamp DESC;
+    -- List tables, views, sequence
+    iot_data=# \d
 
-        -- Data within specific time range
-        SELECT device_id, device_type, AVG(value) as avg_value, MIN(value) as min_value,
-            MAX(value) as max_value,
-            COUNT(*) as reading_count
-        FROM sensor_readings
-        WHERE timestamp BETWEEN '2025-06-17' AND '2025-06-18'
-            AND device_type = 'temperature_sensor'
-        GROUP BY device_id, device_type
-        ORDER BY avg_value DESC;
-        ```
+    -- List only tables
+    iot_data=# \dt
 
-    - Time Bucketing Queries
-        ```sql
-        -- Hourly averages for the last week
-        SELECT 
-            time_bucket('1 hour', timestamp) AS hour_bucket,
-            device_id,
-            device_type,
-            AVG(value) as avg_value,
-            MIN(value) as min_value,
-            MAX(value) as max_value,
-            COUNT(*) as readings_count,
-            COUNT(CASE WHEN is_anomaly THEN 1 END) as anomaly_count
-        FROM sensor_readings
-        WHERE timestamp >= NOW() - INTERVAL '7 days'
-            AND device_type = 'temperature_sensor'
-        GROUP BY hour_bucket, device_id, device_type
-        ORDER BY hour_bucket DESC, device_id;
+    -- List all hypertables
+    iot_data=# select * from timescaledb_information.hypertables;
 
-        -- Daily aggregation with multiple metrics
-        SELECT 
-            time_bucket('1 day', timestamp) AS day_bucket,
-            device_type,
-            COUNT(DISTINCT device_id) as unique_devices,
-            AVG(value) as avg_value,
-            STDDEV(value) as std_deviation,
-            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY value) as median_value,
-            PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY value) as p95_value,
-            COUNT(*) as total_readings,
-            COUNT(CASE WHEN is_anomaly THEN 1 END) as anomaly_count,
-            (COUNT(CASE WHEN is_anomaly THEN 1 END) * 100.0 / COUNT(*)) as anomaly_percentage
-        FROM sensor_readings
-        WHERE timestamp >= NOW() - INTERVAL '30 days'
-        GROUP BY day_bucket, device_type
-        ORDER BY day_bucket DESC, device_type;
+    -- List chunks of a specific hypertable
+    iot_data=# SELECT * FROM timescaledb_information.chunks WHERE hypertable_name = '<hypertable-name>';
 
-        -- 15-minute intervals for real-time monitoring
-        SELECT 
-            time_bucket('15 minutes', timestamp) AS time_bucket,
-            device_id,
-            AVG(value) as avg_value,
-            last(value, timestamp) as latest_value,
-            last(battery_level, timestamp) as latest_battery,
-            MAX(timestamp) as last_reading_time
-        FROM sensor_readings
-        WHERE timestamp >= NOW() - INTERVAL '4 hours'
-            AND device_type IN ('temperature_sensor', 'humidity_sensor')
-        GROUP BY time_bucket, device_id
-        ORDER BY time_bucket DESC, device_id;
-        ```
-
-    - Advanced Time-Series Analytics
-        ```sql
-        -- Gap detection (missing data periods)
-        WITH time_series AS (
-            SELECT 
-                device_id,
-                timestamp,
-                LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_timestamp,
-                timestamp - LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as time_gap
-            FROM sensor_readings
-            WHERE device_id = 'aa:bb:cc:dd:ee:ff_temperature'
-                AND timestamp >= NOW() - INTERVAL '7 days'
-        )
-        SELECT 
-            device_id,
-            prev_timestamp,
-            timestamp,
-            time_gap,
-            EXTRACT(EPOCH FROM time_gap) / 60 as gap_minutes
-        FROM time_series
-        WHERE time_gap > INTERVAL '30 minutes'  -- Gaps longer than 30 minutes
-        ORDER BY timestamp DESC;
-
-        -- Moving averages and trends
-        SELECT 
-            device_id,
-            timestamp,
-            value,
-            AVG(value) OVER (
-                PARTITION BY device_id 
-                ORDER BY timestamp 
-                ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
-            ) as moving_avg_12_readings,
-            value - LAG(value, 1) OVER (
-                PARTITION BY device_id 
-                ORDER BY timestamp
-            ) as value_change
-        FROM sensor_readings
-        WHERE device_type = 'temperature_sensor'
-            AND timestamp >= NOW() - INTERVAL '24 hours'
-        ORDER BY device_id, timestamp DESC;
-
-        -- Rate of change detection
-        SELECT 
-            device_id,
-            timestamp,
-            value,
-            LAG(value) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_value,
-            LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_timestamp,
-            (value - LAG(value) OVER (PARTITION BY device_id ORDER BY timestamp)) / 
-            EXTRACT(EPOCH FROM (timestamp - LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp))) * 3600 
-            as rate_per_hour
-        FROM sensor_readings
-        WHERE device_type = 'temperature_sensor'
-            AND timestamp >= NOW() - INTERVAL '6 hours'
-        ORDER BY device_id, timestamp DESC;
-        ```
-
-    - Query Continuous Aggregates
-        ```sql
-        -- Query hourly continous aggregates
-        SELECT 
-            bucket,
-            device_id,
-            device_type,
-            reading_count,
-            avg_value,
-            min_value,
-            max_value,
-            anomaly_count,
-            latest_battery_level
-        FROM sensor_readings_hourly
-        WHERE bucket >= NOW() - INTERVAL '7 days'
-            AND device_type = 'temperature_sensor'
-        ORDER BY bucket DESC, device_id;
-
-        -- Query daily continuous aggregates
-        SELECT 
-            bucket,
-            device_id,
-            device_type,
-            reading_count,
-            avg_value,
-            min_value,
-            max_value,
-            anomaly_count,
-            first_battery_level,
-            latest_battery_level,
-            (latest_battery_level - first_battery_level) as battery_change
-        FROM sensor_readings_daily
-        WHERE bucket >= NOW() - INTERVAL '30 days'
-        ORDER BY bucket DESC, avg_value DESC;
-
-    - Check compression statistics
-        ```sql
-        SELECT * FROM timescaledb_information.compression_settings;
-        ```
+    -- Check compression statistics
+    SELECT * FROM timescaledb_information.compression_settings;
+    ```
 
 8. Access the Kafka UI
     - Open your browser and navigate to http://localhost:8080
@@ -777,19 +612,210 @@ The application can be configured through environment variables:
     - Consumer group status and lag
 
 2. Database Monitoring
-    ```sql
-    -- Check hypertable info
-    SELECT * FROM timescaledb_information.hypertables;
 
-    -- View recent data
-    SELECT * FROM recent_sensor_readings LIMIT 10;
+    - Access Timescaledb Database
+        ```bash
+        # Connect to TimescaleDB using psql cli
+        docker exec -it timescaledb psql -U iot_user -d iot_data
+        ```
+    
+    - Basic Time-Series Analysis
+        ```sql
+        -- Recent sensor readings (last 24 hours)
+        SELECT 
+            device_id,
+            device_type,
+            value,
+            unit,
+            timestamp,
+            is_anomaly
+        FROM sensor_readings
+        WHERE timestamp >= NOW() - INTERVAL '24 hours'
+        ORDER BY timestamp DESC
+        LIMIT 100;
 
-    -- Check anomalies
-    SELECT * FROM anomalous_sensor_readings;
+        -- Time-series data for specific device
+        SELECT 
+            timestamp,
+            value,
+            unit,
+            battery_level,
+            is_anomaly
+        FROM sensor_readings
+        WHERE device_id = 'c6:8d:c6:26:39:a6_temperature'
+            AND timestamp >= NOW() - INTERVAL '7 days'
+        ORDER BY timestamp DESC;
 
-    -- Device statistics
-    SELECT * FROM device_summary;
-    ```
+        -- Data within specific time range
+        SELECT device_id, device_type, AVG(value) as avg_value, MIN(value) as min_value,
+            MAX(value) as max_value,
+            COUNT(*) as reading_count
+        FROM sensor_readings
+        WHERE timestamp BETWEEN '2025-06-17' AND '2025-06-18'
+            AND device_type = 'temperature_sensor'
+        GROUP BY device_id, device_type
+        ORDER BY avg_value DESC;
+        ```
+
+    - Time Bucketing Queries
+        ```sql
+        -- Hourly averages for the last week
+        SELECT 
+            time_bucket('1 hour', timestamp) AS hour_bucket,
+            device_id,
+            device_type,
+            AVG(value) as avg_value,
+            MIN(value) as min_value,
+            MAX(value) as max_value,
+            COUNT(*) as readings_count,
+            COUNT(CASE WHEN is_anomaly THEN 1 END) as anomaly_count
+        FROM sensor_readings
+        WHERE timestamp >= NOW() - INTERVAL '7 days'
+            AND device_type = 'temperature_sensor'
+        GROUP BY hour_bucket, device_id, device_type
+        ORDER BY hour_bucket DESC, device_id;
+
+        -- Daily aggregation with multiple metrics
+        SELECT 
+            time_bucket('1 day', timestamp) AS day_bucket,
+            device_type,
+            COUNT(DISTINCT device_id) as unique_devices,
+            AVG(value) as avg_value,
+            STDDEV(value) as std_deviation,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY value) as median_value,
+            PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY value) as p95_value,
+            COUNT(*) as total_readings,
+            COUNT(CASE WHEN is_anomaly THEN 1 END) as anomaly_count,
+            (COUNT(CASE WHEN is_anomaly THEN 1 END) * 100.0 / COUNT(*)) as anomaly_percentage
+        FROM sensor_readings
+        WHERE timestamp >= NOW() - INTERVAL '30 days'
+        GROUP BY day_bucket, device_type
+        ORDER BY day_bucket DESC, device_type;
+
+        -- 15-minute intervals for real-time monitoring
+        SELECT 
+            time_bucket('15 minutes', timestamp) AS time_bucket,
+            device_id,
+            AVG(value) as avg_value,
+            last(value, timestamp) as latest_value,
+            last(battery_level, timestamp) as latest_battery,
+            MAX(timestamp) as last_reading_time
+        FROM sensor_readings
+        WHERE timestamp >= NOW() - INTERVAL '4 hours'
+            AND device_type IN ('temperature_sensor', 'humidity_sensor')
+        GROUP BY time_bucket, device_id
+        ORDER BY time_bucket DESC, device_id;
+        ```
+
+    - Advanced Time-Series Analytics
+        ```sql
+        -- Gap detection (missing data periods longer than 30 minutes)
+        WITH time_series AS (
+            SELECT 
+                device_id,
+                timestamp,
+                LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_timestamp,
+                timestamp - LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as time_gap
+            FROM sensor_readings
+            WHERE device_id = 'aa:bb:cc:dd:ee:ff_temperature'
+                AND timestamp >= NOW() - INTERVAL '7 days'
+        )
+        SELECT 
+            device_id,
+            prev_timestamp,
+            timestamp,
+            time_gap,
+            EXTRACT(EPOCH FROM time_gap) / 60 as gap_minutes
+        FROM time_series
+        WHERE time_gap > INTERVAL '30 minutes'
+        ORDER BY timestamp DESC;
+
+        -- Moving averages and trends
+        SELECT 
+            device_id,
+            timestamp,
+            value,
+            AVG(value) OVER (
+                PARTITION BY device_id 
+                ORDER BY timestamp 
+                ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
+            ) as moving_avg_12_readings,
+            value - LAG(value, 1) OVER (
+                PARTITION BY device_id 
+                ORDER BY timestamp
+            ) as value_change
+        FROM sensor_readings
+        WHERE device_type = 'temperature_sensor'
+            AND timestamp >= NOW() - INTERVAL '24 hours'
+        ORDER BY device_id, timestamp DESC;
+
+        -- Rate of change detection
+        SELECT 
+            device_id,
+            timestamp,
+            value,
+            LAG(value) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_value,
+            LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_timestamp,
+            (value - LAG(value) OVER (PARTITION BY device_id ORDER BY timestamp)) / 
+            EXTRACT(EPOCH FROM (timestamp - LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp))) * 3600 
+            as rate_per_hour
+        FROM sensor_readings
+        WHERE device_type = 'temperature_sensor'
+            AND timestamp >= NOW() - INTERVAL '6 hours'
+        ORDER BY device_id, timestamp DESC;
+        ```
+
+    - Query Continuous Aggregates
+        ```sql
+        -- Query hourly continous aggregates
+        SELECT 
+            bucket,
+            device_id,
+            device_type,
+            reading_count,
+            avg_value,
+            min_value,
+            max_value,
+            anomaly_count,
+            latest_battery_level
+        FROM sensor_readings_hourly
+        WHERE bucket >= NOW() - INTERVAL '7 days'
+            AND device_type = 'temperature_sensor'
+        ORDER BY bucket DESC, device_id;
+
+        -- Query daily continuous aggregates
+        SELECT 
+            bucket,
+            device_id,
+            device_type,
+            reading_count,
+            avg_value,
+            min_value,
+            max_value,
+            anomaly_count,
+            first_battery_level,
+            latest_battery_level,
+            (latest_battery_level - first_battery_level) as battery_change
+        FROM sensor_readings_daily
+        WHERE bucket >= NOW() - INTERVAL '30 days'
+        ORDER BY bucket DESC, avg_value DESC;
+
+    - Check compression statistics
+        ```sql
+        SELECT * FROM timescaledb_information.compression_settings;
+
+        -- Check hypertable info
+        SELECT * FROM timescaledb_information.hypertables;
+
+        -- View recent data
+        SELECT * FROM recent_sensor_readings LIMIT 10;
+
+        -- Check anomalies
+        SELECT * FROM anomalous_sensor_readings;
+
+        -- Device statistics
+        SELECT * FROM device_summary;
+        ```
 
 3. Health Checks
     ```bash
