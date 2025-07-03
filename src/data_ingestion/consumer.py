@@ -7,6 +7,7 @@ from confluent_kafka import Consumer, KafkaError, KafkaException
 from src.utils.logger import log
 from src.config.config import settings
 from src.utils.schema_registry import schema_registry
+from src.utils.metrics import get_metrics_instance, MetricsServer, timed_operation
 
 class KafkaConsumer:
     """
@@ -40,6 +41,15 @@ class KafkaConsumer:
         
         # Flag to control consumption loop
         self.running = False
+        
+        # Initialize metrics
+        self.metrics = get_metrics_instance("consumer")
+        
+        # Start metrics server
+        metrics_port = int(os.getenv("METRICS_PORT", "8001"))
+        self.metrics_server = MetricsServer(port=metrics_port)
+        self.metrics_server.start()
+        log.info(f"Consumer metrics server started on port {metrics_port}")
         
         # Get consumer configuration from settings
         self.conf = settings.consumer.get_config(
@@ -85,8 +95,12 @@ class KafkaConsumer:
         try:
             self.consumer.subscribe([self.topic_name], on_assign=self._on_assign_callback)
             log.info(f"Subscribed to topic: {self.topic_name}")
+            # Set connection status to connected
+            self.metrics.set_connection_status(True, "kafka")
         except KafkaException as e:
             log.error(f"Error subscribing to topic {self.topic_name}: {str(e)}")
+            self.metrics.set_connection_status(False, "kafka")
+            self.metrics.record_message_failed(error_type="subscription_error")
             raise
     
     def _on_assign_callback(self, consumer, partitions):
@@ -100,9 +114,11 @@ class KafkaConsumer:
         if partitions:
             partition_info = [f"{p.topic}[{p.partition}]" for p in partitions]
             log.info(f"Assigned partitions: {', '.join(partition_info)}")
+            self.metrics.record_rebalance()
         else:
             log.warning("No partitions assigned to this consumer")
     
+    @timed_operation(None, "message_processing")  # Will be updated in __init__
     def process_message(self, message: Dict[str, Any]) -> None:
         """
         Process a single message from Kafka topic.
@@ -113,6 +129,9 @@ class KafkaConsumer:
         Args:
             message: Dictionary containing the message data
         """
+        # Record message processed
+        self.metrics.record_message_processed()
+        
         # Default implementation just logs the message
         device_id = message.get('device_id', 'unknown')
         device_type = message.get('device_type', 'unknown')
@@ -141,9 +160,11 @@ class KafkaConsumer:
             # Broker connection error
             elif msg.error().code() == KafkaError._TRANSPORT:
                 log.warning(f"Broker connection error: {msg.error()}. Will reconnect automatically.")
+                self.metrics.set_connection_status(False, "kafka")
             # Other errors
             else:
                 log.error(f"Error while consuming message: {msg.error()}")
+                self.metrics.record_message_failed(error_type="kafka_error")
             return False
         
         return True
@@ -177,6 +198,12 @@ class KafkaConsumer:
                 if not self._handle_message_errors(msg):
                     continue
                 
+                # Record message consumed
+                self.metrics.record_message_consumed(
+                    topic=msg.topic(),
+                    partition=str(msg.partition())
+                )
+                
                 # Deserialize the message value using Avro and Schema Registry
                 try:
                     # Deserialization context
@@ -191,6 +218,7 @@ class KafkaConsumer:
                     messages.append(message)
                 except Exception as e:
                     log.error(f"Error deserializing message: {str(e)}")
+                    self.metrics.record_message_failed(error_type="deserialization_error")
                     continue
             
             # Process the batch of messages
@@ -198,14 +226,19 @@ class KafkaConsumer:
                 log.info(f"Consumed {len(messages)} Avro-serialized messages from topic: {self.topic_name}")
                 for message in messages:
                     self.process_message(message)
+                
+                # Update queue size metric
+                self.metrics.set_queue_size(len(messages))
             
             return messages
             
         except KafkaException as e:
             log.error(f"Kafka error during batch consumption: {str(e)}")
+            self.metrics.record_message_failed(error_type="kafka_exception")
             raise
         except Exception as e:
             log.error(f"Unexpected error during batch consumption: {str(e)}")
+            self.metrics.record_message_failed(error_type=type(e).__name__)
             raise
     
     def consume_loop(self, process_fn: Optional[Callable[[Dict[str, Any]], None]] = None, timeout: float = 1.0) -> None:
@@ -238,6 +271,12 @@ class KafkaConsumer:
                 if not self._handle_message_errors(msg):
                     continue
                 
+                # Record message consumed
+                self.metrics.record_message_consumed(
+                    topic=msg.topic(),
+                    partition=str(msg.partition())
+                )
+                
                 # Parse and process the message
                 try:
                     # Deserialize with Schema Registry
@@ -252,16 +291,19 @@ class KafkaConsumer:
                     
                 except Exception as e:
                     log.error(f"Error processing message: {str(e)}")
+                    self.metrics.record_message_failed(error_type=type(e).__name__)
                     continue
                 
         except KafkaException as e:
             log.error(f"Kafka error during consumption loop: {str(e)}")
+            self.metrics.set_connection_status(False, "kafka")
             # If connection to a broker fails, others may still be available
             # Try to continue if possible
             if not self.running:
                 raise
         except Exception as e:
             log.error(f"Unexpected error during consumption loop: {str(e)}")
+            self.metrics.record_message_failed(error_type=type(e).__name__)
             raise
         finally:
             self.close()
@@ -286,6 +328,17 @@ class KafkaConsumer:
                 
             self.consumer.close()
             log.info("Kafka consumer closed")
+            
+        # Stop metrics server
+        if hasattr(self, 'metrics_server'):
+            try:
+                self.metrics_server.stop()
+            except Exception as e:
+                log.warning(f"Error stopping metrics server: {e}")
+        
+        # Set connection status to disconnected
+        if hasattr(self, 'metrics'):
+            self.metrics.set_connection_status(False, "kafka")
 
 class IoTAlertConsumer(KafkaConsumer):
     """
@@ -299,6 +352,9 @@ class IoTAlertConsumer(KafkaConsumer):
         super().__init__(**kwargs)
         # Track devices and their latest readings by device type
         self.device_readings = {}
+        
+        # Update the timed_operation decorator with the actual metrics instance
+        self.process_message = timed_operation(self.metrics, "message_processing")(self.process_message)
     
     def process_message(self, message):
         """
@@ -308,6 +364,9 @@ class IoTAlertConsumer(KafkaConsumer):
         Args:
             message: Dictionary containing the deserialized Avro IoT sensor reading
         """
+        # Record message received
+        self.metrics.record_message_received()
+        
         device_id = message.get('device_id', 'unknown')
         device_type = message.get('device_type', 'unknown')
         value = message.get('value', 'unknown')
@@ -317,6 +376,10 @@ class IoTAlertConsumer(KafkaConsumer):
         is_anomaly = message.get('is_anomaly', False)
         status = message.get('status', 'UNKNOWN')  # Get status from updated schema
         tags = message.get('tags', [])  # Get tags from updated schema
+
+        # Record anomaly if detected
+        if is_anomaly:
+            self.metrics.record_anomaly_detected(device_type=device_type)
 
         # Get device metadata
         device_metadata = message.get('device_metadata', {})
@@ -435,7 +498,11 @@ class IoTAlertConsumer(KafkaConsumer):
                         f"Reading: {formatted_value}{unit} | Status: {status} | "
                         f"Tags: {tags_str}")
                 
+            # Record successful processing
+            self.metrics.record_message_processed()
+            
         except (ValueError, TypeError) as e:
             # Handle case where value conversion fails
             log.error(f"Error processing value from device {device_id}: {str(e)}")
             log.info(f"Raw message: {message}")
+            self.metrics.record_message_failed(error_type="value_conversion_error")

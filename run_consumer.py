@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to run the IoT data consumer with Avro deserialization.
+Script to run the IoT data consumer with Avro deserialization and Prometheus metrics.
 This is intended to be run in a Docker container with a multi-broker Kafka cluster.
 """
 
@@ -97,6 +97,11 @@ def log_configuration():
     log.info(f"Heartbeat interval: {settings.consumer.heartbeat_interval_ms}ms")
     log.info(f"Partition assignment strategy: {settings.consumer.partition_assignment_strategy}")
 
+    # Log metrics configuration
+    metrics_port = os.getenv("METRICS_PORT", "8001")
+    log.info(f"Metrics server port: {metrics_port}")
+    log.info(f"Metrics endpoint: http://localhost:{metrics_port}/metrics")
+
     # Log RuuviTag configuration if available
     if hasattr(settings, 'ruuvitag'):
         log.info("RuuviTag configuration:")
@@ -109,11 +114,11 @@ def log_configuration():
 
 def main():
     """
-    Main function to run the IoT data consumer with Avro deserialization.
+    Main function to run the IoT data consumer with Avro deserialization and Prometheus metrics.
     Handles connection to the multi-broker Kafka cluster,
     sets up the consumer, and processes incoming IoT data.
     """
-    log.info("Starting IoT Data Consumer Service with Avro Deserialization")
+    log.info("Starting IoT Data Consumer Service with Avro Deserialization and Prometheus Metrics")
     log_configuration()
     
     # Wait for Kafka and Schema Registry to be ready
@@ -127,6 +132,7 @@ def main():
 
         log.info("Consumer will now handle RuuviTag data as separate sensor readings")
         log.info("Each RuuviTag physical device now sends multiple messages (one per sensor)")
+        log.info("Prometheus metrics server started and ready for scraping")
 
         # Setup signal handlers
         def signal_handler(sig, frame):
@@ -135,6 +141,11 @@ def main():
         
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+        
+        # Log metrics information
+        metrics_port = os.getenv("METRICS_PORT", "8001")
+        log.info(f"🔍 Metrics available at: http://localhost:{metrics_port}/metrics")
+        log.info("📊 Prometheus can now scrape consumer metrics successfully")
         
         # Start consuming messages in a continuous loop
         log.info("Starting continuous IoT data consumption with Avro deserialization...")
@@ -148,7 +159,7 @@ def main():
     finally:
         # Ensure any cleanup happens
         if 'consumer' in locals():
-            consumer.close
+            consumer.close()
         log.info("Consumer shutdown complete")
 
 if __name__ == "__main__":
