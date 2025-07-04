@@ -1,17 +1,18 @@
 # IoT Data Ingestion Pipeline with Multi-Broker Kafka and Schema Registry
 
-A scalable and fault-tolerant data pipeline that collects real-time IoT sensor data from RuuviTag sensors via ESP32 gateway, processes it through a multi-broker Kafka cluster with Schema Registry validation, and stores it in TimescaleDB for time-series analytics.
+A scalable and fault-tolerant data pipeline that collects real-time IoT sensor data from RuuviTag sensors via ESP32 gateway, processes it through a multi-broker Kafka cluster with Schema Registry validation, stores it in TimescaleDB for time-series analytics, and provides comprehensive monitoring via Prometheus and Grafana.
 
 ## Project Overview
 
 This project implements a complete near real-time IoT data pipeline with the following components:
 
-- `Real-Time Data Collection`:Collects real-time data with real IoT devices - specifically RuuviTags as BLE sensors and an ESP32 as a gateway and MQTT for network protocol
+- `Real-Time Data Collection`: Collects real-time data with real IoT devices - specifically RuuviTags as BLE sensors and an ESP32 as a gateway and MQTT for network protocol
 - `Data Simulation`: Simulates multiple IoT sensors (temperature, humidity, pressure, motion, light, etc.,) to generate data
 - `Data Ingestion`: Uses Confluet-Kafka-Python for reliable, scalable data ingestion
 - `Data Processing`: Processes and filters the data, generating alerts for anomalies
 - `Data Storage`: Uses TimescaleDB for time-series data storage with automatic archiving
-- `Monitoring`: Kafka UI for observability and operational insights
+- `Monitoring & Observability`: Comprehensive monitoring with Prometheus, Grafana, and AlertManager
+- `Alerting`: Real-time alerts for systems and data anomalies
 
 ## Key Features
 
@@ -22,16 +23,19 @@ This project implements a complete near real-time IoT data pipeline with the fol
 - `Fault Tolerance`: Automatic failover and recovery
 - `Containerized`: Complete Docker Compose deployment
 - `Scalable`: Horizontal scaling support
+- `Comprehensive Monitoring`: Prometheus metrics with Grafana dashboards
+- `Alerting System`: Real-time alerts via AlertManager with email notifications
 - `Data Analytics`: Query historical data and generate insights
 
 ## Architecture
 
-![architecture.png](images/architecture4.png)
+![architecture.png](images/architecture5.png)
 
 ## Project Structure
 
 ```
-metrocloud-data-pipeline/
+iot-data-pipeline/
+├── .gitignore
 ├── database
 │   └── init.sql                            # TimescaleDB database initialization script
 ├── docker
@@ -43,16 +47,37 @@ metrocloud-data-pipeline/
 ├── esp32
 │   └── ruuvitag_gateway
 │       ├── CMakeLists.txt                  # Defines project name and target
-│       ├── build
 │       ├── main
 │       │   ├── CMakeLists.txt              # IDF Component Register to declare dependencies
 │       │   └── main.c
 │       ├── partitions.csv                  # Tells ESP32 how to divide its internal flash memory into usable regions (partitions) for different purposes
-│       ├── sdkconfig
+│       └── sdkconfig
 ├── images
 │   ├── architecture.png
-│   └── architecture1.png
-│   └── architecture2.png
+│   ├── architecture1.png
+│   ├── architecture2.png
+│   ├── architecture3.png
+│   ├── architecture4.png
+│   └── architecture5.png
+├── monitoring                              # Monitoring configuration
+│   ├── alertmanager                        
+│   │   └── alertmanager.yml                # Alert routing configurations
+│   ├── grafana
+│   │   ├── dashboards
+│   │   │   └── iot-pipeline.json           # IoT pipeline dashboard
+│   │   └── provisioning
+│   │       ├── datasources/
+│   │       │   └── datasource.yml          # Prometheus datasource config
+│   │       └── dashboards/
+│   │           └── dashboard.yml           # Dashboard provisioning
+│   ├── jmx                                 # JMX exporter configurations
+│   │   ├── kafka1-jmx-config.yml
+│   │   ├── kafka2-jmx-config.yml
+│   │   └── kafka3-jmx-config.yml
+│   └── prometheus                          # Prometheus configuration
+│       ├── prometheus.yml
+│       └── rules
+│           └── alert_rules.yml              # Alerting rules
 ├── mqtt                                    # MQTT protocol configuration
 │   └── config
 │       └── mosquitto.conf
@@ -94,6 +119,7 @@ metrocloud-data-pipeline/
         ├── __pycache__
         ├── database_utils.py               # Database utility functions
         ├── logger.py                       # Enhanced logger configuration
+        ├── metrics.py                      # Comprehensive Prometheus metrics integration
         └── schema_registry.py              # Schema Registry client implementation
 ```
 
@@ -110,6 +136,7 @@ metrocloud-data-pipeline/
 - TimescaleDB: Relational database for time-series data storage
 - SQLAlchemy: SQL toolkit and ORM for database operations
 - Pydantic: For configuration management and data validation
+- Prometheus + Grafana + AlertManager: For real-time IoT pipeline metrics monitoring, visualizations and dashboards
 
 ## Prerequisites
 
@@ -131,7 +158,7 @@ metrocloud-data-pipeline/
 3. Network Requirements
 
     - WiFi network (2.4GHz for ESP32)
-    - Available ports: 1883(MQQT), 8080(Kafka UI), 8081(Schema Registry), 5432(TimescaleDB)
+    - Available ports: 1883(MQQT), 8080(Kafka UI), 8081(Schema Registry), 5432(TimescaleDB), 9090(Prometheus), 3000(Grafana), 9095(AlertManager), 8025(MailPit)
 
 ## Setup ESP-IDF Environment
 
@@ -304,21 +331,19 @@ If you haven't installed ESP-IDF yet, follow these steps:
     SELECT * FROM timescaledb_information.compression_settings;
     ```
 
-8. Access the Kafka UI
-    - Open your browser and navigate to http://localhost:8080
-    - This allows you to monitor:
-        - Kafka broker health
-        - Schema Registry to view registered schemas
-        - Topics and messages
-        - Consumer groups
-        - Partitions and their replication status
+8. Accessing Monitoring interfaces
+    - Promethus: http://localhost:9090
+    - Grafana: http://localhost:3000 (admin/admin123)
+    - Kafka UI: http://localhost:8080
+    - AlertManager: http://localhost:9095
+    - Mailpit (Test SMTP): http://localhost:8025
 
 9. Shutdown
     ```bash
     docker-compose down -v
     ```
 
-10. Other services
+11. Other services
     - Build individual image
     ```bash
     docker-compose build <image-name>
@@ -362,11 +387,11 @@ The data flows through the system as follows:
         - Automatic compression and retention policies
         - Continuous aggregates for analytics
 
-4. Data Output
+4. Monitoring
 
-    - Grafana
+    -   All services -> Prometheus -> Grafana
 
-        - Real-time alerts for anomalous readings
+        - Real-time metrics collection and storage
         - Historical data queries
         - Monitoring dashboards
         - Analytics and reporting
@@ -405,66 +430,14 @@ The data flows through the system as follows:
 
 4. Kafka Pipeline
 
-    The Kafka pipeline remains unchanged:
+    The Kafka pipeline consists of:
 
     - Multi-broker setup for fault tolerance
     - Schema Registry for data validation
     - Topic partitioning for scalability
     - Kafka UI for monitoring
 
-5. Kafka Cluster
-
-    - Multi-Broker Setup
-
-        This project uses 3 Kafka brokers in a KRaft mode:
-
-        | Broker | Internal Port | External Port |         Role        |
-        |--------|---------------|---------------|---------------------|
-        | kafka1 |      9092     |     29092     | broker + controller |
-        | Kafka2 |      9092     |     29093     | broker + controller |
-        | Kafka3 |      9092     |     29094     | broker + controller |
-
-        Benefits:
-        - `High Availabliity` - No single point of failure with data replicated across multiple brokers
-        -  `Scalability` - Horizontal scaling by adding more brokers to handle increased load
-        - `Fault Tolerance` - System continues to operate even if one or more brokers fail
-        - `Performance`x - Multiple brokers can handle more concurrent produceres and consumers
-
-    - KRaft Mode (Kafka Raft)
-        
-        This setup uses KRaft mode which eliminates the ZooKeeper dependency:
-
-        - All brokers participate in the Raft quorum
-        - Controllers quorum handles metadata management
-        - Each broker runs both controller and broker roles
-
-    - Kafka Listeners
-    
-        The Kafka configuration contains several listener configurations that are essential for proper network communication:
-
-        - `KAFKA_LISTENERS`: 'PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092'
-        - `KAFKA_ADVERTISED_LISTENERS`: 'PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092'
-        - `PLAINTEXT`: Used for internal communication between brokers and clients within Docker network
-        - `CONTROLLER`: Used for controller-to-controller communication in KRaft mode
-        - `PLAINTEXT_HOST`: Used for external access from the host machine
-
-    - Controller Quorum
-        
-        The KRaft controller quorum is configured with:
-
-        - `KAFKA_CONTROLLER_QUORUM_VOTERS`: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
-
-        This defines the voting members of the Raft quorum, where each broker participates in the controller election process.
-
-    - Kafka Topic
-    
-        Topics are created with fault tolerance in mind:
-
-        - Replication Factor: 3 (data stored on all brokers)
-        - Partitions: 6 (allows parallel consumption)
-        - Min In-Sync Replicas: 2(requires at least 3 brokers to acknowledge writes) 
-
-6. Avro Schema and Schema Registry
+5.  Avro Schema and Schema Registry
     
     - Schema Registry
 
@@ -486,20 +459,64 @@ The data flows through the system as follows:
         - Anomaly detection (is_anomaly)
         - Extensibility with metadata field
 
-7. TimescaleDB Sink
+6. TimescaleDB Sink
 
     - Consumes IoT data from Kafka with Avro deserialization
     - Validates and transforms data for database storage
     - Performs batch insertions for optimal performance
     - Compression and continuous aggregates
 
-8. TimescalDB Database
+7. TimescalDB Database
 
     - Stores sensor readings with full metadata
     - Supports geospatial data for device locations
     - Implements data archiving and retention policies
     - Provides views for common queries
     - Includes integrity constraints and indexes
+
+8. Monitoring and Observability
+
+    - Prometheus
+    
+        - `Scraping Intervals`: 15-30 seconds for most services
+        - `Retention`: 15 days of metric data storage
+        - `Alert Evaluation`: Every 15 seconds
+        - `Service Discovery`: Static configuration for Docker services
+
+    - Grafana Setup
+
+        - `Data Sources`: Prometheus configured automatically
+        - `Dashboard Provisioning`: IoT pipeline dashboard auto-loaded
+        - `User Management`: Default admin user with configurable password
+        - `Plugins`: Clock panel and JSON datasource included
+
+    - JMX Monitoring
+
+        - `Kafka Metrics`: Comprehensive broker, topic, and request metrics
+        - `Custom Configurations`: Per-broker JMX exporter setup
+        - `Performance Metrics`: Request latency, throughput, partition health  
+
+9. Metrics Collection
+
+    - Application Metrics
+
+        - `Producer/Consumer`: Message throughput, processing latency, error rates
+        - `TimescaleDB Sink`: Batch sizes, insert performance, database connections
+        - `RuuviTag Adapter`: MQTT messages, data transformations, device counts
+        - `Data Quality`: Anomaly detection rates, validation failures
+
+    - Infrastructure Metrics
+
+        - `Kafka`: Broker health, partition status, consumer lag
+        - `TimescaleDB`: Connection pools, query performance, storage usage
+        - `MQTT`: Client connections, message rates, broker status
+        - `System`: CPU, memory, disk usage, network I/O
+
+    - Custom Business Metrics
+
+        - `IoT Devices`: Active device counts, sensor readings per minute
+        - `Data Pipeline`: End-to-end latency, data quality scores
+        - `Anomalies`: Detection rates by sensor type and threshold violations
 
 ## Configuration Options
 The application can be configured through environment variables:
@@ -520,12 +537,55 @@ The application can be configured through environment variables:
 2. Docker Compose Configuration Options
     - Kafka Cluster Configuration
     
-        `Note:` `docker-compose.yml`
+        - Multi-Broker Setup
 
-    - TimescaleDB Configuration
-        - `POSTGRES_DB`=iot_data
-        - `POSTGRES_USER`=iot_user
-        - `POSTGRES_PASSWORD`=iot_password
+            This project uses 3 Kafka brokers in a KRaft mode:
+
+            | Broker | Internal Port | External Port |         Role        |
+            |--------|---------------|---------------|---------------------|
+            | kafka1 |      9092     |     29092     | broker + controller |
+            | Kafka2 |      9092     |     29093     | broker + controller |
+            | Kafka3 |      9092     |     29094     | broker + controller |
+
+            Benefits:
+            - `High Availabliity` - No single point of failure with data replicated across multiple brokers
+            -  `Scalability` - Horizontal scaling by adding more brokers to handle increased load
+            - `Fault Tolerance` - System continues to operate even if one or more brokers fail
+            - `Performance`x - Multiple brokers can handle more concurrent produceres and consumers
+
+        - KRaft Mode (Kafka Raft)
+            
+            This setup uses KRaft mode which eliminates the ZooKeeper dependency:
+
+            - All brokers participate in the Raft quorum
+            - Controllers quorum handles metadata management
+            - Each broker runs both controller and broker roles
+
+        - Kafka Listeners
+        
+            The Kafka configuration contains several listener configurations that are essential for proper network communication:
+
+            - `KAFKA_LISTENERS`: 'PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+            - `KAFKA_ADVERTISED_LISTENERS`: 'PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092'
+            - `PLAINTEXT`: Used for internal communication between brokers and clients within Docker network
+            - `CONTROLLER`: Used for controller-to-controller communication in KRaft mode
+            - `PLAINTEXT_HOST`: Used for external access from the host machine
+
+        - Controller Quorum
+            
+            The KRaft controller quorum is configured with:
+
+            - `KAFKA_CONTROLLER_QUORUM_VOTERS`: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+
+            This defines the voting members of the Raft quorum, where each broker participates in the controller election process.
+
+        - Kafka Topic
+        
+            Topics are created with fault tolerance in mind:
+
+            - Replication Factor: 3 (data stored on all brokers)
+            - Partitions: 6 (allows parallel consumption)
+            - Min In-Sync Replicas: 2(requires at least 3 brokers to acknowledge writes)
 
     - IoT Simulator Configuration
         - `IOT_NUM_DEVICES`=8
@@ -534,25 +594,30 @@ The application can be configured through environment variables:
         - `IOT_ANOMALY_PROBABILITY`=0.05
 
     - Schema Registry Configuration
-        
-        `Note:` `docker-compose.yml`
+    
+        `Check => docker/docker-compose.yml`
 
     - Kafka UI Configuration
 
-        `Note:` `docker-compose.yml`
+        `Check=> docker/docker-compose.yml`
 
     - MQTT Broker Configuration
 
-        `Note:` `docker-compose.yml`
+        `Check => docker/docker-compose.yml`
 
     - RuuviTag Adapter Configuration
 
-        `Note:` `docker-compose.yml`
+        `Check => docker/docker-compose.yml`
 
     - Kafka Consumer
 
-        `Note:` `docker-compose.yml`
+        `Check => docker/docker-compose.yml`
 
+    - TimescaleDB Configuration
+        - `POSTGRES_DB`=iot_data
+        - `POSTGRES_USER`=iot_user
+        - `POSTGRES_PASSWORD`=iot_password
+    
     - TimescaleDB Sink Configuration
         - `DATA_SINK_BATCH_SIZE`=50
         - `DATA_SINK_COMMIT_INTERVAL`=5.0
@@ -560,8 +625,35 @@ The application can be configured through environment variables:
         - `POSTGRES_ARCHIVE_AFTER_DAYS`=30
         - `POSTGRES_RETENTION_DAYS`=90
 
+    - Prometheus
+
+        `Check => docker/docker-compose.yml`
+
+    - Grafana
+        - `GF_SECURITY_ADMIN_USER`=admin
+        - `GF_SECURITY_ADMIN_PASSWORD`=admin123
+            
 3. Logging Configuration
     - `LOG_LEVEL`=INFO
+
+4. Monitoring Configuration
+
+    - Prometheus Metrics
+
+        All services expose metrics on dedicated ports:
+        
+        | Service               | Port  | Endpoint  | Key Metrics                                       |
+        |-----------------------|-------|-----------|---------------------------------------------------|
+        | RuuviTag Adapter      | 8002  | /metrics  | MQTT messages, transformations, device counts     |
+        | Kafka Consumer        | 8001  | /metrics  | Message processing, consumer lag, errors          |
+        | TimescaleDB Sink      | 8003  | /metrics  | Database inserts, batch performance, connections  |
+        | Kafka JMX (Broker 1)  | 9101  | /metrics  | Broker health, topic metrics, partition status    |
+        | Kafka JMX (Broker 2)  | 9102  | /metrics  | Broker health, topic metrics, partition status    |
+        | Kafka JMX (Broker 3)  | 9103  | /metrics  | Broker health, topic metrics, partition status    |
+        | PostgreSQL Exporter   | 9187  | /metrics  | Database performance, connections, queries        |
+        | MQTT Exporter         | 9234  | /metrics  | MQTT broker status, client connections            |
+        | Node Exporter         | 9100  | /metrics  | System metrics (CPU, memory, disk)                |
+        | cAdvisor              | 8090  | /metrics  | Container resource usage                          |
 
 ## Database Management
 
@@ -580,36 +672,15 @@ The application can be configured through environment variables:
     - `Archived Data`: Moved to archive table, kept for 90 days (configurable)
     - `Cleanup`: Automatic cleanup runs periodically via the TimescaleDB sink
 
-## Maintenance
-
-1. RuuviTag Maintenance
-
-    - Check battery levels periodically
-    - Replace batteries when voltage drops below 2.5V
-    - Keep RuuviTags within range of ESP32
-
-2. ESP32 Maintenance
-
-    - Ensure stable power supply
-    - Monitor WiFi connectivity
-    - Update firmware as needed
-
-3. Database Maintenance
-    - Monitor disk space usage
-    - Run periodic cleanup operations
-    - Check data integrity regularly
-    - Monitor query performance
-
 ## Monitoring
 
-1. Kafka UI (http://localhost:8080)
+1. Accessing Monitoring interfaces
+    - Promethus: http://localhost:9090
+    - Grafana: http://localhost:3000 (admin/admin123)
+    - Kafka UI: http://localhost:8080
+    - AlertManager: http://localhost:9095
+    - Mailpit (Test SMTP): http://localhost:8025
 
-    The Kafka UI provides insights into the health and performance of Kafka cluster:
-
-    - Broker status and configuration
-    - Topic information including partitions and replication
-    - Messages viewer with filtering capabilities
-    - Consumer group status and lag
 
 2. Database Monitoring
 
@@ -731,7 +802,7 @@ The application can be configured through environment variables:
         ORDER BY timestamp DESC;
 
         -- Moving averages and trends
-        SELECT 
+        SELECT
             device_id,
             timestamp,
             value,
@@ -832,6 +903,74 @@ The application can be configured through environment variables:
     docker exec -it timescaledb pg_isready -U iot_user
     ```
 
+4. Key Metrics
+
+    - IoT Pipeline Metrics
+
+        - Message Processing
+            - iot_messages_received_total
+            - iot_messages_processed_total
+            - iot_messages_failed_total
+            - iot_processing_duration_seconds
+
+        - MQTT Adapter
+            - mqtt_adapter_messages_received_total
+            - mqtt_adapter_ruuvitag_devices_seen
+            - mqtt_adapter_transformation_duration_seconds_count
+
+    - Infrastructure Metrics
+
+        - Kafka
+            - kafka_server_brokertopicmetrics_messagesin_total
+            - kafka_server_replica_manager_under_replicated_partitions
+            - kafka_network_requests_total
+
+        - Database
+            - pg_stat_database_numbackends
+            - pg_stat_database_xact_commit
+
+        - System
+            - node_cpu_seconds_total
+            - node_memory_MemAvailable_bytes
+            - container_memory_usage_bytes
+
+## Maintenance and Operations
+
+1. RuuviTag Maintenance
+
+    - Check battery levels periodically
+    - Replace batteries when voltage drops below 2.5V
+    - Keep RuuviTags within range of ESP32
+
+2. ESP32 Maintenance
+
+    - Ensure stable power supply
+    - Monitor WiFi connectivity
+    - Update firmware as needed
+
+3. Database Maintenance
+    - Monitor disk space usage
+    - Run periodic cleanup operations
+    - Check data integrity regularly
+    - Monitor query performance
+
+4. Monitoring Maintenance
+    
+    - Prometheus Data Management
+        - `Storage`: Metrics retained for 15 days by default
+        - `Disk Usage`: Monitor prometheus_tsdb_storage_size_bytes
+        - `Cleanup`: Automatic retention policy handles old data
+
+    - Grafana Management
+        - `Dashboard Updates`: Modify JSON files in monitoring/grafana/dashboards/
+        - `User Management`: Additional users can be configured
+        - `Plugin Management`: Install additional plugins as needed
+
+    - Alert Management
+        - `Rule Updates`: Modify alert_rules.yml and restart Prometheus
+        - `Notification Channels`: Configure additional receivers in AlertManager
+        - `Silence Management`: Use AlertManager UI to manage alert silences
+
 ## Fault Tolerance Features
 
 1. Producer Resilience
@@ -888,9 +1027,17 @@ The application can be configured through environment variables:
         SELECT add_retention_policy('sensor_readings', INTERVAL '30 days');
         ```
 
-2. Monitoring Performance
+2. Performance Optimization
 
-    One can monitor Kafka cluster performacne metrics using JMX and tools like Prometheus and Grafana.
+    - Metrics Collection
+        - `Scrape Frequency`: Adjust based on system load
+        - `Metric Retention`: Configure based on storage requirements
+        - `Label Cardinality`: Monitor high-cardinality metrics
+
+    - Dashboard Performance
+        - `Query Optimization`: Use appropriate time ranges
+        - `Panel Refresh`: Configure refresh intervals based on needs
+        - `Data Source`: Optimize Prometheus queries
 
 3. Data Recovery
 
@@ -1025,6 +1172,39 @@ The application can be configured through environment variables:
         - Monitor disk usage
         - Adjust batch sizes and intervals
 
+8. Monitoring Issues
+    
+    - Prometheus Not Collecting Metrics
+
+        - Check service endpoints: curl http://localhost:8002/metrics
+        - Verify scrape configuration in prometheus.yml
+        - Check Prometheus logs: docker-compose logs prometheus
+
+    - Grafana Dashboard Issues
+
+        - Verify Prometheus datasource connection
+        - Check dashboard JSON configuration
+        - Review Grafana logs: docker-compose logs grafana
+
+    - Missing Metrics
+
+        - Confirm service metrics exposition
+        - Check network connectivity between services
+        - Verify metrics server startup in application logs
+
+    - AlertManager Not Sending Alerts
+
+        - Check alert rule evaluation in Prometheus
+        - Verify AlertManager configuration
+        - Test SMTP configuration with Mailpit
+
+    - Common Monitoring Problems
+
+        - High Memory Usage: Monitor prometheus_tsdb_head_samples
+        - Missing Data Points: Check scrape_duration vs scrape_interval
+        - Dashboard Loading Slowly: Optimize query time ranges
+        - Alerts Not Firing: Verify expression evaluation in Prometheus
+
 ## Acknowledgements
 
 - [ruuvi](https://ruuvi.com/) for excellent environmental sensors
@@ -1033,16 +1213,16 @@ The application can be configured through environment variables:
 - [CONFLUENT](https://developer.confluent.io/get-started/python/?session_ref=https://www.google.com/&_ga=2.115239876.2102348729.1750172126-1532447712.1744219053&_gac=1.53093082.1750172135.CjwKCAjwpMTCBhA-EiwA_-Msmf0YzSRvWOlxo3ylbokBzvAEdAKmGOT3O0G3KSnjOuc-PU-My69LtRoCQWIQAvD_BwE&_gl=1*i8p1b3*_gcl_aw*R0NMLjE3NTAxNzIxMzUuQ2p3S0NBandwTVRDQmhBLUVpd0FfLU1zbWYwWXpTUnZXT2x4bzN5bGJva0J6dkFFZEFLbUdPVDNPMEczS1Nuak91Yy1QVS1NeTY5THRSb0NRV0lRQXZEX0J3RQ..*_gcl_au*Mjg2MDE2MDg2LjE3NDQyMTkwNTM.*_ga*MTUzMjQ0NzcxMi4xNzQ0MjE5MDUz*_ga_D2D3EGKSGD*czE3NTAxNzIxMjYkbzQyJGcxJHQxNzUwMTcyMTg5JGo2MCRsMCRoMA..) for reliable messaging
 - [timescaledb](https://github.com/timescale/timescaledb) for time-series database
 - [CONFLUENT](https://docs.confluent.io/platform/current/schema-registry/index.html) for Schema Registry
+- [Prometheus](https://prometheus.io/docs/introduction/overview/) for Prometheus metrics collection
+- [Grafana](https://grafana.com/docs/grafana/latest/?pg=oss-graf&plcmt=hero-btn-2) for Grafana
 
 ## Next Steps and Enhancements
 
 Further enhancements for this project:
 
-- `Analytics Dashboard`: Create real-time dashboards with Grafana or similar tools
 - `Data Processing`: Implement stream processing with Kafka Streams or Apache Flink
 - `Machine Learning`: Add anomaly detection and predictive analytics
 - `API Layer`: Create REST API for data access and device management
 - `Security`: Add authentication and TLS encryption for Kafka and TimescaleDB
-- `Monitoring`: Implement comprehensive monitoring with Prometheus and Grafana
 - `Data Warehouse`: Add data warehouse integration for long-term analytics
 - `Mobile App`: Create mobile application for real-time monitoring
