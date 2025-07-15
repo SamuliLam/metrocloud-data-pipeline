@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script to run the IoT data consumer.
-This is intended to be run in a Docker container with a multi-broker cluster.
+Script to run the IoT data consumer with Avro deserialization and Prometheus metrics.
+This is intended to be run in a Docker container with a multi-broker Kafka cluster.
 """
 
 import time
@@ -12,53 +12,55 @@ import os
 
 from src.utils.logger import log
 from src.config.config import settings
-from src.data_ingestion.consumer import KafkaConsumer
-from confluent_kafka import Consumer
+from src.data_ingestion.consumer import KafkaConsumer, IoTAlertConsumer
+from src.utils.schema_registry import schema_registry
 
-
-def wait_for_kafka(max_retries=30, initial_backoff=1):
+def wait_for_kafka_and_schema_registry(max_retries=60, initial_backoff=1):
     """
-    Wait for Kafka to become available with exponential backoff.
-    With multiple brokers, connection attemps are more complex and may require more time and retries.
-
+    Wait for Kafka and Schema Registry to become available with exponential backoff.
+    With multiple brokers and Schema Registry, connection attempts are more complex 
+    and may require more time and retries.
+    
     Args:
         max_retries: Maximum number of retry attempts
         initial_backoff: Initial backoff time in seconds
     
     Returns:
-        True if Kafka connection was successful, False otherwise
+        True if connection was successful, False otherwise
     """
-
     backoff = initial_backoff
     
     for attempt in range(1, max_retries + 1):
         try:
-            # Get the bootstrap severs from environment or settings
+            # Get the bootstrap servers from environment or settings
             bootstrap_servers = settings.kafka.bootstrap_servers
-            log.info(f"Attempt {attempt}/{max_retries} to connect to Kafka at {bootstrap_servers}")
+            log.info(f"Attempt {attempt}/{max_retries} to connect to Kafka cluster at {bootstrap_servers}")
             
             # Try to create a consumer to test connection
-            consumer = Consumer({
-                'bootstrap.servers': bootstrap_servers,
-                'group.id': 'test-connection-group',
-                'auto.offset.reset': 'earliest',
-                'session.timeout.ms': 10000, # Longer timeout for multi-broker setup
-                'heartbeat.interval.ms': 3000
-            })
+            from confluent_kafka import Consumer
+            consumer_conf = settings.consumer.get_config()
+            consumer = Consumer(consumer_conf)
             
             # List topics as a connectivity test
-            metadata = consumer.list_topics(timeout=10)
-            if metadata:
-                log.info(f"Successfully listed {len(metadata.topics)} topics from Kafka")
+            device_metadata = consumer.list_topics(timeout=10)
+            if device_metadata:
+                log.info(f"Successfully listed {len(device_metadata.topics)} topics from Kafka")
             
             # Close the consumer properly
             consumer.close()
             
-            log.info("Successfully connected to a Kafka cluster!")
+            # Now check Schema Registry
+            sr_url = settings.schema_registry.url
+            log.info(f"Attempting to connect to Schema Registry at {sr_url}")
+            
+            # Try to get subjects from Schema Registry
+            subjects = schema_registry.get_subjects()
+            log.info(f"Successfully connected to Schema Registry. Available subjects: {subjects}")
+            
             return True
             
         except Exception as e:
-            log.warning(f"Failed to connect to Kafka: {str(e)}")
+            log.warning(f"Failed to connect to Kafka or Schema Registry: {str(e)}")
             
             if attempt < max_retries:
                 # Add some jitter to the backoff
@@ -71,80 +73,84 @@ def wait_for_kafka(max_retries=30, initial_backoff=1):
                 # Increase backoff for next attempt (exponential backoff)
                 backoff = min(backoff * 2, 30)  # Cap at 30 seconds
             else:
-                log.error(f"Failed to connect to Kafka after {max_retries} attempts")
+                log.error(f"Failed to connect after {max_retries} attempts")
                 return False
 
-class IoTAlertConsumer(KafkaConsumer):
+def log_configuration():
     """
-    Custom consumer that processes IoT data and generates alerts.
-    This implementation is aware of the multi-broker setup and 
-    includes logic to handle broker failovers.
-    """ 
+    Log the current configuration settings to help with troubleshooting.
+    """
+    log.info("Current configuration:")
+    log.info(f"App name: {settings.app_name}")
+    log.info(f"Environment: {settings.environment}")
+    log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
+    log.info(f"Kafka topic: {settings.kafka.topic_name}")
+    log.info(f"Kafka consumer group ID: {settings.kafka.consumer_group_id}")
+    log.info(f"Kafka auto offset reset: {settings.kafka.auto_offset_reset}")
+    log.info(f"Schema Registry URL: {settings.schema_registry.url}")
     
-    def process_message(self, message):
-        """
-        Process a received IoT sensor reading and generate alerts based on specified thresholds
-        
-        Args:
-            message: Dictionary containing the IoT sensor reading
-        """
-        device_id = message.get('device_id', 'unknown')
-        device_type = message.get('device_type', 'unknown')
-        value = message.get('value', 'unknown')
-        unit = message.get('unit', '')
-        timestamp = message.get('timestamp', 'unknown')
-        
-        # Check for anomalies or specific conditions
-        try:
-            # Convert value to float for numeric comparisons
-            # but handle the case when value might be non-numeric (like boolean for motion)
-            if device_type == "temperature" and float(value) > 30:
-                log.warning(f"HIGH TEMPERATURE ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
-            elif device_type == "humidity" and float(value) > 70:
-                log.warning(f"HIGH HUMIDITY ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
-            elif device_type == "pressure" and float(value) < 990:
-                log.warning(f"LOW PRESSURE ALERT: Device {device_id} reported {value}{unit} at {timestamp}")
-            elif device_type == "motion" and value == 1:
-                log.info(f"MOTION DETECTED: Device {device_id} at {timestamp}")
-            elif device_type == "light" and float(value) < 10:
-                log.info(f"LOW LIGHT LEVEL: Device {device_id} reported {value}{unit} at {timestamp}")
-            else:
-                log.info(f"Device {device_id} ({device_type}): {value}{unit}")
-        except (ValueError, TypeError) as e:
-            # Handle case where value conversion fails
-            log.error(f"Error processing value from device {device_id}: {str(e)}")
-            log.info(f"Raw message: {message}")
+    # Log consumer-specific configuration
+    log.info("Consumer configuration:")
+    log.info(f"Auto commit enabled: {settings.consumer.enable_auto_commit}")
+    log.info(f"Auto commit interval: {settings.consumer.auto_commit_interval_ms}ms")
+    log.info(f"Session timeout: {settings.consumer.session_timeout_ms}ms")
+    log.info(f"Heartbeat interval: {settings.consumer.heartbeat_interval_ms}ms")
+    log.info(f"Partition assignment strategy: {settings.consumer.partition_assignment_strategy}")
+
+    # Log metrics configuration
+    metrics_port = os.getenv("METRICS_PORT", "8001")
+    log.info(f"Metrics server port: {metrics_port}")
+    log.info(f"Metrics endpoint: http://localhost:{metrics_port}/metrics")
+
+    # Log RuuviTag configuration if available
+    if hasattr(settings, 'ruuvitag'):
+        log.info("RuuviTag configuration:")
+        log.info(f"Device type: {settings.ruuvitag.device_type}")
+        log.info(f"Temperature thresholds: {settings.ruuvitag.anomaly_thresholds.get('temperature_min', -50)}°C to {settings.ruuvitag.anomaly_thresholds.get('temperature_max', 50)}°C")
+        log.info(f"Humidity thresholds: {settings.ruuvitag.anomaly_thresholds.get('humidity_min', 15)}% to {settings.ruuvitag.anomaly_thresholds.get('humidity_max', 100)}%")
+        log.info(f"Pressure thresholds: {settings.ruuvitag.anomaly_thresholds.get('pressure_min', 87000)} to {settings.ruuvitag.anomaly_thresholds.get('pressure_max', 108500)} Pa")
+        log.info(f"Battery threshold: {settings.ruuvitag.anomaly_thresholds.get('battery_low', 2.0)}V")
+
 
 def main():
     """
-    Main functions to run the IoT data consumer.
-    Handles connection to the multi-broker Kafka cluster.
-    Sets up the consumer, and processes incoming IoT data.
+    Main function to run the IoT data consumer with Avro deserialization and Prometheus metrics.
+    Handles connection to the multi-broker Kafka cluster,
+    sets up the consumer, and processes incoming IoT data.
     """
-    log.info("Starting IoT Data Consumer Service")
-    log.info(f"Kafka bootstrap servers: {settings.kafka.bootstrap_servers}")
-    log.info(f"Kafka topic: {settings.kafka.topic_name}")
-
-    # Get consumer group ID from environment or use default
-    consumer_groupd_id = os.getenv("KAFKA_CONSUMER_GROUP_ID", "iod-data-consumer")
-    log.info(f"Consumer group ID: {consumer_groupd_id}")
+    log.info("Starting IoT Data Consumer Service with Avro Deserialization and Prometheus Metrics")
+    log_configuration()
     
-    # Wait for Kafka to be ready
-    if not wait_for_kafka():
-        log.error("Kafka is not available. Exiting.")
+    # Wait for Kafka and Schema Registry to be ready
+    if not wait_for_kafka_and_schema_registry():
+        log.error("Kafka cluster or Schema Registry is not available. Exiting.")
         sys.exit(1)
     
-    try: 
-        # Create and start the consumer
-        consumer = IoTAlertConsumer(
-            group_id=consumer_groupd_id,
-            # Fault tolerance settings for multi-broker environment
-            auto_offset_reset=os.getenv("KAFKA_AUTO_OFFSET_RESET", "earliest")
-        )
+    try:
+        # Create and start the consumer with multi-broker awareness and Avro deserialization
+        consumer = IoTAlertConsumer()
+
+        log.info("Consumer will now handle RuuviTag data as separate sensor readings")
+        log.info("Each RuuviTag physical device now sends multiple messages (one per sensor)")
+        log.info("Prometheus metrics server started and ready for scraping")
+
+        # Setup signal handlers
+        def signal_handler(sig, frame):
+            log.info(f"Caught signal {sig}. Stopping consumer...")
+            consumer.running = False
+        
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+        
+        # Log metrics information
+        metrics_port = os.getenv("METRICS_PORT", "8001")
+        log.info(f"🔍 Metrics available at: http://localhost:{metrics_port}/metrics")
+        log.info("📊 Prometheus can now scrape consumer metrics successfully")
         
         # Start consuming messages in a continuous loop
-        log.info("Starting continuous IoT data consumption...")
-        consumer.consume_loop(timeout=1.0)        
+        log.info("Starting continuous IoT data consumption with Avro deserialization...")
+        consumer.consume_loop(timeout=1.0)
+        
     except KeyboardInterrupt:
         log.info("Consumer interrupted by user")
     except Exception as e:
@@ -152,9 +158,9 @@ def main():
         raise
     finally:
         # Ensure any cleanup happens
+        if 'consumer' in locals():
+            consumer.close()
         log.info("Consumer shutdown complete")
-
 
 if __name__ == "__main__":
     main()
-

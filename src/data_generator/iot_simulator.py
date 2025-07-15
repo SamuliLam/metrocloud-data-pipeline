@@ -2,9 +2,8 @@ import json
 import time
 import uuid
 import random
-# Import math module for day/night cycle simulation
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from faker import Faker
 
@@ -20,6 +19,7 @@ class IoTDevice:
     
     This class represents a single IoT device that can generate
     readings of a specific type (temperature, humidity, etc.).
+    Readings are compatible with the Avro schema for serialization.
     """
     
     def __init__(self, device_id: Optional[str] = None, device_type: Optional[str] = None):
@@ -30,8 +30,8 @@ class IoTDevice:
             device_id: Optional device ID (generated if not provided)
             device_type: Optional device type (randomly selected if not provided)
         """
-    
         self.device_id = device_id or str(uuid.uuid4())
+        
         # Use device types from settings or fallback to default list
         available_types = settings.iot_simulator.device_types
         self.device_type = device_type or random.choice(available_types)
@@ -42,13 +42,57 @@ class IoTDevice:
             "longitude": float(f"{fake.longitude():2.6f}"),
             "building": fake.building_number(),
             "floor": random.randint(1, 10),
-            "zone": random.choice(["north", "south", "east", "west", "central"])
+            "zone": random.choice(["north", "south", "east", "west", "central"]),
+            "room": f"room-{random.randint(100, 999)}"  # Added room field to match updated schema
         }
-
+        
         # Set device-specific parameters for more realistic simulation
         self._set_device_parameters()
+        
+        # Set firmware version for schema compatibility
+        self.firmware_version = f"{random.randint(1,3)}.{random.randint(0,9)}.{random.randint(0,20)}"
 
+        # Set device status according to new schema
+        self.status = random.choice(["ACTIVE", "IDLE", "MAINTENANCE", "ERROR", "UNKNOWN"])
+
+        # Set tags according to new schema
+        self.tags = self._generate_tags()
+        
+        # Set maintenance date according to new schema
+        self.maintenance_date = self._generate_maintenance_date() if random.random() < 0.7 else None
+        
         log.info(f"Initialized IoT device: {self.device_id} of type {self.device_type}")
+    
+    def _generate_tags(self) -> List[str]:
+        """
+        Generate a list of tags for the device.
+        
+        Returns:
+            List of tag strings
+        """
+        possible_tags = [
+            "indoor", "outdoor", "critical", "non-critical", 
+            "primary", "secondary", "backup", "main-floor", 
+            "building-a", "building-b", "zone-1", "zone-2",
+            "maintenance-required", "newly-installed"
+        ]
+        
+        # Generate 0-4 tags
+        num_tags = random.randint(0, 4)
+        return random.sample(possible_tags, min(num_tags, len(possible_tags)))
+    
+    def _generate_maintenance_date(self) -> str:
+        """
+        Generate a random maintenance date in ISO-8601 format.
+        
+        Returns:
+            ISO-8601 formatted date string
+        """
+        # Generate date in the past 1-180 days
+        days_ago = random.randint(1, 180)
+        date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        date = date - timedelta(days=days_ago)
+        return date.isoformat() + "Z"
 
     def _set_device_parameters(self):
         """
@@ -57,6 +101,7 @@ class IoTDevice:
         These parameters help generate more realistic data with consistent
         trends and baselines for each device.
         """
+
         # Base value ranges for different device types
         if self.device_type == "temperature":
             self.base_value = random.uniform(20.0, 25.0)  # Starting temperature in Celsius
@@ -86,21 +131,22 @@ class IoTDevice:
     def generate_reading(self) -> Dict[str, Any]:
         """
         Generate a simulated sensor reading based on the device type.
+        The reading format is compatible with the Avro schema.
         
         Returns:
             Dictionary containing the simulated reading data
         """
-
-        timestamp = datetime.now(timezone.utc).isoformat() + "Z"
+        # timestamp = datetime.utcnow().isoformat() + "Z" -- deprecated
+        timestamp = datetime.now(datetime.timezone.utc).isoformat() + "Z"
         
         # Generate sensor reading based on device type
         if self.device_type == "temperature":
             # Simulate temperature with some noise, trend, and occasional spikes
             noise = random.uniform(-self.variation, self.variation)
-            self.base_value += self.trend + (noise * 0.1) # Slow drift
+            self.base_value += self.trend + (noise * 0.1)  # Slow drift
             value = round(self.base_value + noise, 2)
             unit = "°C"
-
+        
         elif self.device_type == "humidity":
             # Simulate humidity with some noise and trend
             noise = random.uniform(-self.variation, self.variation)
@@ -152,8 +198,8 @@ class IoTDevice:
             unit = "unknown"
         
         # Add anomalies based on configurable probability
-        anomaly_probability = settings.iot_simulator.anomaly_probability
-        is_anomaly = random.random() < anomaly_probability
+        self.anomaly_probability = settings.iot_simulator.anomaly_probability
+        is_anomaly = random.random() < self.anomaly_probability
         
         if is_anomaly:
             if self.device_type in ["temperature", "humidity", "pressure", "light"]:
@@ -174,17 +220,40 @@ class IoTDevice:
                 value = 1
                 log.warning(f"Generated anomaly: unexpected motion for device {self.device_id}")
         
-        # Create the reading object with all metadata
+        # Signal strength varies slightly over time
+        signal_strength = round(random.uniform(-100.0, -30.0), 2)
+        
+        # Battery level decreases over time
+        self.battery_level = getattr(self, 'battery_level', 100.0)
+        self.battery_level = max(0.0, self.battery_level - random.uniform(0.0, 0.5))       
+
+        # Occasionally change status
+        if random.random() < 0.01:  # 1% chance to change status
+            self.status = random.choice(["ACTIVE", "IDLE", "MAINTENANCE", "ERROR", "UNKNOWN"])
+
+        # Create device metadata field for additional device info
+        device_metadata = {
+            "manufacturer": random.choice(["SensorTech", "IoTDevices", "SmartSense", "TechnoIoT"]),
+            "model": f"Model-{random.choice(['A', 'B', 'C', 'X'])}{random.randint(100, 999)}",
+            "installation_date": f"2023-{random.randint(1,12):02d}-{random.randint(1,28):02d}"
+        }
+        
+        # Create the reading object with all device metadata according to Avro schema
         reading = {
             "device_id": self.device_id,
             "device_type": self.device_type,
             "timestamp": timestamp,
-            "value": value,
+            "value": float(value) if isinstance(value, (int, float)) else value,
             "unit": unit,
             "location": self.location,
-            "battery_level": round(random.uniform(0.0, 100.0), 2),
-            "signal_strenth": round(random.uniform(-100.0, -30.0), 2), # in dBm
-            "is_anomaly": is_anomaly
+            "battery_level": round(self.battery_level, 2),
+            "signal_strength": signal_strength,
+            "is_anomaly": is_anomaly,
+            "firmware_version": self.firmware_version,
+            "device_metadata": device_metadata,
+            "status": self.status,
+            "tags": self.tags,
+            "maintenance_date": self.maintenance_date
         }
         
         return reading
@@ -197,7 +266,7 @@ class IoTSimulator:
     This class manages a collection of IoT devices and provides methods
     to generate readings from all devices simultaneously.
     """
-
+    
     def __init__(self, num_devices: int = None):
         """
         Initialize a set of IoT devices.
@@ -205,12 +274,11 @@ class IoTSimulator:
         Args:
             num_devices: Number of devices to simulate (default from settings)
         """
-
         self.num_devices = num_devices or settings.iot_simulator.num_devices
         self.devices: List[IoTDevice] = []
         
-        # Create a variety of device types
-        device_types = settings.iot_simulator.device_types 
+        # Get available device types from settings
+        device_types = settings.iot_simulator.device_types
         
         # Create a variety of device types with distribution
         for _ in range(self.num_devices):
@@ -223,17 +291,18 @@ class IoTSimulator:
                 "motion": 0.1,
                 "light": 0.15
             }
-
+            
             # Default to random choice if device type doesn't have a weight
             device_type = random.choices(
                 population=device_types,
                 weights=[weights.get(t, 1.0/len(device_types)) for t in device_types],
                 k=1
             )[0]
+            
             self.devices.append(IoTDevice(device_type=device_type))
         
         log.info(f"IoT simulator initialized with {self.num_devices} devices")
-
+        
         # Log the distribution of device types
         type_counts = {}
         for device in self.devices:
@@ -276,10 +345,11 @@ class IoTSimulator:
         except Exception as e:
             log.error(f"Error in data generation: {str(e)}")
 
+
 # For testing
 if __name__ == "__main__":
-    # Create a simulator with 3 devices
-    simulator = IoTSimulator(3)
+    # Create a simulator with default number of devices from settings
+    simulator = IoTSimulator()
     
     # Function to print readings
     def print_readings(readings):

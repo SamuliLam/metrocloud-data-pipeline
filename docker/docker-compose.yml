@@ -8,36 +8,42 @@ services:
     ports:
       - "9092:9092" # Internal Kafka port for broker-to-client communication
       - "29092:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
+      - "7071:7071"  # JMX metrics port
     environment:
       # KRaft settings - Unique ID and roles
-      KAFKA_NODE_ID: 1 
-      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID_1:-1}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller} # This node will act as both broker and controller
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
       # Listener Configuration - critical for proper networking      
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
       # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS_1:-PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:29093,PLAINTEXT_HOST://0.0.0.0:29092}
       # What the broker advertises to clients: 'internal communication,external docker host communication'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS_1:-PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT} # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES:-CONTROLLER} # Controller listener name
       
       # Topic configurations with higher replication factor for fault tolerance
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_MIN_ISR:-2}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       
       # KRaft Cluster Initialization
-      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
-
+      CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
+      
+      # JMX Configuration for monitoring
+      KAFKA_JMX_PORT: 7071
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka1"
+    
     volumes:
       - kafka1_data:/var/lib/kafka/data # Persist Kafka logs and data
+      - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     healthcheck:
@@ -53,36 +59,42 @@ services:
     ports:
       - "9093:9092" # Internal Kafka port for broker-to-client communication
       - "29093:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
+      - "7072:7071"  # JMX metrics port
     environment:
       # KRaft settings - Unique ID and roles
-      KAFKA_NODE_ID: 2 
-      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID_2:-2}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller} # This node will act as both broker and controller
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
       # Listener Configuration - critical for proper networking      
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
       # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS_2:-PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:29093,PLAINTEXT_HOST://0.0.0.0:29092}
       # What the broker advertises to clients: 'internal communication,external docker host communication'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:29093'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS_2:-PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:29093}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT} # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES:-CONTROLLER} # Controller listener name
       
       # Topic configurations with higher replication factor for fault tolerance
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_MIN_ISR:-2}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       
       # KRaft Cluster Initialization
-      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
+      CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
+      # JMX Configuration for monitoring
+      KAFKA_JMX_PORT: 7071
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka2"
+    
     volumes:
       - kafka2_data:/var/lib/kafka/data # Persist Kafka logs and data
+      - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     depends_on:
@@ -99,37 +111,43 @@ services:
     hostname: kafka3
     ports:
       - "9094:9092" # Internal Kafka port for broker-to-client communication
-      - "29094:29092" # Host-accessible external kafka port for host machine tools like Kafka UI 
+      - "29094:29092" # Host-accessible external kafka port for host machine tools like Kafka UI
+      - "7073:7071"  # JMX metrics port
     environment:
       # KRaft settings - Unique ID and roles
-      KAFKA_NODE_ID: 3 
-      KAFKA_PROCESS_ROLES: 'broker, controller' # This node will act as both broker and controller
+      KAFKA_NODE_ID: ${KAFKA_NODE_ID_3:-3}
+      KAFKA_PROCESS_ROLES: ${KAFKA_PROCESS_ROLES:-broker,controller} # This node will act as both broker and controller
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093,2@kafka2:29093,3@kafka3:29093'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
       # Listener Configuration - critical for proper networking      
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
       # Listeners for different roles: 'internal docker dns,internal controller port,exposed port for outside-Docker clients'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:29093,PLAINTEXT_HOST://0.0.0.0:29092'
+      KAFKA_LISTENERS: ${KAFKA_LISTENERS_3:-PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:29093,PLAINTEXT_HOST://0.0.0.0:29092}
       # What the broker advertises to clients: 'internal communication,external docker host communication'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:29094'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT' # Used for broker-to-broker communication
-      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER' # Controller listener name
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS_3:-PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:29094}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: ${KAFKA_LISTENER_SECURITY_PROTOCOL_MAP:-CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: ${KAFKA_INTER_BROKER_LISTENER_NAME:-PLAINTEXT} # Used for broker-to-broker communication
+      KAFKA_CONTROLLER_LISTENER_NAMES: ${KAFKA_CONTROLLER_LISTENER_NAMES:-CONTROLLER} # Controller listener name
       
       # Topic configurations with higher replication factor for fault tolerance
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_MIN_ISR:-2}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-3}
       
       # KRaft Cluster Initialization
-      CLUSTER_ID: ${CLUSTER_ID} # UUID usd to uniquely initialize the KRaft metadata quorum
+      CLUSTER_ID: ${CLUSTER_ID} # UUID used to uniquely initialize the KRaft metadata quorum
 
+      # JMX Configuration for monitoring
+      KAFKA_JMX_PORT: 7071
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka3"
+    
     volumes:
       - kafka3_data:/var/lib/kafka/data # Persist Kafka logs and data
+      - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     depends_on:
@@ -140,6 +158,53 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5 
+
+# Schema Registry
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.9.0
+    container_name: schema-registry
+    hostname: schema-registry
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: ${SCHEMA_REGISTRY_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+      # Schema compatibility settings
+      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: ${SCHEMA_COMPATIBILITY_LEVEL:-BACKWARD}
+
+      # Replication factor for schemas topic
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: ${SCHEMA_REGISTRY_REPLICATION_FACTOR:-3}
+
+      # JMX for monitoring
+      SCHEMA_REGISTRY_JMX_PORT: 7075
+      SCHEMA_REGISTRY_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+
+    volumes:
+      - ../src/config/config.yaml:/etc/schema-registry/config.yaml # Mount configuration file
+    restart: always
+    command: >
+      bash -c '
+        echo "Waiting for Kafka to be ready..."
+        cub kafka-ready -b kafka1:9092 1 60 &&
+        cub kafka-ready -b kafka2:9092 1 60 &&
+        cub kafka-ready -b kafka3:9092 1 60 &&
+        echo "Kafka is ready! Starting Schema Registry..." &&
+        /etc/confluent/docker/run
+      '
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    networks:
+      - kafka-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     
   # Kafka UI
   kafka-ui:
@@ -148,35 +213,93 @@ services:
     ports:
       - "8080:8080" # Web UI exposed at http://localhost:8080
     environment:
-      KAFKA_CLUSTERS_0_NAME: local-cluster
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9092,kafka2:9092,kafka3:9092 # Connects to Kafka's exposed port
+      KAFKA_CLUSTERS_0_NAME: ${KAFKA_UI_CLUSTER_NAME:-local-cluster}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092} # Connects to Kafka's exposed port
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
       SERVER_SERVLET_CONTEXT_PATH: / # Root path for the UI
+    volumes:
+      - ../src/config/config.yaml:/etc/kafka-ui/config.yaml # Mount configuration file
     depends_on:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
     networks:
       - kafka-net # Access Kafka over Docker network
 
-  # Kafka Producer 
-  kafka-producer:
-    build:
-      context: .. # Project root directory
-      dockerfile: docker/Dockerfile.producer
-    container_name: kafka-producer
+  # TimeScaleDB Database
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: timescaledb
+    hostname: timescaledb
+    ports:
+    - "5432:5432"
     environment:
-      # Configure producer to connect all brokers inside docker for fault tolerance
-      KAFKA_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092,kafka3:9092
-      KAFKA_TOPIC_NAME: iot-sensor-data # Topic to publish simulated data
-      IOT_NUM_DEVICES: 8 # Number of virtual IoT devices
-      IOT_DATA_INTERVAL_SEC: 1.0 # How often each device sends data
-      PYTHONUNBUFFERED: 1 # Ensures real-time stdout logging
+      POSTGRES_DB: ${POSTGRES_DB:-iot_data}
+      POSTGRES_USER: ${POSTGRES_USER:-iot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      # TimescaleDB specific configurations
+      TIMESCALEDB_TELEMETRY: "off"
+    volumes:
+        - timescaledb_data:/var/lib/postgresql/data
+        - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-iot_user} -d ${POSTGRES_DB:-iot_data}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+      
+  # MQTT Broker for ESP32 Gateway
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mosquitto
+    ports:
+      - "1883:1883" # MQTT port
+      - "9001:9001" # WebSockets port
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+      - ../mqtt/config:/mosquitto/config
+    networks:
+      - kafka-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RuuviTag Adapter (Real-time IoT Producer with metrics)
+  ruuvitag-adapter:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ruuvitag_adapter
+    container_name: ruuvitag-adapter
+    hostname: ruuvitag-adapter
+    ports:
+      - "8002:8002"  # Metrics endpoint
+    volumes:
+      - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
+    environment:
+      PYTHONUNBUFFERED: 1
+      # Add debugging environment variables
+      PYTHONTRACEMALLOC: 1
+      PYTHONFAULTHANDLER: 1
+      METRICS_PORT: 8002
     depends_on:
       - kafka1
       - kafka2
       - kafka3
+      - schema-registry
+      - mosquitto
     networks:
       - kafka-net
+    restart: unless-stopped
 
   # Kafka Consumer
   kafka-consumer:
@@ -184,19 +307,263 @@ services:
       context: .. # Project root directory
       dockerfile: docker/Dockerfile.consumer
     container_name: kafka-consumer
+    ports:
+      - "8001:8001"  # Metrics endpoint
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092,kafka3:9092 # Kafka broker inside Docker network
-      KAFKA_TOPIC_NAME: iot-sensor-data # Topic to subscribe and consume from
-      KAFKA_CONSUMER_GROUP_ID: iot-data-consumer # Consumer's groud id
-      KAFKA_AUTO_OFFSET_RESET: earliest # Start from the beginning if no offset is found
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092} # Kafka broker inside Docker network
+      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data} # Topic to subscribe and consume from
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID:-iot-data-consumer} # Consumer's group id
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest} # Start from the beginning if no offset is found
+      # Schema Registry configuration
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
       PYTHONUNBUFFERED: 1
+      CONFIG_FILE_PATH: /app/config.yaml # Path to the config file inside the container
+      METRICS_PORT: 8001
+    volumes:
+      - ../src/config/config.yaml:/app/config.yaml # Mount configuration file
     depends_on:
       - kafka1
       - kafka2
       - kafka3
-      - kafka-producer # Wait until produer is available
+      - schema-registry
+      - ruuvitag-adapter # Wait until ruuvitag-adapter is available
     networks:
       - kafka-net
+  
+  # TImeScaleDB Data Sink Service
+  timescaledb-sink:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.timescaledb_sink
+    container_name: timescaledb-sink
+    hostname: timescaledb-sink
+    ports:
+      - "8003:8003"  # Metrics endpoint
+    environment:
+      # Database configuration
+      POSTGRES_HOST: timescaledb
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-iot_data}
+      POSTGRES_USER: ${POSTGRES_USER:-iot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
+
+      # Kafka configuration
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka1:9092,kafka2:9092,kafka3:9092}
+      KAFKA_TOPIC_NAME: ${KAFKA_TOPIC_NAME:-iot-sensor-data}
+      DATA_SINK_CONSUMER_GROUP_ID: ${DATA_SINK_CONSUMER_GROUP_ID:-iot-data-sink}
+      
+      # Schema Registry configuration
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      
+      # Data sink specific configuration
+      DATA_SINK_BATCH_SIZE: ${DATA_SINK_BATCH_SIZE:-50}
+      DATA_SINK_COMMIT_INTERVAL: ${DATA_SINK_COMMIT_INTERVAL:-5.0}
+      DATA_SINK_MAX_RETRIES: ${DATA_SINK_MAX_RETRIES:-3}
+      DATA_SINK_RETRY_BACKOFF: ${DATA_SINK_RETRY_BACKOFF:-2.0}
+      
+      # TimescaleDB specific settings
+      TIMESCALE_BATCH_SIZE: ${TIMESCALE_BATCH_SIZE:-100}
+      TIMESCALE_COMMIT_INTERVAL: ${TIMESCALE_COMMIT_INTERVAL:-5.0}
+      TIMESCALE_CHUNK_TIME_INTERVAL: ${TIMESCALE_CHUNK_TIME_INTERVAL:-1 day}
+      TIMESCALE_COMPRESS_AFTER: ${TIMESCALE_COMPRESS_AFTER:-7 days}
+      TIMESCALE_DROP_AFTER: ${TIMESCALE_DROP_AFTER:-90 days}
+      
+      CONFIG_FILE_PATH: /app/config.yaml
+      PYTHONUNBUFFERED: 1
+      METRICS_PORT: 8003
+    volumes:
+      - ../src/config/config.yaml:/app/config.yaml
+    depends_on:
+      - timescaledb
+      - kafka1
+      - kafka2
+      - kafka3
+      - schema-registry
+      - ruuvitag-adapter
+    networks:
+      - kafka-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import psycopg2; psycopg2.connect(host=\"timescaledb\", database=\"iot_data\", user=\"iot_user\", password=\"iot_password\")'"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Prometheus for Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/prometheus/rules/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://localhost:9090'
+    networks:
+      - kafka-net
+    restart: unless-stopped
+
+  # Grafana for Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ../monitoring/grafana/provisioning/dashboards/dashboard.yml:/var/lib/grafana/provisioning/dashboards/dashboard.yml
+    depends_on:
+      - prometheus
+    networks:
+      - kafka-net
+    restart: unless-stopped
+  
+  # JMX Exporter for Kafka metrics
+  kafka-jmx-exporter1:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter1
+    ports:
+      - "9101:9101"  # Separate metrics port
+    environment:
+      SERVICE_PORT: 9101
+    volumes:
+      - ../monitoring/jmx/kafka1-jmx-config.yml:/opt/bitnami/jmx-exporter/etc/config.yml
+    command: ["9101", "/opt/bitnami/jmx-exporter/etc/config.yml"]
+    depends_on:
+      - kafka1
+    networks:
+      - kafka-net
+
+  kafka-jmx-exporter2:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter2
+    ports:
+      - "9102:9102"  # Separate metrics port
+    environment:
+      SERVICE_PORT: 9102
+    volumes:
+      - ../monitoring/jmx/kafka2-jmx-config.yml:/opt/bitnami/jmx-exporter/etc/config.yml
+    command: ["9102", "/opt/bitnami/jmx-exporter/etc/config.yml"]
+    depends_on:
+      - kafka2
+    networks:
+      - kafka-net
+
+  kafka-jmx-exporter3:
+    image: bitnami/jmx-exporter:latest
+    container_name: kafka-jmx-exporter3
+    ports:
+      - "9103:9103"  # Separate metrics port
+    environment:
+      SERVICE_PORT: 9103
+    volumes:
+      - ../monitoring/jmx/kafka3-jmx-config.yml:/opt/bitnami/jmx-exporter/etc/config.yml
+    command: ["9103", "/opt/bitnami/jmx-exporter/etc/config.yml"]
+    depends_on:
+      - kafka3
+    networks:
+      - kafka-net
+
+  # PostgreSQL Exporter for TimescaleDB metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-iot_user}:${POSTGRES_PASSWORD:-iot_password}@timescaledb:5432/${POSTGRES_DB:-iot_data}?sslmode=disable"
+    depends_on:
+      - timescaledb
+    networks:
+      - kafka-net
+
+  # MQTT Exporter for Mosquitto metrics
+  mosquitto-exporter:
+    image: jryberg/mosquitto-exporter:v0.7.5
+    container_name: mosquitto-exporter
+    ports:
+      - "9234:9234"
+    environment:
+      BROKER_ENDPOINT: tcp://mosquitto:1883
+      MQTT_IGNORED_TOPICS: "$$SYS/broker/clients/disconnected,$$SYS/broker/clients/maximum"
+    depends_on:
+      - mosquitto
+    networks:
+      - kafka-net
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($|/)'
+    networks:
+      - kafka-net
+
+  # cAdvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8090:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    networks:
+      - kafka-net
+
+  # AlertManager for alerting
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9095:9093"
+    volumes:
+      - ../monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - kafka-net
+    restart: unless-stopped
+
+  # Mailpit (test SMTP server)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - kafka-net
+
 
 # Docker Volume for Kafka Storage
 volumes:
@@ -205,6 +572,28 @@ volumes:
   kafka2_data:
     driver: local
   kafka3_data:
+    driver: local
+  schema-registry:
+    driver: local
+  kafka-ui:
+    driver: local
+  timescaledb_data:
+    driver: local
+  mosquitto_data:
+    driver: local
+  mosquitto_log:
+    driver: local
+  ruuvitag-adapter:
+    driver: local
+  kafka-consumer:
+    driver: local
+  timescaledb-sink:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  alertmanager_data:
     driver: local
 
 # Docker Network for All Services

@@ -1,0 +1,74 @@
+global:
+  smtp_smarthost: 'mailpit:1025'
+  smtp_from: 'alertmanager@iot-pipeline.local'
+  smtp_require_tls: false
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'web.hook'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://localhost:5001/alerts'
+        send_resolved: true
+
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'admin@iot-pipeline.local'
+        html: |
+          <h2>🚨 CRITICAL ALERT: IoT Pipeline</h2>
+          <h3>{{ .GroupLabels.alertname }}</h3>
+          
+          <table border="1" cellpadding="5" style="border-collapse: collapse;">
+            <tr><td><strong>Summary</strong></td><td>{{ .CommonAnnotations.summary }}</td></tr>
+            <tr><td><strong>Description</strong></td><td>{{ .CommonAnnotations.description }}</td></tr>
+            <tr><td><strong>Severity</strong></td><td style="color: red;">CRITICAL</td></tr>
+          </table>
+          
+          <h4>Affected Instances:</h4>
+          <ul>
+          {{ range .Alerts }}
+          <li>
+            <strong>{{ .Labels.instance }}</strong> ({{ .Labels.job }})<br>
+            Status: {{ .Status }} | Started: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          </li>
+          {{ end }}
+          </ul>
+
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'ops@iot-pipeline.local'
+        html: |
+          <h2>⚠️ WARNING: IoT Pipeline</h2>
+          <h3>{{ .GroupLabels.alertname }}</h3>
+          
+          <table border="1" cellpadding="5" style="border-collapse: collapse;">
+            <tr><td><strong>Summary</strong></td><td>{{ .CommonAnnotations.summary }}</td></tr>
+            <tr><td><strong>Description</strong></td><td>{{ .CommonAnnotations.description }}</td></tr>
+            <tr><td><strong>Severity</strong></td><td style="color: orange;">WARNING</td></tr>
+          </table>
+          
+          <h4>Affected Instances:</h4>
+          <ul>
+          {{ range .Alerts }}
+          <li><strong>{{ .Labels.instance }}</strong> ({{ .Labels.job }})</li>
+          {{ end }}
+          </ul>
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']

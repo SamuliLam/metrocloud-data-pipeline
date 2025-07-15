@@ -1,0 +1,65 @@
+jmxUrl: service:jmx:rmi:///jndi/rmi://kafka2:7071/jmxrmi
+ssl: false
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false
+
+rules:
+  # Broker Topic Metrics
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=MessagesInPerSec><>Count
+    name: kafka_server_brokertopicmetrics_messagesin_total
+    type: COUNTER
+    labels:
+      broker_id: "2"
+
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=BytesInPerSec><>Count
+    name: kafka_server_brokertopicmetrics_bytesin_total
+    type: COUNTER
+    labels:
+      broker_id: "2"
+
+  - pattern: kafka.server<type=BrokerTopicMetrics, name=BytesOutPerSec><>Count
+    name: kafka_server_brokertopicmetrics_bytesout_total
+    type: COUNTER
+    labels:
+      broker_id: "2"
+
+  # Replica Manager Metrics
+  - pattern: kafka.server<type=ReplicaManager, name=UnderReplicatedPartitions><>Value
+    name: kafka_server_replica_manager_under_replicated_partitions
+    type: GAUGE
+    labels:
+      broker_id: "2"
+
+  - pattern: kafka.server<type=ReplicaManager, name=LeaderCount><>Value
+    name: kafka_server_replica_manager_leader_count
+    type: GAUGE
+    labels:
+      broker_id: "2"
+
+  - pattern: kafka.server<type=ReplicaManager, name=PartitionCount><>Value
+    name: kafka_server_replica_manager_partition_count
+    type: GAUGE
+    labels:
+      broker_id: "2"
+
+  # Request Handler Metrics
+  - pattern: kafka.server<type=KafkaRequestHandlerPool, name=RequestHandlerAvgIdlePercent><>OneMinuteRate
+    name: kafka_server_request_handler_avg_idle_percent
+    type: GAUGE
+    labels:
+      broker_id: "2"
+
+  # Network Request Metrics
+  - pattern: kafka.network<type=RequestMetrics, name=RequestsPerSec, request=(.+)><>Count
+    name: kafka_network_requests_total
+    type: COUNTER
+    labels:
+      broker_id: "2"
+      request: "$1"
+
+  # Log Size Metrics
+  - pattern: kafka.log<type=LogSize, name=Size><>Value
+    name: kafka_log_size_bytes
+    type: GAUGE
+    labels:
+      broker_id: "2"
