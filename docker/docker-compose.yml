@@ -16,7 +16,7 @@ services:
       # Define all controllers (all 3 brokers) in the quorum (format: node_id@host:controller_port)
       KAFKA_CONTROLLER_QUORUM_VOTERS: ${KAFKA_CONTROLLER_QUORUM_VOTERS:-1@kafka1:29093,2@kafka2:29093,3@kafka3:29093}
 
-      # Listener Configuration - critical for proper networking      
+      # Listener Configuration - critical for proper networking
       # 1. PLAINTEXT - For client communication
       # 2. CONTROLLER - For controller communication
       # 3. PLAINTEXT_HOST - For external access from host machine
@@ -39,15 +39,16 @@ services:
       
       # JMX Configuration for monitoring
       KAFKA_JMX_PORT: 7071
-      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka1"
-    
+      KAFKA_JMX_HOSTNAME: kafka1
+      # KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka1"
+
     volumes:
       - kafka1_data:/var/lib/kafka/data # Persist Kafka logs and data
       - ../src/config/config.yaml:/etc/kafka/config.yaml # Mount configuration file
     networks:
       - kafka-net # Connects to custom Docker network for inter-service DNS
     healthcheck:
-      test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka1:9092 --list"]
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka1:9092 --list || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -90,7 +91,8 @@ services:
 
       # JMX Configuration for monitoring
       KAFKA_JMX_PORT: 7071
-      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka2"
+      KAFKA_JMX_HOSTNAME: kafka2
+      # KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka2"
     
     volumes:
       - kafka2_data:/var/lib/kafka/data # Persist Kafka logs and data
@@ -143,7 +145,8 @@ services:
 
       # JMX Configuration for monitoring
       KAFKA_JMX_PORT: 7071
-      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka3"
+      KAFKA_JMX_HOSTNAME: kafka3
+      # KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=7071 -Dcom.sun.management.jmxremote.rmi.port=7071 -Djava.rmi.server.hostname=kafka3"
     
     volumes:
       - kafka3_data:/var/lib/kafka/data # Persist Kafka logs and data
@@ -269,7 +272,7 @@ services:
       - kafka-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$$"]
+      test: ["CMD-SHELL", "timeout 5 mosquitto_pub -h localhost -p 1883 -t health/check -m ping -q 1 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -501,7 +504,8 @@ services:
       BROKER_ENDPOINT: tcp://mosquitto:1883
       MQTT_IGNORED_TOPICS: "$$SYS/broker/clients/disconnected,$$SYS/broker/clients/maximum"
     depends_on:
-      - mosquitto
+      mosquitto:
+        condition: service_healthy
     networks:
       - kafka-net
 
@@ -563,7 +567,6 @@ services:
       - "8025:8025"  # Web UI
     networks:
       - kafka-net
-
 
 # Docker Volume for Kafka Storage
 volumes:
