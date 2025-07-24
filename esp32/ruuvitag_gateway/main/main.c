@@ -37,9 +37,9 @@
 #define WIFI_PASSWORD           "888Eight888."
 //#define WIFI_PASSWORD           "AIoT-2024"
 //#define WIFI_PASSWORD           "fHTEzpnowAs4"
-//#define MQTT_BROKER_URL         "mqtt://192.168.50.240:1883"     // Change to your MQTT broker IP
+#define MQTT_BROKER_URL         "mqtt://192.168.50.240:1883"     // Change to your MQTT broker IP
 //#define MQTT_BROKER_URL         "mqtt://192.168.50.108:1883"
-#define MQTT_BROKER_URL         "mqtt://192.168.50.240:1883"
+//#define MQTT_BROKER_URL         "mqtt://10.67.39.156:1883"
 #define MQTT_TOPIC              "ruuvitag/data"
 #define MQTT_QOS                1
 #define MAX_RUUVITAGS           10
