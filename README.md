@@ -722,7 +722,7 @@ The application can be configured through environment variables:
             MAX(value) as max_value,
             COUNT(*) as reading_count
         FROM sensor_readings
-        WHERE timestamp BETWEEN '2025-06-17' AND '2025-06-18'
+        WHERE timestamp BETWEEN '2025-07-24' AND '2025-07-26'
             AND device_type = 'temperature_sensor'
         GROUP BY device_id, device_type
         ORDER BY avg_value DESC;

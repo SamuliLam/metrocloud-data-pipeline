@@ -182,7 +182,8 @@ services:
 
       # JMX for monitoring
       SCHEMA_REGISTRY_JMX_PORT: 7075
-      SCHEMA_REGISTRY_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+      SCMEMA_REGISTRY_JMX_HOSTNAME: schema-registry
+      # SCHEMA_REGISTRY_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 
     volumes:
       - ../src/config/config.yaml:/etc/schema-registry/config.yaml # Mount configuration file
