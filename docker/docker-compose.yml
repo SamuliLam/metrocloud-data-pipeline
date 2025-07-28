@@ -175,10 +175,10 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
       # Schema compatibility settings
-      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: ${SCHEMA_COMPATIBILITY_LEVEL:-BACKWARD}
+      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: ${SCHEMA_REGISTRY_COMPATIBILITY_LEVEL:-BACKWARD}
 
       # Replication factor for schemas topic
-      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: ${SCHEMA_REGISTRY_REPLICATION_FACTOR:-3}
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: ${SCHEMA_REGISTRY_KAFKA_TOPIC_REPLICATION_FACTOR:-3}
 
       # JMX for monitoring
       SCHEMA_REGISTRY_JMX_PORT: 7075
@@ -345,8 +345,8 @@ services:
       - "8003:8003"  # Metrics endpoint
     environment:
       # Database configuration
-      POSTGRES_HOST: timescaledb
-      POSTGRES_PORT: 5432
+      POSTGRES_HOST: ${POSTGRES_HOST:-timescaledb}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_DB: ${POSTGRES_DB:-iot_data}
       POSTGRES_USER: ${POSTGRES_USER:-iot_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-iot_password}
@@ -424,7 +424,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin123}
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
     volumes:
       - grafana_data:/var/lib/grafana
