@@ -272,6 +272,7 @@ If you haven't installed ESP-IDF yet, follow these steps:
         - Producer service that receives and sends IoT data with Avro serialization
         - Consumer/Sink service that consumes and processes the data with Avro deserialization
         - Storage service that stores the time-series data into database
+        - Monitoring service for metric collection and dashboard services for visualization
 
 5. Verify System Operation
     ```bash
