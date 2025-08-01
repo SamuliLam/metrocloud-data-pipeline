@@ -334,7 +334,8 @@ SELECT
     COUNT(CASE WHEN is_anomaly THEN 1 END) as anomaly_count,
     last(battery_level, timestamp) as latest_battery_level
 FROM sensor_readings
-GROUP BY bucket, device_id, device_type;
+GROUP BY bucket, device_id, device_type
+ORDER BY bucket DESC;
 
 -- Add refresh policy for continuous aggregate
 SELECT add_continuous_aggregate_policy('sensor_readings_hourly',
@@ -357,7 +358,8 @@ SELECT
     first(battery_level, timestamp) as first_battery_level,
     last(battery_level, timestamp) as latest_battery_level
 FROM sensor_readings
-GROUP BY bucket, device_id, device_type;
+GROUP BY bucket, device_id, device_type
+ORDER BY bucket DESC;
 
 -- Add refresh policy for daily aggregate
 SELECT add_continuous_aggregate_policy('sensor_readings_daily',

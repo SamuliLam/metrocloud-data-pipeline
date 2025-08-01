@@ -29,7 +29,7 @@ This project implements a complete near real-time IoT data pipeline with the fol
 
 ## Architecture
 
-![architecture.png](images/architecture5.png)
+![architecture.png](images/architecture6.jpg)
 
 ## Project Structure
 
@@ -272,6 +272,7 @@ If you haven't installed ESP-IDF yet, follow these steps:
         - Producer service that receives and sends IoT data with Avro serialization
         - Consumer/Sink service that consumes and processes the data with Avro deserialization
         - Storage service that stores the time-series data into database
+        - Monitoring service for metric collection and dashboard services for visualization
 
 5. Verify System Operation
     ```bash
@@ -722,7 +723,7 @@ The application can be configured through environment variables:
             MAX(value) as max_value,
             COUNT(*) as reading_count
         FROM sensor_readings
-        WHERE timestamp BETWEEN '2025-06-17' AND '2025-06-18'
+        WHERE timestamp BETWEEN '2025-07-24' AND '2025-07-26'
             AND device_type = 'temperature_sensor'
         GROUP BY device_id, device_type
         ORDER BY avg_value DESC;
@@ -788,7 +789,7 @@ The application can be configured through environment variables:
                 LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as prev_timestamp,
                 timestamp - LAG(timestamp) OVER (PARTITION BY device_id ORDER BY timestamp) as time_gap
             FROM sensor_readings
-            WHERE device_id = 'aa:bb:cc:dd:ee:ff_temperature'
+            WHERE device_id = 'c6:8d:c6:26:39:a6_temperature'
                 AND timestamp >= NOW() - INTERVAL '7 days'
         )
         SELECT 
@@ -1007,25 +1008,7 @@ The application can be configured through environment variables:
     - Add more Kafka Brokers:
         - Add a new broker configuration to `docker-compose.yml`
         - Update the controller quorum voters list to include the new broker
-        - Restart the cluster with `docker-compose up -d
-    
-    - Add more Consumers
-        ```bash
-        # Scale consumer service
-        docker-compose up -d --scale kafka-consumer=3
-        ```
-
-    - Optimize TimescaleDB
-        ```sql
-        -- Adjust chunk intervals for your data volume
-        SELECT set_chunk_time_interval('sensor_readings', INTERVAL '6 hours');
-
-        -- Enable compression
-        ALTER TABLE sensor_readings SET (timescaledb.compress);
-
-        -- Add retention policy
-        SELECT add_retention_policy('sensor_readings', INTERVAL '30 days');
-        ```
+        - Restart the cluster with `docker-compose up -d  
 
 2. Performance Optimization
 
@@ -1047,6 +1030,18 @@ The application can be configured through environment variables:
     - Start the cluster with `docker-compose up -d`
     - The brokers will recover data from the persistent volumes
     - TimescaleDB data is preserved in persistent volumes
+
+4. Optimize TimescaleDB
+    ```sql
+    -- Adjust chunk intervals for your data volume
+    SELECT set_chunk_time_interval('sensor_readings', INTERVAL '6 hours');
+
+    -- Enable compression
+    ALTER TABLE sensor_readings SET (timescaledb.compress);
+
+    -- Add retention policy
+    SELECT add_retention_policy('sensor_readings', INTERVAL '30 days');
+    ```
 
 ## Troubleshooting
 
