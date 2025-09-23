@@ -1,5 +1,4 @@
 {
-  "dashboard": {
     "id": null,
     "title": "IoT Data Pipeline Monitoring",
     "tags": ["iot", "kafka", "timescaledb"],
@@ -238,5 +237,4 @@
         ]
       }
     ]
-  }
 }
